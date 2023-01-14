@@ -1,9 +1,10 @@
+#include "pch.h"
 
-#include <Windows.h>
+#include "App.h"
 
+int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
+	App app;
+	const int result = app.run();
 
-int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
-{
-	MessageBox(nullptr, "Hello World!", "Hello World!", MB_OK);
-	return 0;
+	return result;
 }
