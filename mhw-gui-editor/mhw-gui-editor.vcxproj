@@ -155,7 +155,24 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="BinaryReader.cpp" />
+    <ClCompile Include="GUIAnimation.cpp" />
     <ClCompile Include="GUIEditor.cpp" />
+    <ClCompile Include="GUIFile.cpp" />
+    <ClCompile Include="GUIFlow.cpp" />
+    <ClCompile Include="GUIFlowProcess.cpp" />
+    <ClCompile Include="GUIFontFilter.cpp" />
+    <ClCompile Include="GUIGeneralResource.cpp" />
+    <ClCompile Include="GUIInitParam.cpp" />
+    <ClCompile Include="GUIInstance.cpp" />
+    <ClCompile Include="GUIKey.cpp" />
+    <ClCompile Include="GUIMessage.cpp" />
+    <ClCompile Include="GUIObject.cpp" />
+    <ClCompile Include="GUIObjectSequence.cpp" />
+    <ClCompile Include="GUIParam.cpp" />
+    <ClCompile Include="GUIResource.cpp" />
+    <ClCompile Include="GUISequence.cpp" />
+    <ClCompile Include="GUITexture.cpp" />
     <ClCompile Include="HrException.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="pch.cpp" />
@@ -163,7 +180,26 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
+    <ClInclude Include="BinaryReader.h" />
+    <ClInclude Include="dti_types.h" />
+    <ClInclude Include="GUIAnimation.h" />
     <ClInclude Include="GUIEditor.h" />
+    <ClInclude Include="GUIFile.h" />
+    <ClInclude Include="GUIFlow.h" />
+    <ClInclude Include="GUIFlowProcess.h" />
+    <ClInclude Include="GUIFontFilter.h" />
+    <ClInclude Include="GUIGeneralResource.h" />
+    <ClInclude Include="GUIInitParam.h" />
+    <ClInclude Include="GUIInstance.h" />
+    <ClInclude Include="GUIKey.h" />
+    <ClInclude Include="GUIMessage.h" />
+    <ClInclude Include="GUIObject.h" />
+    <ClInclude Include="GUIObjectSequence.h" />
+    <ClInclude Include="GUIParam.h" />
+    <ClInclude Include="GUIResource.h" />
+    <ClInclude Include="GUISequence.h" />
+    <ClInclude Include="GUITexture.h" />
+    <ClInclude Include="GUITypes.h" />
     <ClInclude Include="HrException.h" />
     <ClInclude Include="MinWindows.h" />
     <ClInclude Include="pch.h" />

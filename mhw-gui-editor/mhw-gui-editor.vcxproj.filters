@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\rGUI">
+      <UniqueIdentifier>{f4206d0b-ea4a-46c1-aa7c-1c55df3d0ee5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rGUI">
+      <UniqueIdentifier>{27225483-a3c7-4a6d-9fac-c24a850e21b7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md">
@@ -38,6 +44,57 @@
     <ClCompile Include="GUIEditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GUIAnimation.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIFile.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUISequence.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIObject.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIObjectSequence.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIInitParam.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIParam.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIKey.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIInstance.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIFlow.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIFlowProcess.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUITexture.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIFontFilter.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIResource.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIGeneralResource.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryReader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIMessage.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -57,6 +114,63 @@
     </ClInclude>
     <ClInclude Include="GUIEditor.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dti_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIAnimation.h">
+      <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIFile.h">
+      <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUISequence.h">
+      <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIObject.h">
+      <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIObjectSequence.h">
+      <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIInitParam.h">
+      <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIParam.h">
+      <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIKey.h">
+      <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIInstance.h">
+      <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIFlow.h">
+      <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIFlowProcess.h">
+      <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUITexture.h">
+      <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIFontFilter.h">
+      <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIResource.h">
+      <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIGeneralResource.h">
+      <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GUITypes.h">
+      <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIMessage.h">
+      <Filter>Header Files\rGUI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
