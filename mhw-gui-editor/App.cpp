@@ -53,11 +53,12 @@ int App::run() {
 			DispatchMessage(&msg);
 		}
 
+
 		ImGui_ImplDX11_NewFrame();
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::ShowDemoWindow();
+		render_frame();
 
 		ImGui::Render();
 
@@ -77,7 +78,24 @@ int App::run() {
 }
 
 void App::render_frame() {
-	
+	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+
+	if (ImGui::BeginMainMenuBar()) {
+		if (ImGui::BeginMenu("File")) {
+			if (ImGui::MenuItem("Open", "Ctrl+O")) {
+				
+			}
+
+			if (ImGui::MenuItem("Exit", "Alt+F4")) {
+				PostQuitMessage(0);
+			}
+
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMainMenuBar();
+	}
+
 }
 
 void App::handle_input() {
