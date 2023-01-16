@@ -83,7 +83,7 @@ void App::render_frame() {
 	if (ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("File")) {
 			if (ImGui::MenuItem("Open", "Ctrl+O")) {
-				
+				m_editor.open_file();
 			}
 
 			if (ImGui::MenuItem("Exit", "Alt+F4")) {

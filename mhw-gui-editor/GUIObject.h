@@ -8,7 +8,7 @@
 
 struct GUIObject {
 	static constexpr size_t size = 56;
-	static GUIObject read(BinaryReader& reader, std::streamoff text_offset);
+	static GUIObject read(BinaryReader& reader, const GUIHeader& header);
 
 	u32 ID;
 	u8 InitParamNum;
@@ -20,6 +20,6 @@ struct GUIObject {
     ObjectType Type;
     u32 InitParamIndex;
     u32 ObjectSequenceIndex;
-	u64 ExtendDataOffset;
+	s64 ExtendDataOffset;
 };
 

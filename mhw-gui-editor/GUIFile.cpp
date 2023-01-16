@@ -7,6 +7,22 @@
 GUIFile::GUIFile() = default;
 
 void GUIFile::load_from(BinaryReader& stream) {
+    m_animations.clear();
+    m_sequences.clear();
+    m_objects.clear();
+    m_obj_sequences.clear();
+    m_init_params.clear();
+    m_params.clear();
+    m_keys.clear();
+    m_instances.clear();
+    m_flows.clear();
+    m_flow_processes.clear();
+    m_textures.clear();
+    m_font_filters.clear();
+    m_messages.clear();
+    m_resources.clear();
+    m_general_resources.clear();
+
     const auto header = stream.read<GUIHeader>();
 
     std::memcpy(m_magic.data(), header.fileType, m_magic.size());
@@ -30,7 +46,7 @@ void GUIFile::load_from(BinaryReader& stream) {
 
     stream.seek_absolute(static_cast<s64>(header.objectOffset));
     for (auto i = 0u; i < header.objectNum; ++i) {
-        m_objects.emplace_back(GUIObject::read(stream, static_cast<s64>(header.stringOffset)));
+        m_objects.emplace_back(GUIObject::read(stream, header));
     }
 
     stream.seek_absolute(static_cast<s64>(header.objSequenceOffset));
