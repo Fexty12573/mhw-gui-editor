@@ -10,6 +10,8 @@ struct GUIObject {
 	static constexpr size_t size = 56;
 	static GUIObject read(BinaryReader& reader, std::streamoff text_offset);
 
+	[[nodiscard]] std::string get_preview(u32 index = 0xFFFFFFFF) const;
+
 	u32 ID;
 	u8 InitParamNum;
 	u8 AnimateParamNum;

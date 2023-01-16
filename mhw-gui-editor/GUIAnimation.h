@@ -9,6 +9,8 @@ struct GUIAnimation {
 	static constexpr size_t size = 0x20;
 	static GUIAnimation read(BinaryReader& stream, std::streamoff text_offset);
 
+	[[nodiscard]] std::string get_preview(u32 index = 0xFFFFFFFF) const;
+
 	u32 ID;
 	u16 ObjectNum;
 	u16 SequenceNum;

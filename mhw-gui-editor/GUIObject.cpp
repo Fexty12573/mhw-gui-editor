@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "GUIObject.h"
 
+#include <format>
+
 GUIObject GUIObject::read(BinaryReader& reader, std::streamoff text_offset) {
 	return {
 		.ID = reader.read<u32>(),
@@ -14,4 +16,12 @@ GUIObject GUIObject::read(BinaryReader& reader, std::streamoff text_offset) {
 		.ObjectSequenceIndex = reader.read_skip<u32>(4),
 		.ExtendDataOffset = reader.read<u64>()
 	};
+}
+
+std::string GUIObject::get_preview(u32 index) const {
+	if (index == 0xFFFFFFFF) {
+		return std::format("Object<{}>: {} {}", ID, enum_to_string(Type), Name);
+	} else {
+		return std::format("[{}] Object<{}>: {} {}", index, ID, enum_to_string(Type), Name);
+	}
 }
