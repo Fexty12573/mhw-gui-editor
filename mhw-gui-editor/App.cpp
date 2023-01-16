@@ -5,7 +5,7 @@
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 
-App::App([[maybe_unused]] const std::string& commandline) : m_window("MHW GUI Editor", 1280, 720) {
+App::App([[maybe_unused]] const std::string& commandline) : m_window("MHW GUI Editor", 1920, 1080) {
 	m_swap_chain = m_window.m_swap_chain;
 	m_device = m_window.m_device;
 	m_context = m_window.m_context;

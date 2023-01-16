@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GUIEditor.h"
 #include "HrException.h"
+#include "RichText.h"
 
 #include <fmt/format.h>
 #include <imgui_internal.h>
@@ -8,6 +9,7 @@
 #include <imgui.h>
 #include <ShObjIdl.h>
 #include <wrl.h>
+
 
 GUIEditor::GUIEditor() {
     HR_INIT(S_OK);
@@ -56,7 +58,6 @@ void GUIEditor::render(u32 dockspace_id) {
 
                 ImGui::EndMenu();
             }
-            
         }
 
         ImGui::EndMainMenuBar();
@@ -64,29 +65,29 @@ void GUIEditor::render(u32 dockspace_id) {
 
     ImGui::Begin("Overview");
 
-    ImGui::Text("Animation Count: %llu", m_file.m_animations.size());
-    ImGui::Text("Sequence Count: %llu", m_file.m_sequences.size());
-    ImGui::Text("Object Count: %llu", m_file.m_objects.size());
-    ImGui::Text("ObjectSequence Count: %llu", m_file.m_obj_sequences.size());
-    ImGui::Text("InitParam Count: %llu", m_file.m_init_params.size());
-    ImGui::Text("Param Count: %llu", m_file.m_params.size());
-    ImGui::Text("Key Count: %llu", m_file.m_keys.size());
-    ImGui::Text("Instance Count: %llu", m_file.m_instances.size());
-    ImGui::Text("Flow Count: %llu", m_file.m_flows.size());
-    ImGui::Text("FlowProcess Count: %llu", m_file.m_flow_processes.size());
-    ImGui::Text("Texture Count: %llu", m_file.m_textures.size());
-    ImGui::Text("FontFilter Count: %llu", m_file.m_font_filters.size());
-    ImGui::Text("Message Count: %llu", m_file.m_messages.size());
-    ImGui::Text("Resource Count: %llu", m_file.m_resources.size());
-    ImGui::Text("GeneralResource Count: %llu", m_file.m_general_resources.size());
+    ImGui::RichText("<C FFC6913F>Animation Count:</C> {}", m_file.m_animations.size());
+    ImGui::RichText("<C FFC6913F>Sequence Count:</C> {}", m_file.m_sequences.size());
+    ImGui::RichText("<C FFC6913F>Object Count:</C> {}", m_file.m_objects.size());
+    ImGui::RichText("<C FFC6913F>ObjectSequence Count:</C> {}", m_file.m_obj_sequences.size());
+    ImGui::RichText("<C FFC6913F>InitParam Count:</C> {}", m_file.m_init_params.size());
+    ImGui::RichText("<C FFC6913F>Param Count:</C> {}", m_file.m_params.size());
+    ImGui::RichText("<C FFC6913F>Key Count:</C> {}", m_file.m_keys.size());
+    ImGui::RichText("<C FFC6913F>Instance Count:</C> {}", m_file.m_instances.size());
+    ImGui::RichText("<C FFC6913F>Flow Count:</C> {}", m_file.m_flows.size());
+    ImGui::RichText("<C FFC6913F>FlowProcess Count:</C> {}", m_file.m_flow_processes.size());
+    ImGui::RichText("<C FFC6913F>Texture Count:</C> {}", m_file.m_textures.size());
+    ImGui::RichText("<C FFC6913F>FontFilter Count:</C> {}", m_file.m_font_filters.size());
+    ImGui::RichText("<C FFC6913F>Message Count:</C> {}", m_file.m_messages.size());
+    ImGui::RichText("<C FFC6913F>Resource Count:</C> {}", m_file.m_resources.size());
+    ImGui::RichText("<C FFC6913F>GeneralResource Count:</C> {}", m_file.m_general_resources.size());
 
     ImGui::End();
 
     ImGui::Begin("Tree Viewer");
 
-    if (ImGui::TreeNode("Animations")) {
+    if (ImGui::RichTextTreeNode("Animations", "<C FFC6913F>Animations</C> ({})", m_file.m_animations.size())) {
         for (auto i = 0u; i < m_file.m_animations.size(); ++i) {
-            if (ImGui::TreeNode(fmt::format("Anim{}", i).c_str(), m_file.m_animations[i].get_preview(i).c_str())) {
+            if (ImGui::RichTextTreeNode(fmt::format("Anim{}", i), m_file.m_animations[i].get_preview(i))) {
                 render_animation(m_file.m_animations[i]);
                 ImGui::TreePop();
             }
@@ -97,7 +98,7 @@ void GUIEditor::render(u32 dockspace_id) {
 
     if (ImGui::TreeNode("Objects")) {
         for (auto i = 0u; i < m_file.m_objects.size(); ++i) {
-            if (ImGui::TreeNode(fmt::format("Obj{}", i).c_str(), m_file.m_objects[i].get_preview(i).c_str())) {
+            if (ImGui::RichTextTreeNode(fmt::format("Obj{}", i), m_file.m_objects[i].get_preview(i))) {
                 render_object(m_file.m_objects[i]);
                 ImGui::TreePop();
             }
@@ -150,14 +151,14 @@ void GUIEditor::render_animation(GUIAnimation& anim) {
     ImGui::InputScalar("ID", ImGuiDataType_U32, &anim.ID, &u32_step, &u32_fast_step);
     ImGui::InputText("Name", &anim.Name);
     ImGui::InputScalar("Root Object Index", ImGuiDataType_U32, &anim.RootObjectIndex, &u32_step, &u32_fast_step);
-    ImGui::InputScalar("Object Count", ImGuiDataType_U32, &anim.ObjectNum, &u32_step, &u32_fast_step);
+    ImGui::InputScalar("Object Count", ImGuiDataType_U16, &anim.ObjectNum, &u32_step, &u32_fast_step);
 
     if (ImGui::TreeNode("Objects")) {
         auto& objects = m_file.m_objects;
         const u64 max = std::min(static_cast<u64>(anim.RootObjectIndex + anim.ObjectNum), objects.size());
 
         for (auto i = anim.RootObjectIndex; i < max; ++i) {
-            if (ImGui::TreeNode(fmt::format("Obj{}", i).c_str(), objects[i].get_preview(i).c_str())) {
+            if (ImGui::RichTextTreeNode(fmt::format("Obj{}", i), objects[i].get_preview(i))) {
                 render_object(objects[i]);
 
                 ImGui::TreePop();

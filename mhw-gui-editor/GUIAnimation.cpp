@@ -18,8 +18,8 @@ GUIAnimation GUIAnimation::read(BinaryReader& stream, std::streamoff text_offset
 
 std::string GUIAnimation::get_preview(u32 index) const {
 	if (index == 0xFFFFFFFF) {
-		return std::format("Animation<{}> {}", ID, Name);
-	} else {
-		return std::format("[{}] Animation<{}> {}", index, ID, Name);
+		return std::format("Animation<<C FFA3D7B8>{}</C>> <C FFFEDC9C>{}</C>", ID, Name);
 	}
+    
+	return std::format("[<C FFA3D7B8>{}</C>] Animation<<C FFA3D7B8>{}</C>> <C FFFEDC9C>{}</C>", index, ID, Name);
 }

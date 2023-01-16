@@ -20,8 +20,8 @@ GUIObject GUIObject::read(BinaryReader& reader, const GUIHeader& header) {
 
 std::string GUIObject::get_preview(u32 index) const {
 	if (index == 0xFFFFFFFF) {
-		return std::format("Object<{}>: {} {}", ID, enum_to_string(Type), Name);
-	} else {
-		return std::format("[{}] Object<{}>: {} {}", index, ID, enum_to_string(Type), Name);
+		return std::format("Object<<C FFA3D7B8>{}</C>>: <C FFB0C94E>{} </C><C FFFEDC9C>{}</C>", ID, enum_to_string(Type), Name);
 	}
+
+    return std::format("[<C FFA3D7B8>{}</C>] Object<<C FFA3D7B8>{}</C>>: <C FFB0C94E>{} </C><C FFFEDC9C>{}</C>", index, ID, enum_to_string(Type), Name);
 }
