@@ -134,7 +134,7 @@ void GUIEditor::open_file() {
     HR_ASSERT(item->GetDisplayName(SIGDN_FILESYSPATH, &file_name));
 
     std::wstring wpath = file_name;
-    BinaryReader reader{ { wpath.begin(), wpath.end() } };
+    BinaryReader reader{ std::string{ wpath.begin(), wpath.end() } };
     m_file.load_from(reader);
 
     m_first_render = true;
