@@ -17,7 +17,7 @@ GUIEditor::GUIEditor() {
     add_menu_item("View", { "Animation Editor", "Ctrl+Shift+A", [this](GUIEditor* e) {
         m_animation_editor_visible = true;
         
-        ImGui::DockB
+        
     } });
 }
 
