@@ -176,6 +176,7 @@
     <ClCompile Include="HrException.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="RichText.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -203,6 +204,7 @@
     <ClInclude Include="HrException.h" />
     <ClInclude Include="MinWindows.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="RichText.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

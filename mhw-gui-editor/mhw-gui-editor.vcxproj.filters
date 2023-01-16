@@ -95,6 +95,9 @@
     <ClCompile Include="GUIMessage.cpp">
       <Filter>Source Files\rGUI</Filter>
     </ClCompile>
+    <ClCompile Include="RichText.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -171,6 +174,9 @@
     </ClInclude>
     <ClInclude Include="GUIMessage.h">
       <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="RichText.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
