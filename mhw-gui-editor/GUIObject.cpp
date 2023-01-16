@@ -9,7 +9,7 @@ GUIObject GUIObject::read(BinaryReader& reader, std::streamoff text_offset) {
 		.PassParentIndex = reader.read<s32>(),
 		.ChildIndex = reader.read<s32>(),
 		.Name = reader.abs_offset_read_string(text_offset + reader.read_skip<u32>(4)),
-		.Type = reader.read<ObjectType>(),
+		.Type = reader.read_skip<ObjectType>(4),
 		.InitParamIndex = reader.read_skip<u32>(4),
 		.ObjectSequenceIndex = reader.read_skip<u32>(4),
 		.ExtendDataOffset = reader.read<u64>()

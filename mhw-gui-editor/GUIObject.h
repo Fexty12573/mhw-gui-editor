@@ -13,7 +13,6 @@ struct GUIObject {
 	u32 ID;
 	u8 InitParamNum;
 	u8 AnimateParamNum;
-	u16 Padding;
 	s32 PassParentIndex;
 	s32 ChildIndex;
 	std::string Name;

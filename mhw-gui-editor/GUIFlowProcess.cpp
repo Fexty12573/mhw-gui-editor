@@ -4,6 +4,7 @@
 GUIFlowProcess GUIFlowProcess::read(BinaryReader& reader, const GUIHeader& header) {
 	return {
 		.LoopData = { .Raw = reader.read<u32>() },
+		.TotalFrameCount = reader.read<u32>(),
 		.ParamNum = reader.read<u32>(),
 		.ParamIndex = reader.read<u32>(),
 		.ActionNum = reader.read<u32>(),
