@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "GUIAnimation.h"
 
+#include <format>
+
 GUIAnimation GUIAnimation::read(BinaryReader& stream, std::streamoff text_offset) {
 	return {
 		.ID = stream.read<u32>(),
@@ -12,4 +14,12 @@ GUIAnimation GUIAnimation::read(BinaryReader& stream, std::streamoff text_offset
 		.Name = stream.abs_offset_read_string(text_offset + stream.read_skip<u32>(4)),
 		.SequenceIndex = stream.read_skip<u32>(4),
 	};
+}
+
+std::string GUIAnimation::get_preview(u32 index) const {
+	if (index == 0xFFFFFFFF) {
+		return std::format("Animation<{}> {}", ID, Name);
+	} else {
+		return std::format("[{}] Animation<{}> {}", index, ID, Name);
+	}
 }

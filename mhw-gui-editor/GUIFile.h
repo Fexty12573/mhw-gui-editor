@@ -22,11 +22,15 @@
 #include <array>
 #include <vector>
 
+class GUIEditor;
+
 class GUIFile {
 public:
 	GUIFile();
 
 	void load_from(BinaryReader& stream);
+
+	friend class GUIEditor;
 
 private:
 	GUIHeader m_header{};
