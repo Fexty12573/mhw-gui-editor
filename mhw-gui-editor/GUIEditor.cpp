@@ -111,9 +111,25 @@ void GUIEditor::render(u32 dockspace_id) {
         ImGui::TreePop();
     }
 
+    if (ImGui::TreeNode("ObjectSequences")) {
+        for (auto i = 0u; i < m_file.m_obj_sequences.size(); ++i) {
+            render_obj_sequence(m_file.m_obj_sequences[i]);
+        }
+
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNode("InitParams")) {
+        for (auto i = 0u; i < m_file.m_init_params.size(); ++i) {
+            render_init_param(m_file.m_init_params[i]);
+        }
+
+        ImGui::TreePop();
+    }
+
     ImGui::End();
 
-    ImGui::ShowStackToolWindow();
+    ImGui::ShowDemoWindow();
 }
 
 void GUIEditor::open_file() {
@@ -234,9 +250,53 @@ void GUIEditor::render_sequence(GUISequence& seq) {
     ImGui::PushID("Sequence");
     ImGui::PushID(seq.Index);
 
-    ImGui::InputScalar("ID", ImGuiDataType_U32, &seq.ID, &u32_step, &u32_fast_step);
-    ImGui::InputText("Name", &seq.Name);
-    ImGui::InputScalar("Frame Count", ImGuiDataType_U32, &seq.FrameCount, &u32_step, &u32_fast_step);
+    if (ImGui::RichTextTreeNode("Seq", seq.get_preview(seq.Index))) {
+        ImGui::InputScalar("ID", ImGuiDataType_U32, &seq.ID, &u32_step, &u32_fast_step);
+        ImGui::InputText("Name", &seq.Name);
+        ImGui::InputScalar("Frame Count", ImGuiDataType_U32, &seq.FrameCount, &u32_step, &u32_fast_step);
+    }
+
+    ImGui::PopID();
+    ImGui::PopID();
+}
+
+void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq) {
+    constexpr u32 u32_step = 1;
+    constexpr u32 u32_fast_step = 10;
+
+    ImGui::PushID("ObjectSequence");
+    ImGui::PushID(objseq.Index);
+
+    if (ImGui::RichTextTreeNode("ObjSeq", objseq.get_preview(objseq.Index))) {
+        ImGui::InputScalar("Attribute", ImGuiDataType_U16, &objseq.Attr, &u32_step, &u32_fast_step);
+        ImGui::InputScalar("InitParam Count", ImGuiDataType_U8, &objseq.InitParamNum, &u32_step, &u32_fast_step);
+        ImGui::InputScalar("Param Count", ImGuiDataType_U8, &objseq.ParamNum, &u32_step, &u32_fast_step);
+        ImGui::InputScalar("Loop Start", ImGuiDataType_S16, &objseq.LoopStart, &u32_step, &u32_fast_step);
+        ImGui::InputScalar("Frame Count", ImGuiDataType_S16, &objseq.FrameCount, &u32_step, &u32_fast_step);
+        ImGui::InputScalar("InitParam Index", ImGuiDataType_U32, &objseq.InitParamIndex, &u32_step, &u32_fast_step);
+        ImGui::InputScalar("Param Index", ImGuiDataType_U32, &objseq.ParamIndex, &u32_step, &u32_fast_step);
+
+        ImGui::TreePop();
+    }
+
+    ImGui::PopID();
+    ImGui::PopID();
+}
+
+void GUIEditor::render_init_param(GUIInitParam& param) {
+    constexpr u32 u32_step = 1;
+    constexpr u32 u32_fast_step = 10;
+
+    ImGui::PushID("InitParam");
+    ImGui::PushID(param.Index);
+
+    if (ImGui::RichTextTreeNode("InitParam", param.get_preview(param.Index))) {
+        ImGui::Checkbox("Use", &param.Use);
+        ImGui::InputScalar("Type", ImGuiDataType_U8, &param.Type, &u32_step, &u32_fast_step);
+        ImGui::InputText("Name", &param.Name);
+
+        ImGui::TreePop();
+    }
 
     ImGui::PopID();
     ImGui::PopID();
@@ -249,6 +309,8 @@ void GUIEditor::update_indices() {
     UPDATE_INDEX_LOOP(m_file.m_animations, Index);
     UPDATE_INDEX_LOOP(m_file.m_objects, Index);
     UPDATE_INDEX_LOOP(m_file.m_sequences, Index);
+    UPDATE_INDEX_LOOP(m_file.m_obj_sequences, Index);
+    UPDATE_INDEX_LOOP(m_file.m_init_params, Index);
 }
 
 #undef UPDATE_INDEX_LOOP

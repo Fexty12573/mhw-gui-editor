@@ -10,6 +10,8 @@ struct GUIInitParam {
 	static constexpr size_t size = 32;
 	static GUIInitParam read(BinaryReader& reader, const GUIHeader& header);
 
+	[[nodiscard]] std::string get_preview(u32 index = 0xFFFFFFFF) const;
+
 	u8 Type;
 	bool Use;
 	std::string Name;
@@ -24,5 +26,7 @@ struct GUIInitParam {
 		vector3 ValueFloat3;
 		vector4 ValueFloat4;
 	};
+
+	u32 Index;
 };
 

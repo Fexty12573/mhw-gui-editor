@@ -27,6 +27,8 @@ private:
 	void render_animation(GUIAnimation& anim);
 	void render_object(GUIObject& obj);
 	void render_sequence(GUISequence& seq);
+	void render_obj_sequence(GUIObjectSequence& objseq);
+	void render_init_param(GUIInitParam& param);
 
 	void update_indices();
 
