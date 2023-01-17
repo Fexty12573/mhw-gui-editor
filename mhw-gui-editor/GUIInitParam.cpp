@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "GUIInitParam.h"
 
-#include <format>
+#include <fmt/format.h>
 
 GUIInitParam GUIInitParam::read(BinaryReader& reader, const GUIHeader& header) {
 	GUIInitParam result = {
@@ -50,8 +50,8 @@ GUIInitParam GUIInitParam::read(BinaryReader& reader, const GUIHeader& header) {
 
 std::string GUIInitParam::get_preview(u32 index) const {
 	if (index == 0xFFFFFFFF) {
-		return std::format("InitParam: <C FFB0C94E>{}</C> <C FFFEDC9C>{}</C>{}", Type, Name, !Use ? " <C FF3030EE>(Unused)</C>" : "");
+		return fmt::format("InitParam: <C FFB0C94E>{}</C> <C FFFEDC9C>{}</C>{}", Type, Name, !Use ? " <C FF3030EE>(Unused)</C>" : "");
 	}
 
-	return std::format("[<C FFA3D7B8>{}</C>] InitParam: <C FFB0C94E>{}</C> <C FFFEDC9C>{}</C>{}", Index, Type, Name, !Use ? " <C FF3030EE>(Unused)</C>" : "");
+	return fmt::format("[<C FFA3D7B8>{}</C>] InitParam: <C FFB0C94E>{}</C> <C FFFEDC9C>{}</C>{}", Index, Type, Name, !Use ? " <C FF3030EE>(Unused)</C>" : "");
 }

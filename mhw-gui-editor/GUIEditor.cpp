@@ -86,42 +86,40 @@ void GUIEditor::render(u32 dockspace_id) {
     ImGui::Begin("Tree Viewer");
 
     if (ImGui::RichTextTreeNode("Animations", "<C FFC6913F>Animations</C> ({})", m_file.m_animations.size())) {
-        for (auto i = 0u; i < m_file.m_animations.size(); ++i) {
-            render_animation(m_file.m_animations[i]);
+        for (auto& m_animation : m_file.m_animations) {
+            render_animation(m_animation);
         }
 
         ImGui::TreePop();
     }
 
     if (ImGui::TreeNode("Objects")) {
-        for (auto i = 0u; i < m_file.m_objects.size(); ++i) {
-            render_object(m_file.m_objects[i]);
+        for (auto& m_object : m_file.m_objects) {
+            render_object(m_object);
         }
 
         ImGui::TreePop();
     }
 
     if (ImGui::TreeNode("Sequences")) {
-        auto& sequences = m_file.m_sequences;
-
-        for (auto i = 0u; i < sequences.size(); ++i) {
-            render_sequence(sequences[i]);
+        for (auto& sequence : m_file.m_sequences) {
+            render_sequence(sequence);
         }
 
         ImGui::TreePop();
     }
 
     if (ImGui::TreeNode("ObjectSequences")) {
-        for (auto i = 0u; i < m_file.m_obj_sequences.size(); ++i) {
-            render_obj_sequence(m_file.m_obj_sequences[i]);
+        for (auto& m_obj_sequence : m_file.m_obj_sequences) {
+            render_obj_sequence(m_obj_sequence);
         }
 
         ImGui::TreePop();
     }
 
     if (ImGui::TreeNode("InitParams")) {
-        for (auto i = 0u; i < m_file.m_init_params.size(); ++i) {
-            render_init_param(m_file.m_init_params[i]);
+        for (auto& m_init_param : m_file.m_init_params) {
+            render_init_param(m_init_param);
         }
 
         ImGui::TreePop();
