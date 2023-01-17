@@ -87,10 +87,7 @@ void GUIEditor::render(u32 dockspace_id) {
 
     if (ImGui::RichTextTreeNode("Animations", "<C FFC6913F>Animations</C> ({})", m_file.m_animations.size())) {
         for (auto i = 0u; i < m_file.m_animations.size(); ++i) {
-            if (ImGui::RichTextTreeNode(fmt::format("Anim{}", i), m_file.m_animations[i].get_preview(i))) {
-                render_animation(m_file.m_animations[i]);
-                ImGui::TreePop();
-            }
+            render_animation(m_file.m_animations[i]);
         }
 
         ImGui::TreePop();
@@ -98,16 +95,25 @@ void GUIEditor::render(u32 dockspace_id) {
 
     if (ImGui::TreeNode("Objects")) {
         for (auto i = 0u; i < m_file.m_objects.size(); ++i) {
-            if (ImGui::RichTextTreeNode(fmt::format("Obj{}", i), m_file.m_objects[i].get_preview(i))) {
-                render_object(m_file.m_objects[i]);
-                ImGui::TreePop();
-            }
+            render_object(m_file.m_objects[i]);
+        }
+
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNode("Sequences")) {
+        auto& sequences = m_file.m_sequences;
+
+        for (auto i = 0u; i < sequences.size(); ++i) {
+            render_sequence(sequences[i]);
         }
 
         ImGui::TreePop();
     }
 
     ImGui::End();
+
+    ImGui::ShowStackToolWindow();
 }
 
 void GUIEditor::open_file() {
@@ -137,6 +143,7 @@ void GUIEditor::open_file() {
     std::wstring wpath = file_name;
     BinaryReader reader{ std::string{ wpath.begin(), wpath.end() } };
     m_file.load_from(reader);
+    update_indices();
 
     m_first_render = true;
 }
@@ -146,23 +153,40 @@ void GUIEditor::render_animation(GUIAnimation& anim) {
     constexpr u32 u32_fast_step = 10;
 
     ImGui::PushID("Animation");
-    ImGui::PushID(anim.ID);
+    ImGui::PushID(anim.Index);
 
-    ImGui::InputScalar("ID", ImGuiDataType_U32, &anim.ID, &u32_step, &u32_fast_step);
-    ImGui::InputText("Name", &anim.Name);
-    ImGui::InputScalar("Root Object Index", ImGuiDataType_U32, &anim.RootObjectIndex, &u32_step, &u32_fast_step);
-    ImGui::InputScalar("Object Count", ImGuiDataType_U16, &anim.ObjectNum, &u32_step, &u32_fast_step);
+    if (ImGui::RichTextTreeNode("Anim", anim.get_preview(anim.Index))) {
+        ImGui::InputScalar("ID", ImGuiDataType_U32, &anim.ID, &u32_step, &u32_fast_step);
+        ImGui::InputText("Name", &anim.Name);
+        ImGui::InputScalar("Root Object Index", ImGuiDataType_U32, &anim.RootObjectIndex, &u32_step, &u32_fast_step);
+        ImGui::InputScalar("Object Count", ImGuiDataType_U16, &anim.ObjectNum, &u32_step, &u32_fast_step);
+        ImGui::InputScalar("Sequence Start Index", ImGuiDataType_U32, &anim.SequenceIndex, &u32_step, &u32_fast_step);
+        ImGui::InputScalar("Sequence Count", ImGuiDataType_U16, &anim.SequenceNum, &u32_step, &u32_fast_step);
 
-    if (ImGui::TreeNode("Objects")) {
-        auto& objects = m_file.m_objects;
-        const u64 max = std::min(static_cast<u64>(anim.RootObjectIndex + anim.ObjectNum), objects.size());
+        if (ImGui::TreeNode("Objects")) {
+            auto object = &m_file.m_objects[anim.RootObjectIndex];
+            render_object(*object);
 
-        for (auto i = anim.RootObjectIndex; i < max; ++i) {
-            if (ImGui::RichTextTreeNode(fmt::format("Obj{}", i), objects[i].get_preview(i))) {
-                render_object(objects[i]);
-
-                ImGui::TreePop();
+            while (object->NextIndex != -1) {
+                object = &m_file.m_objects[object->NextIndex];
+                render_object(*object);
             }
+
+            ImGui::TreePop();
+        }
+
+        if (ImGui::TreeNode("Sequences")) {
+            auto& sequences = m_file.m_sequences;
+            const u64 max = std::min(static_cast<u64>(anim.SequenceIndex + anim.SequenceNum), sequences.size());
+
+            for (auto i = anim.SequenceIndex; i < max; ++i) {
+                if (ImGui::RichTextTreeNode(fmt::format("Seq{}", i), sequences[i].get_preview(i))) {
+                    render_sequence(sequences[i]);
+                    ImGui::TreePop();
+                }
+            }
+
+            ImGui::TreePop();
         }
 
         ImGui::TreePop();
@@ -177,15 +201,57 @@ void GUIEditor::render_object(GUIObject& obj) {
     constexpr u32 u32_fast_step = 10;
 
     ImGui::PushID("Object");
-    ImGui::PushID(obj.ID);
+    ImGui::PushID(obj.Index);
 
-    ImGui::InputScalar("ID", ImGuiDataType_U32, &obj.ID, &u32_step, &u32_fast_step);
-    ImGui::InputText("Name", &obj.Name);
-    ImGui::Text("Type: %s", enum_to_string(obj.Type));
+    if (ImGui::RichTextTreeNode("Obj", obj.get_preview(obj.Index))) {
+        ImGui::InputScalar("ID", ImGuiDataType_U32, &obj.ID, &u32_step, &u32_fast_step);
+        ImGui::InputInt("Child Index", &obj.ChildIndex);
+        ImGui::InputInt("Next Index", &obj.NextIndex);
+        ImGui::InputText("Name", &obj.Name);
+        ImGui::Text("Type: %s", enum_to_string(obj.Type));
+
+        if (obj.ChildIndex != -1) {
+            auto object = &m_file.m_objects[obj.ChildIndex];
+            render_object(*object);
+
+            while (object->NextIndex != -1) {
+                object = &m_file.m_objects[object->NextIndex];
+                render_object(*object);
+            }
+        }
+
+        ImGui::TreePop();
+    }
 
     ImGui::PopID();
     ImGui::PopID();
 }
+
+void GUIEditor::render_sequence(GUISequence& seq) {
+    constexpr u32 u32_step = 1;
+    constexpr u32 u32_fast_step = 10;
+
+    ImGui::PushID("Sequence");
+    ImGui::PushID(seq.Index);
+
+    ImGui::InputScalar("ID", ImGuiDataType_U32, &seq.ID, &u32_step, &u32_fast_step);
+    ImGui::InputText("Name", &seq.Name);
+    ImGui::InputScalar("Frame Count", ImGuiDataType_U32, &seq.FrameCount, &u32_step, &u32_fast_step);
+
+    ImGui::PopID();
+    ImGui::PopID();
+}
+
+#define UPDATE_INDEX_LOOP(list, IndexMember) \
+for (auto i = 0u; i < list.size(); ++i) list[i].##IndexMember = i
+
+void GUIEditor::update_indices() {
+    UPDATE_INDEX_LOOP(m_file.m_animations, Index);
+    UPDATE_INDEX_LOOP(m_file.m_objects, Index);
+    UPDATE_INDEX_LOOP(m_file.m_sequences, Index);
+}
+
+#undef UPDATE_INDEX_LOOP
 
 void GUIEditor::open_animation_editor() {
     if (m_animation_editor_first) {

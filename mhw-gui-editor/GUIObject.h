@@ -15,12 +15,14 @@ struct GUIObject {
 	u32 ID;
 	u8 InitParamNum;
 	u8 AnimateParamNum;
-	s32 PassParentIndex;
+	s32 NextIndex;
 	s32 ChildIndex;
 	std::string Name;
     ObjectType Type;
     u32 InitParamIndex;
     u32 ObjectSequenceIndex;
 	s64 ExtendDataOffset;
+
+	u32 Index = 0;
 };
 

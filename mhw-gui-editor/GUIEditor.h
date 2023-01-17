@@ -26,6 +26,9 @@ public:
 private:
 	void render_animation(GUIAnimation& anim);
 	void render_object(GUIObject& obj);
+	void render_sequence(GUISequence& seq);
+
+	void update_indices();
 
 	void open_animation_editor();
 

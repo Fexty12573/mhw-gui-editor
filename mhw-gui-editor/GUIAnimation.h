@@ -19,5 +19,7 @@ struct GUIAnimation {
 	u32 RootObjectIndex;
 	std::string Name;
 	u32 SequenceIndex;
+
+	u32 Index = 0;
 };
 
