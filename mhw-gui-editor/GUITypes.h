@@ -306,7 +306,7 @@ enum class KeyMode : u8
     DEFAULT_10 = 0xB,
 };
 
-enum class ParamType : u32 {
+enum class ParamType : u8 {
     UNKNOWN = 0x0,
     INT = 0x1,
     FLOAT = 0x2,
@@ -677,6 +677,33 @@ constexpr const char* enum_to_string(KeyMode v) {
     case KeyMode::NUM_8: return "NUM_8";
     case KeyMode::SUMMARY: return "SUMMARY";
     case KeyMode::DEFAULT_10: return "DEFAULT_10";
+    }
+
+    return "INVALID";
+}
+
+constexpr const char* enum_to_string(ParamType v) {
+    switch (v) {
+    case ParamType::UNKNOWN: return "UNKNOWN"; 
+    case ParamType::INT: return "INT"; 
+    case ParamType::FLOAT: return "FLOAT"; 
+    case ParamType::BOOL: return "BOOL"; 
+    case ParamType::VECTOR: return "VECTOR"; 
+    case ParamType::RESOURCE: return "RESOURCE"; 
+    case ParamType::STRING: return "STRING"; 
+    case ParamType::TEXTURE: return "TEXTURE"; 
+    case ParamType::FONT: return "FONT"; 
+    case ParamType::MESSAGE: return "MESSAGE"; 
+    case ParamType::VARIABLE: return "VARIABLE"; 
+    case ParamType::ANIMATION: return "ANIMATION"; 
+    case ParamType::EVENT: return "EVENT"; 
+    case ParamType::GUIRESOURCE: return "GUIRESOURCE"; 
+    case ParamType::FONT_FILTER: return "FONT_FILTER"; 
+    case ParamType::ANIMEVENT: return "ANIMEVENT"; 
+    case ParamType::SEQUENCE: return "SEQUENCE"; 
+    case ParamType::INIT_BOOL: return "INIT_BOOL"; 
+    case ParamType::INIT_INT: return "INIT_INT"; 
+    case ParamType::GENERALRESOURCE: return "GENERALRESOURCE";
     }
 
     return "INVALID";

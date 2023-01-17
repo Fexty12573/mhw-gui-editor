@@ -93,7 +93,7 @@ void GUIEditor::render(u32 dockspace_id) {
         ImGui::TreePop();
     }
 
-    if (ImGui::TreeNode("Objects")) {
+    if (ImGui::TreeNodeEx("Objects", ImGuiTreeNodeFlags_SpanAvailWidth)) {
         for (auto& m_object : m_file.m_objects) {
             render_object(m_object);
         }
@@ -101,7 +101,7 @@ void GUIEditor::render(u32 dockspace_id) {
         ImGui::TreePop();
     }
 
-    if (ImGui::TreeNode("Sequences")) {
+    if (ImGui::TreeNodeEx("Sequences", ImGuiTreeNodeFlags_SpanAvailWidth)) {
         for (auto& sequence : m_file.m_sequences) {
             render_sequence(sequence);
         }
@@ -109,7 +109,7 @@ void GUIEditor::render(u32 dockspace_id) {
         ImGui::TreePop();
     }
 
-    if (ImGui::TreeNode("ObjectSequences")) {
+    if (ImGui::TreeNodeEx("ObjectSequences", ImGuiTreeNodeFlags_SpanAvailWidth)) {
         for (auto& m_obj_sequence : m_file.m_obj_sequences) {
             render_obj_sequence(m_obj_sequence);
         }
@@ -117,7 +117,7 @@ void GUIEditor::render(u32 dockspace_id) {
         ImGui::TreePop();
     }
 
-    if (ImGui::TreeNode("InitParams")) {
+    if (ImGui::TreeNodeEx("InitParams", ImGuiTreeNodeFlags_SpanAvailWidth)) {
         for (auto& m_init_param : m_file.m_init_params) {
             render_init_param(m_init_param);
         }
@@ -177,27 +177,24 @@ void GUIEditor::render_animation(GUIAnimation& anim) {
         ImGui::InputScalar("Sequence Start Index", ImGuiDataType_U32, &anim.SequenceIndex, &u32_step, &u32_fast_step);
         ImGui::InputScalar("Sequence Count", ImGuiDataType_U16, &anim.SequenceNum, &u32_step, &u32_fast_step);
 
-        if (ImGui::TreeNode("Objects")) {
+        if (ImGui::TreeNodeEx("Objects", ImGuiTreeNodeFlags_SpanAvailWidth)) {
             auto object = &m_file.m_objects[anim.RootObjectIndex];
-            render_object(*object);
+            render_object(*object, anim.SequenceNum);
 
             while (object->NextIndex != -1) {
                 object = &m_file.m_objects[object->NextIndex];
-                render_object(*object);
+                render_object(*object, anim.SequenceNum);
             }
 
             ImGui::TreePop();
         }
 
-        if (ImGui::TreeNode("Sequences")) {
+        if (ImGui::TreeNodeEx("Sequences", ImGuiTreeNodeFlags_SpanAvailWidth)) {
             auto& sequences = m_file.m_sequences;
             const u64 max = std::min(static_cast<u64>(anim.SequenceIndex + anim.SequenceNum), sequences.size());
 
             for (auto i = anim.SequenceIndex; i < max; ++i) {
-                if (ImGui::RichTextTreeNode(fmt::format("Seq{}", i), sequences[i].get_preview(i))) {
-                    render_sequence(sequences[i]);
-                    ImGui::TreePop();
-                }
+                render_sequence(sequences[i]);
             }
 
             ImGui::TreePop();
@@ -210,7 +207,7 @@ void GUIEditor::render_animation(GUIAnimation& anim) {
     ImGui::PopID();
 }
 
-void GUIEditor::render_object(GUIObject& obj) {
+void GUIEditor::render_object(GUIObject& obj, u32 seq_count) {
     constexpr u32 u32_step = 1;
     constexpr u32 u32_fast_step = 10;
 
@@ -226,11 +223,33 @@ void GUIEditor::render_object(GUIObject& obj) {
 
         if (obj.ChildIndex != -1) {
             auto object = &m_file.m_objects[obj.ChildIndex];
-            render_object(*object);
+            render_object(*object, seq_count);
 
             while (object->NextIndex != -1) {
                 object = &m_file.m_objects[object->NextIndex];
-                render_object(*object);
+                render_object(*object, seq_count);
+            }
+        }
+
+        if (obj.InitParamNum > 0) {
+            if (ImGui::TreeNodeEx("InitParams", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+                const u64 max = std::min(static_cast<u64>(obj.InitParamIndex + obj.InitParamNum), m_file.m_init_params.size());
+                for (auto i = obj.InitParamIndex; i < max; ++i) {
+                    render_init_param(m_file.m_init_params[i]);
+                }
+
+                ImGui::TreePop();
+            }
+        }
+
+        if (seq_count > 0) {
+            if (ImGui::TreeNodeEx("ObjectSequences", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+                const u64 max = std::min(static_cast<u64>(obj.ObjectSequenceIndex + seq_count), m_file.m_obj_sequences.size());
+                for (auto i = obj.ObjectSequenceIndex; i < max; ++i) {
+                    render_obj_sequence(m_file.m_obj_sequences[i]);
+                }
+
+                ImGui::TreePop();
             }
         }
 
@@ -273,6 +292,21 @@ void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq) {
         ImGui::InputScalar("Frame Count", ImGuiDataType_S16, &objseq.FrameCount, &u32_step, &u32_fast_step);
         ImGui::InputScalar("InitParam Index", ImGuiDataType_U32, &objseq.InitParamIndex, &u32_step, &u32_fast_step);
         ImGui::InputScalar("Param Index", ImGuiDataType_U32, &objseq.ParamIndex, &u32_step, &u32_fast_step);
+
+        if (objseq.InitParamNum > 0) {
+            if (ImGui::TreeNodeEx("InitParams", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+                auto& initparams = m_file.m_init_params;
+                const u64 max = std::min(static_cast<u64>(objseq.InitParamIndex + objseq.InitParamNum), initparams.size());
+
+                for (auto i = objseq.InitParamIndex; i < max; ++i) {
+                    render_init_param(initparams[i]);
+                }
+
+                ImGui::TreePop();
+            }
+        }
+
+
 
         ImGui::TreePop();
     }

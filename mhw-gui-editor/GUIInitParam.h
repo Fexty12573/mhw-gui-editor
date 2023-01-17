@@ -12,20 +12,19 @@ struct GUIInitParam {
 
 	[[nodiscard]] std::string get_preview(u32 index = 0xFFFFFFFF) const;
 
-	u8 Type;
+	ParamType Type;
 	bool Use;
 	std::string Name;
 	union {
+        bool ValueBool;
 		u8 Value8;
-		u16 Value16;
 		u32 Value32;
 		u64 Value64;
 		f32 ValueFloat;
-		f64 ValueDouble;
-		vector2 ValueFloat2;
-		vector3 ValueFloat3;
-		vector4 ValueFloat4;
+		vector4 ValueVector;
 	};
+	// Should be part of the union but that deletes the implicit constructor and I don't wanna deal with that
+    std::string ValueString; 
 
 	u32 Index;
 };

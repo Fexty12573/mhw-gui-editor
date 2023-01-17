@@ -5,13 +5,15 @@
 
 GUIInitParam GUIInitParam::read(BinaryReader& reader, const GUIHeader& header) {
 	GUIInitParam result = {
-		.Type = reader.read<u8>(),
+		.Type = reader.read<ParamType>(),
 		.Use = reader.read_skip<bool>(14),
 		.Name = reader.abs_offset_read_string(static_cast<s64>(header.stringOffset) + reader.read_skip<u32>(4))
 	};
 
+	result.ValueVector = {};
+
 	const auto offset = reader.read_skip<u32>(4);
-	switch (result.Type) {
+	switch (static_cast<u8>(result.Type)) {
 	case 3: [[fallthrough]];
 	case 17:
 	case 18:
@@ -37,8 +39,13 @@ GUIInitParam GUIInitParam::read(BinaryReader& reader, const GUIHeader& header) {
 		break;
 
 	case 4:
-		result.ValueFloat4 = reader.abs_offset_read<vector4>(static_cast<s64>(header.keyValue32Offset) + offset);
+		result.ValueVector = reader.abs_offset_read<vector4>(static_cast<s64>(header.keyValue32Offset) + offset);
 		break;
+
+	case 6:
+        result.ValueString = reader.abs_offset_read_string(static_cast<s64>(header.stringOffset) + 
+			reader.abs_offset_read<s64>(static_cast<s64>(header.keyValue32Offset) + offset));
+	    break;
 
 	default:
 		result.Value32 = reader.abs_offset_read<u32>(static_cast<s64>(header.keyValue32Offset) + offset);
@@ -50,8 +57,8 @@ GUIInitParam GUIInitParam::read(BinaryReader& reader, const GUIHeader& header) {
 
 std::string GUIInitParam::get_preview(u32 index) const {
 	if (index == 0xFFFFFFFF) {
-		return fmt::format("InitParam: <C FFB0C94E>{}</C> <C FFFEDC9C>{}</C>{}", Type, Name, !Use ? " <C FF3030EE>(Unused)</C>" : "");
+		return fmt::format("InitParam: <C FFB0C94E>{}</C> <C FFFEDC9C>{}</C>{}", enum_to_string(Type), Name, !Use ? " <C FF3030EE>(Unused)</C>" : "");
 	}
 
-	return fmt::format("[<C FFA3D7B8>{}</C>] InitParam: <C FFB0C94E>{}</C> <C FFFEDC9C>{}</C>{}", Index, Type, Name, !Use ? " <C FF3030EE>(Unused)</C>" : "");
+	return fmt::format("[<C FFA3D7B8>{}</C>] InitParam: <C FFB0C94E>{}</C> <C FFFEDC9C>{}</C>{}", Index, enum_to_string(Type), Name, !Use ? " <C FF3030EE>(Unused)</C>" : "");
 }
