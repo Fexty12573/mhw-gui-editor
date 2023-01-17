@@ -5,8 +5,13 @@ namespace ImGui::Internal {
 
 std::vector<TaggedText> ParseRichText(const std::string& text) {
 	std::vector<TaggedText> result;
-	std::vector<TagType> tag_stack;
+    bool bold = false;
+    bool italic = false;
+    bool underline = false;
+    bool strike = false;
 	std::stack<ImU32> color_stack;
+
+    color_stack.push(ImGui::GetColorU32(ImGuiCol_Text)); // default color
 
 	// XML like tags, e.g.
 	// <B>Bold text</B>
@@ -15,59 +20,49 @@ std::vector<TaggedText> ParseRichText(const std::string& text) {
 	size_t last_tag_change = 0;
 
 	for (size_t i = 0; i < text.size();) {
-		auto& c = text[i];
-
-		if (c == '<') {
+		if (text[i] == '<') {
 			if (i >= text.size() - 3) {
 				// Not enough characters for a tag
 				break;
 			}
 
-			TagType tag;
+            const ImU32 pre_color = color_stack.top();
 
 			if (text[i + 1] == '/') {
-				if (tag_stack.empty()) {
-                    throw std::runtime_error("Invalid rich text: closing tag without opening tag");
-				}
-
 				switch (text[i + 2]) {
 				case 'B':
-					tag = TagType::Bold;
+				    bold = false;
 					break;
 				case 'I':
-					tag = TagType::Italic;
+					italic = false;
 					break;
 				case 'U':
-					tag = TagType::Underline;
+					underline = false;
 					break;
 				case 'S':
-					tag = TagType::StrikeThrough;
+					strike = false;
 					break;
 				case 'C':
-					tag = TagType::Color;
+				    if (color_stack.size() > 1) {
+					    color_stack.pop();
+				    } else {
+					    throw std::runtime_error("Closing color tag without opening tag");
+				    }
 					break;
 				default:
 				    ++i;
 					continue;
 				}
 
-				const auto iter = std::find_if(tag_stack.rbegin(), tag_stack.rend(), [tag](TagType t) {
-					return t == tag;
-				});
-
 				if (i != last_tag_change) {
 					result.push_back({
 					    .Text = std::string_view(text.c_str() + last_tag_change, i - last_tag_change),
-					    .Tags = tag_stack,
-					    .Param = {.Color = color_stack.empty() ? 0 : color_stack.top() }
+					    .Bold = bold,
+                        .Italic = italic,
+                        .Underline = underline,
+                        .StrikeThrough = strike,
+					    .Color = pre_color
 					});
-				}
-
-				if (tag == TagType::Color) {
-					color_stack.pop();
-				}
-				if (iter != tag_stack.rend()) {
-					tag_stack.erase(std::next(iter).base());
 				}
 
 				i += 4; // </#>
@@ -77,24 +72,22 @@ std::vector<TaggedText> ParseRichText(const std::string& text) {
 
 				switch (text[i + 1]) {
 				case 'B':
-					tag_stack.push_back(TagType::Bold);
+				    bold = true;
 					i += 3;
 					break;
 				case 'I':
-					tag_stack.push_back(TagType::Italic);
+					italic = true;
 					i += 3;
 					break;
 				case 'U':
-					tag_stack.push_back(TagType::Underline);
+					underline = true;
 					i += 3;
 					break;
 				case 'S':
-					tag_stack.push_back(TagType::StrikeThrough);
+					strike = true;
 					i += 3;
 					break;
 				case 'C': {
-					tag_stack.push_back(TagType::Color);
-
 					const size_t begin_col = i + 3; // <C RRGGBBAA>
 					const size_t end_col = text.find_first_of('>', begin_col);
 					color_stack.push(std::strtoul(text.c_str() + begin_col, nullptr, 16));
@@ -109,8 +102,11 @@ std::vector<TaggedText> ParseRichText(const std::string& text) {
                 if (pre_pos != last_tag_change) {
 					result.push_back({
 					    .Text = std::string_view(text.c_str() + last_tag_change, pre_pos - last_tag_change),
-					    .Tags = {},
-					    .Param = {.Color = color_stack.empty() ? 0 : color_stack.top() }
+						.Bold = bold,
+						.Italic = italic,
+						.Underline = underline,
+						.StrikeThrough = strike,
+						.Color = pre_color
 					});
                 }
 
@@ -124,13 +120,16 @@ std::vector<TaggedText> ParseRichText(const std::string& text) {
     if (last_tag_change < text.size()) { // Add the last part of the text
         result.push_back({
             .Text = std::string_view(text.c_str() + last_tag_change, text.size() - last_tag_change),
-            .Tags = tag_stack,
-            .Param = {.Color = color_stack.empty() ? 0 : color_stack.top() }
+			.Bold = bold,
+		    .Italic = italic,
+		    .Underline = underline,
+		    .StrikeThrough = strike,
+		    .Color = color_stack.top()
         });
     }
 
-	if (!tag_stack.empty() || !color_stack.empty()) {
-		throw std::runtime_error(std::format("Missing closing tag in string '{}'", text));
+    if (color_stack.size() > 1) {
+		throw std::runtime_error(std::format("Missing closing color tag in string '{}'", text));
 	}
 
 	return result;

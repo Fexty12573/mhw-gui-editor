@@ -24,12 +24,11 @@ enum class TagType {
 
 struct TaggedText {
 	std::string_view Text;
-	std::vector<TagType> Tags;
-
-	union {
-		ImU32 Color;
-		std::string_view Link;
-	} Param;
+    bool Bold = false;
+    bool Italic = false;
+    bool Underline = false;
+    bool StrikeThrough = false;
+    ImU32 Color = 0xFFFFFFFF;
 };
 
 std::vector<TaggedText> ParseRichText(const std::string& text);
@@ -42,25 +41,7 @@ void RichText(std::string_view fmt, Args&&... args) {
     const auto tagged = Internal::ParseRichText(formatted);
 
 	for (const auto& msg : tagged) {
-		bool bold = false;
-		bool italic = false;
-		bool underline = false;
-		bool strikethrough = false;
-		ImU32 color = 0xFFFFFFFF;
-
-		for (const auto tag : msg.Tags) {
-			switch (tag) {
-			case Internal::TagType::None: break;
-			case Internal::TagType::Bold: bold = true; break;
-			case Internal::TagType::Italic: italic = true; break;
-			case Internal::TagType::Underline: underline = true; break;
-			case Internal::TagType::StrikeThrough: strikethrough = true; break;
-			case Internal::TagType::Color: color = msg.Param.Color; break;
-			default: break;
-			}
-		}
-
-		PushStyleColor(ImGuiCol_Text, ImColor(color).Value);
+		PushStyleColor(ImGuiCol_Text, ImColor(msg.Color).Value);
         TextEx(msg.Text.data(), msg.Text.data() + msg.Text.size(), ImGuiTextFlags_NoWidthForLargeClippedText);
 		PopStyleColor();
         SameLine(0.0f, 0.0f);
@@ -79,25 +60,7 @@ bool RichTextTreeNode(std::string_view str_id, std::string_view fmt, Args&&... a
 	ImGui::SameLine();
 
     for (const auto& msg : tagged) {
-        bool bold = false;
-        bool italic = false;
-        bool underline = false;
-        bool strikethrough = false;
-        ImU32 color = 0xFFFFFFFF;
-
-        for (const auto tag : msg.Tags) {
-            switch (tag) {
-            case Internal::TagType::None: break;
-            case Internal::TagType::Bold: bold = true; break;
-            case Internal::TagType::Italic: italic = true; break;
-            case Internal::TagType::Underline: underline = true; break;
-            case Internal::TagType::StrikeThrough: strikethrough = true; break;
-            case Internal::TagType::Color: color = msg.Param.Color; break;
-            default: break;
-            }
-        }
-
-        PushStyleColor(ImGuiCol_Text, ImColor(color).Value);
+        PushStyleColor(ImGuiCol_Text, ImColor(msg.Color).Value);
         TextEx(msg.Text.data(), msg.Text.data() + msg.Text.size(), ImGuiTextFlags_NoWidthForLargeClippedText);
         PopStyleColor();
         SameLine(0.0f, 0.0f);
