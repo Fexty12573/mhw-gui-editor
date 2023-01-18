@@ -9,12 +9,13 @@
 #include <imgui.h>
 #include <ShObjIdl.h>
 #include <wrl.h>
+#include <DirectXTex.h>
 
 
 GUIEditor::GUIEditor() {
     HR_INIT(S_OK);
     HR_ASSERT(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
-
+    
     add_menu_item("File", { "Open", "Ctrl+O", [](GUIEditor* e) { e->open_file(); } });
     add_menu_item("View", { "Animation Editor", "Ctrl+Shift+A", [this](GUIEditor* e) {
         m_animation_editor_visible = true;

@@ -19,6 +19,12 @@
     <Filter Include="Header Files\rGUI">
       <UniqueIdentifier>{27225483-a3c7-4a6d-9fac-c24a850e21b7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\rTexture">
+      <UniqueIdentifier>{d9a4c078-d3d0-4684-813a-435eac4106d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rTexture">
+      <UniqueIdentifier>{f96be62b-5397-4917-b26a-8e86b5a3ec82}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md">
@@ -97,6 +103,12 @@
     </ClCompile>
     <ClCompile Include="RichText.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSTextureLoader.cpp">
+      <Filter>Source Files\rTexture</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files\rTexture</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +189,12 @@
     </ClInclude>
     <ClInclude Include="RichText.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSTextureLoader.h">
+      <Filter>Header Files\rTexture</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files\rTexture</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -28,7 +28,7 @@ public:
 
 	[[nodiscard]] std::string read_string(std::streamsize length);
 	[[nodiscard]] std::string read_string();
-	void read_bytes(std::span<char> buffer);
+	void read_bytes(std::span<uint8_t> buffer);
 
 	// ----------------------------------
 	// Methods for reading at an offset

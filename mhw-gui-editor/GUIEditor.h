@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GUIFile.h"
+#include "Texture.h"
 
 #include <functional>
 #include <map>

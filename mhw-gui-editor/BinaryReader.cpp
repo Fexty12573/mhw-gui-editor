@@ -25,8 +25,8 @@ std::string BinaryReader::read_string() {
 	return result;
 }
 
-void BinaryReader::read_bytes(std::span<char> buffer) {
-	m_file.read(buffer.data(), static_cast<std::streamsize>(buffer.size()));
+void BinaryReader::read_bytes(std::span<uint8_t> buffer) {
+	m_file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(buffer.size()));
 }
 
 std::string BinaryReader::abs_offset_read_string(std::streamsize length, std::streamoff offset, bool restore_position) {
