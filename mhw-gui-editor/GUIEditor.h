@@ -24,13 +24,21 @@ public:
 	[[nodiscard]] GUIFile& get_file() { return m_file; }
 
 private:
+	void render_tree_viewer();
+	void render_overview();
+	void render_resource_manager();
+	void render_texture_viewer();
+
 	void render_animation(GUIAnimation& anim);
 	void render_object(GUIObject& obj, u32 seq_count = 0);
 	void render_sequence(GUISequence& seq);
 	void render_obj_sequence(GUIObjectSequence& objseq);
 	void render_init_param(GUIInitParam& param);
+	void render_param(GUIParam& param);
 
 	void update_indices();
+
+	void select_chunk_dir();
 
 	void open_animation_editor();
 
@@ -39,7 +47,9 @@ private:
 	std::map<std::string, std::vector<MenuItem>> m_menu_items;
 
 	bool m_first_render = true;
-	
+	bool m_options_menu_open = false;
 	bool m_animation_editor_first = true;
 	bool m_animation_editor_visible = false;
+
+	std::string m_chunk_dir;
 };

@@ -1,9 +1,11 @@
 #include "pch.h"
 #include "GUIParam.h"
 
+#include <format>
+
 GUIParam GUIParam::read(BinaryReader& reader, const GUIHeader& header) {
 	GUIParam result = {
-		.Type = reader.read<u8>(),
+		.Type = reader.read<ParamType>(),
 		.ValueCount = reader.read_skip<u8>(14),
 		.ParentID = reader.read_skip<u32>(4),
 		.Name = reader.abs_offset_read_string(header.stringOffset + reader.read_skip<u32>(4)),
@@ -11,7 +13,7 @@ GUIParam GUIParam::read(BinaryReader& reader, const GUIHeader& header) {
 	};
 
 	const auto offset = reader.read_skip<u32>(4);
-	switch (result.Type) {
+	switch (static_cast<u8>(result.Type)) {
 	case 3: [[fallthrough]];
 	case 17:
 	case 18:
@@ -46,4 +48,22 @@ GUIParam GUIParam::read(BinaryReader& reader, const GUIHeader& header) {
 	}
 
 	return result;
+}
+
+std::string GUIParam::get_preview(u32 index) const {
+	const std::string fmt = "Param: <C FFB0C94E>{}</C> <C FFFEDC9C>{}</C>";
+
+	if (index == -1) {
+		if (ValueCount > 1) {
+			return std::vformat(fmt + "[<C FFA3D7B8>{}</C>]", std::make_format_args(enum_to_string(Type), Name, ValueCount));
+		}
+
+		return std::vformat(fmt, std::make_format_args(enum_to_string(Type), Name));
+	}
+
+	if (ValueCount > 1) {
+		return std::vformat("[<C FFA3D7B8>{}</C>] " + fmt + "[<C FFA3D7B8>{}</C>]", std::make_format_args(index, enum_to_string(Type), Name, ValueCount));
+	}
+	
+	return std::vformat("[<C FFA3D7B8>{}</C>] " + fmt, std::make_format_args(index, enum_to_string(Type), Name));
 }

@@ -10,7 +10,9 @@ struct GUIParam {
 	static constexpr size_t size = 48;
 	static GUIParam read(BinaryReader& reader, const GUIHeader& header);
 
-	u8 Type;
+	[[nodiscard]] std::string get_preview(u32 index = -1) const;
+
+	ParamType Type;
 	u8 ValueCount;
 	u32 ParentID;
 	std::string Name;
@@ -26,5 +28,7 @@ struct GUIParam {
 		vector3 ValueFloat3;
 		vector4 ValueFloat4;
 	};
+
+	u32 Index = 0;
 };
 

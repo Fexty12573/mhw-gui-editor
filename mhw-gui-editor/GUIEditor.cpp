@@ -42,10 +42,28 @@ void GUIEditor::render(u32 dockspace_id) {
             nullptr, 
             &dockspace_id
         );
+        ImGuiID dock_id_bottom_left = ImGui::DockBuilderSplitNode(
+            dockspace_id,
+            ImGuiDir_Down,
+            0.4f,
+            nullptr,
+            &dockspace_id
+        );
+        const ImGuiID dock_id_bottom_right = ImGui::DockBuilderSplitNode(
+            dock_id_bottom_left,
+            ImGuiDir_Right,
+            0.4f,
+            nullptr,
+            &dock_id_bottom_left
+        );
 
         ImGui::DockBuilderDockWindow("Overview", dock_id_right);
         ImGui::DockBuilderDockWindow("Tree Viewer", dockspace_id);
+        ImGui::DockBuilderDockWindow("Resource Manager", dock_id_bottom_left);
+        ImGui::DockBuilderDockWindow("Texture Viewer", dock_id_bottom_right);
     }
+
+    bool open_options_window = false;
 
     if (ImGui::BeginMainMenuBar()) {
         for (const auto& [menu, items] : m_menu_items) {
@@ -60,74 +78,38 @@ void GUIEditor::render(u32 dockspace_id) {
             }
         }
 
+        if (ImGui::BeginMenu("Tools")) {
+            if (ImGui::MenuItem("Options")) {
+                open_options_window = true;
+            }
+
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMainMenuBar();
     }
 
-    ImGui::Begin("Overview");
+    render_overview();
+    render_tree_viewer();
+    render_resource_manager();
+    render_texture_viewer();
 
-    ImGui::RichText("<C FFC6913F>Animation Count:</C> {}", m_file.m_animations.size());
-    ImGui::RichText("<C FFC6913F>Sequence Count:</C> {}", m_file.m_sequences.size());
-    ImGui::RichText("<C FFC6913F>Object Count:</C> {}", m_file.m_objects.size());
-    ImGui::RichText("<C FFC6913F>ObjectSequence Count:</C> {}", m_file.m_obj_sequences.size());
-    ImGui::RichText("<C FFC6913F>InitParam Count:</C> {}", m_file.m_init_params.size());
-    ImGui::RichText("<C FFC6913F>Param Count:</C> {}", m_file.m_params.size());
-    ImGui::RichText("<C FFC6913F>Key Count:</C> {}", m_file.m_keys.size());
-    ImGui::RichText("<C FFC6913F>Instance Count:</C> {}", m_file.m_instances.size());
-    ImGui::RichText("<C FFC6913F>Flow Count:</C> {}", m_file.m_flows.size());
-    ImGui::RichText("<C FFC6913F>FlowProcess Count:</C> {}", m_file.m_flow_processes.size());
-    ImGui::RichText("<C FFC6913F>Texture Count:</C> {}", m_file.m_textures.size());
-    ImGui::RichText("<C FFC6913F>FontFilter Count:</C> {}", m_file.m_font_filters.size());
-    ImGui::RichText("<C FFC6913F>Message Count:</C> {}", m_file.m_messages.size());
-    ImGui::RichText("<C FFC6913F>Resource Count:</C> {}", m_file.m_resources.size());
-    ImGui::RichText("<C FFC6913F>GeneralResource Count:</C> {}", m_file.m_general_resources.size());
-
-    ImGui::End();
-
-    ImGui::Begin("Tree Viewer");
-
-    if (ImGui::RichTextTreeNode("Animations", "<C FFC6913F>Animations</C> ({})", m_file.m_animations.size())) {
-        for (auto& m_animation : m_file.m_animations) {
-            render_animation(m_animation);
-        }
-
-        ImGui::TreePop();
+    if (open_options_window) {
+        ImGui::OpenPopup("Options##OptionsWindow");
+        m_options_menu_open = true;
     }
 
-    if (ImGui::TreeNodeEx("Objects", ImGuiTreeNodeFlags_SpanAvailWidth)) {
-        for (auto& m_object : m_file.m_objects) {
-            render_object(m_object);
+    if (ImGui::BeginPopupModal("Options##OptionsWindow", &m_options_menu_open, ImGuiWindowFlags_NoDocking)) {
+        ImGui::InputText("Chunk Directory", &m_chunk_dir);
+        ImGui::SameLine();
+        if (ImGui::Button("Choose Folder")) {
+            select_chunk_dir();
         }
 
-        ImGui::TreePop();
+        ImGui::EndPopup();
     }
 
-    if (ImGui::TreeNodeEx("Sequences", ImGuiTreeNodeFlags_SpanAvailWidth)) {
-        for (auto& sequence : m_file.m_sequences) {
-            render_sequence(sequence);
-        }
-
-        ImGui::TreePop();
-    }
-
-    if (ImGui::TreeNodeEx("ObjectSequences", ImGuiTreeNodeFlags_SpanAvailWidth)) {
-        for (auto& m_obj_sequence : m_file.m_obj_sequences) {
-            render_obj_sequence(m_obj_sequence);
-        }
-
-        ImGui::TreePop();
-    }
-
-    if (ImGui::TreeNodeEx("InitParams", ImGuiTreeNodeFlags_SpanAvailWidth)) {
-        for (auto& m_init_param : m_file.m_init_params) {
-            render_init_param(m_init_param);
-        }
-
-        ImGui::TreePop();
-    }
-
-    ImGui::End();
-
-    ImGui::ShowDemoWindow();
+    //ImGui::ShowDemoWindow();
 }
 
 void GUIEditor::open_file() {
@@ -160,6 +142,98 @@ void GUIEditor::open_file() {
     update_indices();
 
     m_first_render = true;
+}
+
+void GUIEditor::render_tree_viewer() {
+    ImGui::Begin("Tree Viewer");
+
+    if (ImGui::RichTextTreeNode("Animations", "<C FFC6913F>Animations</C> ({})", m_file.m_animations.size())) {
+        for (auto& animation : m_file.m_animations) {
+            render_animation(animation);
+        }
+
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNodeEx("Objects", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+        for (auto& object : m_file.m_objects) {
+            render_object(object);
+        }
+
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNodeEx("Sequences", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+        for (auto& sequence : m_file.m_sequences) {
+            render_sequence(sequence);
+        }
+
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNodeEx("ObjectSequences", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+        for (auto& obj_sequence : m_file.m_obj_sequences) {
+            render_obj_sequence(obj_sequence);
+        }
+
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNodeEx("InitParams", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+        for (auto& init_param : m_file.m_init_params) {
+            render_init_param(init_param);
+        }
+
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNodeEx("Params", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+        for (auto& param : m_file.m_params) {
+            render_param(param);
+        }
+
+        ImGui::TreePop();
+    }
+
+    ImGui::End();
+}
+
+void GUIEditor::render_overview() {
+    ImGui::Begin("Overview");
+
+    ImGui::RichText("<C FFC6913F>Animation Count:</C> {}", m_file.m_animations.size());
+    ImGui::RichText("<C FFC6913F>Sequence Count:</C> {}", m_file.m_sequences.size());
+    ImGui::RichText("<C FFC6913F>Object Count:</C> {}", m_file.m_objects.size());
+    ImGui::RichText("<C FFC6913F>ObjectSequence Count:</C> {}", m_file.m_obj_sequences.size());
+    ImGui::RichText("<C FFC6913F>InitParam Count:</C> {}", m_file.m_init_params.size());
+    ImGui::RichText("<C FFC6913F>Param Count:</C> {}", m_file.m_params.size());
+    ImGui::RichText("<C FFC6913F>Key Count:</C> {}", m_file.m_keys.size());
+    ImGui::RichText("<C FFC6913F>Instance Count:</C> {}", m_file.m_instances.size());
+    ImGui::RichText("<C FFC6913F>Flow Count:</C> {}", m_file.m_flows.size());
+    ImGui::RichText("<C FFC6913F>FlowProcess Count:</C> {}", m_file.m_flow_processes.size());
+    ImGui::RichText("<C FFC6913F>Texture Count:</C> {}", m_file.m_textures.size());
+    ImGui::RichText("<C FFC6913F>FontFilter Count:</C> {}", m_file.m_font_filters.size());
+    ImGui::RichText("<C FFC6913F>Message Count:</C> {}", m_file.m_messages.size());
+    ImGui::RichText("<C FFC6913F>Resource Count:</C> {}", m_file.m_resources.size());
+    ImGui::RichText("<C FFC6913F>GeneralResource Count:</C> {}", m_file.m_general_resources.size());
+
+    ImGui::End();
+}
+
+void GUIEditor::render_resource_manager() {
+    ImGui::Begin("Resource Manager");
+
+
+
+    ImGui::End();
+}
+
+void GUIEditor::render_texture_viewer() {
+    ImGui::Begin("Texture Viewer");
+
+
+
+    ImGui::End();
 }
 
 void GUIEditor::render_animation(GUIAnimation& anim) {
@@ -306,7 +380,18 @@ void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq) {
             }
         }
 
+        if (objseq.ParamNum > 0) {
+            if (ImGui::TreeNodeEx("Params", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+                auto& params = m_file.m_params;
+                const u64 max = std::min(static_cast<u64>(objseq.ParamIndex + objseq.ParamNum), params.size());
 
+                for (auto i = objseq.ParamIndex; i < max; ++i) {
+                    render_param(params[i]);
+                }
+
+                ImGui::TreePop();
+            }
+        }
 
         ImGui::TreePop();
     }
@@ -334,6 +419,25 @@ void GUIEditor::render_init_param(GUIInitParam& param) {
     ImGui::PopID();
 }
 
+void GUIEditor::render_param(GUIParam& param) {
+    constexpr u32 u32_step = 1;
+    constexpr u32 u32_fast_step = 10;
+
+    ImGui::PushID("Param");
+    ImGui::PushID(param.Index);
+
+    if (ImGui::RichTextTreeNode("Param", param.get_preview(param.Index))) {
+        ImGui::InputScalar("Type", ImGuiDataType_U8, &param.Type, &u32_step, &u32_fast_step);
+        ImGui::InputScalar("Count", ImGuiDataType_U8, &param.ValueCount, &u32_step, &u32_fast_step);
+        ImGui::InputText("Name", &param.Name);
+
+        ImGui::TreePop();
+    }
+
+    ImGui::PopID();
+    ImGui::PopID();
+}
+
 #define UPDATE_INDEX_LOOP(list, IndexMember) \
 for (auto i = 0u; i < list.size(); ++i) list[i].##IndexMember = i
 
@@ -343,6 +447,25 @@ void GUIEditor::update_indices() {
     UPDATE_INDEX_LOOP(m_file.m_sequences, Index);
     UPDATE_INDEX_LOOP(m_file.m_obj_sequences, Index);
     UPDATE_INDEX_LOOP(m_file.m_init_params, Index);
+    UPDATE_INDEX_LOOP(m_file.m_params, Index);
+}
+
+void GUIEditor::select_chunk_dir() {
+    HR_INIT(S_OK);
+
+    Microsoft::WRL::ComPtr<IFileOpenDialog> dialog;
+    HR_ASSERT(CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&dialog)));
+    HR_ASSERT(dialog->SetOptions(FOS_PATHMUSTEXIST | FOS_PICKFOLDERS));
+
+    HR_ASSERT(dialog->Show(nullptr));
+
+    Microsoft::WRL::ComPtr<IShellItem> item;
+    LPWSTR path;
+    HR_ASSERT(dialog->GetResult(&item));
+    HR_ASSERT(item->GetDisplayName(SIGDN_FILESYSPATH, &path));
+
+    std::wstring wpath = path;
+    m_chunk_dir = { wpath.begin(), wpath.end() };
 }
 
 #undef UPDATE_INDEX_LOOP
