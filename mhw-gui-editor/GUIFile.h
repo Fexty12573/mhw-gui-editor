@@ -29,6 +29,7 @@ public:
 	GUIFile();
 
 	void load_from(BinaryReader& stream);
+    void load_resources(const std::string& chunk_path, ID3D11Device* device, ID3D11DeviceContext* context);
 
 	friend class GUIEditor;
 

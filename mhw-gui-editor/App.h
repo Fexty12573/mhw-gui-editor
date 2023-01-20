@@ -15,6 +15,10 @@ public:
 
 	int run();
 
+    const ComPtr<ID3D11Device>& get_device() const { return m_device; }
+    const ComPtr<ID3D11DeviceContext>& get_context() const { return m_context; }
+    const ComPtr<IDXGISwapChain>& get_swapchain() const { return m_swap_chain; }
+
 private:
 	void render_frame();
 	void handle_input();

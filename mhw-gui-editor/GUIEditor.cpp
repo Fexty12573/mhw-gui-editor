@@ -11,8 +11,9 @@
 #include <wrl.h>
 #include <DirectXTex.h>
 
+#include "App.h"
 
-GUIEditor::GUIEditor() {
+GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
     HR_INIT(S_OK);
     HR_ASSERT(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
     
@@ -25,7 +26,7 @@ GUIEditor::GUIEditor() {
 }
 
 void GUIEditor::add_menu_item(const std::string& menu, MenuItem item) {
-    m_menu_items[menu].emplace_back(std::move(item));
+    m_menu_items[menu].push_back(std::move(item));
 }
 
 void GUIEditor::render(u32 dockspace_id) {
@@ -129,7 +130,9 @@ void GUIEditor::open_file() {
         FOS_STRICTFILETYPES | FOS_PATHMUSTEXIST | FOS_FILEMUSTEXIST
     ));
 
-    HR_ASSERT(dialog->Show(nullptr));
+    if (dialog->Show(nullptr) == ERROR_CANCELLED) {
+        return;
+    }
 
     Microsoft::WRL::ComPtr<IShellItem> item;
     HR_ASSERT(dialog->GetResult(&item));
@@ -140,6 +143,11 @@ void GUIEditor::open_file() {
     std::wstring wpath = file_name;
     BinaryReader reader{ std::string{ wpath.begin(), wpath.end() } };
     m_file.load_from(reader);
+
+    if (!m_chunk_dir.empty()) {
+        m_file.load_resources(m_chunk_dir, m_owner->get_device().Get(), m_owner->get_context().Get());
+    }
+
     update_indices();
 
     m_first_render = true;
@@ -224,7 +232,12 @@ void GUIEditor::render_overview() {
 void GUIEditor::render_resource_manager() {
     ImGui::Begin("Resource Manager");
 
-
+    for (auto i = 0; i < m_file.m_textures.size(); ++i) {
+        const auto& tex = m_file.m_textures[i];
+        if (ImGui::Selectable(tex.Name.c_str(), m_selected_texture == i)) {
+            m_selected_texture = i;
+        }
+    }
 
     ImGui::End();
 }
@@ -232,7 +245,12 @@ void GUIEditor::render_resource_manager() {
 void GUIEditor::render_texture_viewer() {
     ImGui::Begin("Texture Viewer");
 
-
+    if (m_selected_texture != -1 && m_selected_texture < m_file.m_textures.size()) {
+        const auto& tex = m_file.m_textures[m_selected_texture];
+        if (tex.RenderTexture.is_valid()) {
+            ImGui::Image(tex.RenderTexture.get_view().Get(), ImVec2{ static_cast<float>(tex.Width), static_cast<float>(tex.Height) });
+        }
+    }
 
     ImGui::End();
 }
@@ -458,7 +476,9 @@ void GUIEditor::select_chunk_dir() {
     HR_ASSERT(CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&dialog)));
     HR_ASSERT(dialog->SetOptions(FOS_PATHMUSTEXIST | FOS_PICKFOLDERS));
 
-    HR_ASSERT(dialog->Show(nullptr));
+    if (dialog->Show(nullptr) == ERROR_CANCELLED) {
+        return;
+    }
 
     Microsoft::WRL::ComPtr<IShellItem> item;
     LPWSTR path;

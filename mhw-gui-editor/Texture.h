@@ -29,7 +29,13 @@ class Texture {
     static bool is_16bpp(FORMAT fmt);
 
 public:
-    explicit Texture(BinaryReader& source, ID3D11Device* dev, ID3D11DeviceContext* ctx);
+    explicit Texture(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceContext* ctx);
+    Texture();
+
+    void load_from(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceContext* ctx);
+
+    [[nodiscard]] bool is_valid() const { return m_texture && m_view; }
+    [[nodiscard]] auto& get_view() const { return m_view; }
 
 private:
     Microsoft::WRL::ComPtr<ID3D11Resource> m_texture;

@@ -91,6 +91,12 @@ bool Texture::is_16bpp(FORMAT fmt) {
 }
 
 Texture::Texture(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceContext* ctx) {
+    load_from(reader, dev, ctx);
+}
+
+Texture::Texture() = default;
+
+void Texture::load_from(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceContext* ctx) {
     if (reader.read<u32>() != MAKEFOURCC("TEX\0") || reader.read<u32>() != 0x10) {
         throw std::runtime_error("Invalid TEX file");
     }
@@ -101,7 +107,7 @@ Texture::Texture(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceContext* c
     const auto height = reader.read<u32>();
     const auto format = reader.abs_offset_read<FORMAT>(0x24, false);
     const auto dxformat = convert_format(format);
-    const auto offset = reader.abs_offset_read<u64>(0xB8, false);
+    const auto offset = reader.abs_offset_read<s64>(0xB8, false);
 
     std::vector<u8> data;
     data.resize(reader.size() - offset);
@@ -139,7 +145,7 @@ Texture::Texture(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceContext* c
         header.ext.resourceDimension = D3D11_RESOURCE_DIMENSION_TEXTURE2D;
         header.ext.arraySize = 1;
     }
-    
+
     HR_INIT(S_OK);
     HR_ASSERT(DirectX::CreateTextureFromDDS(
         dev,

@@ -7,6 +7,8 @@
 #include <map>
 #include <vector>
 
+class App;
+
 struct MenuItem {
 	const char* Name;
 	const char* Shortcut;
@@ -15,7 +17,7 @@ struct MenuItem {
 
 class GUIEditor {
 public:
-	GUIEditor();
+    GUIEditor(App* owner);
 
 	void add_menu_item(const std::string& menu, MenuItem item);
 
@@ -44,6 +46,8 @@ private:
 	void open_animation_editor();
 
 private:
+    App* m_owner;
+
 	GUIFile m_file;
 	std::map<std::string, std::vector<MenuItem>> m_menu_items;
 
@@ -51,6 +55,8 @@ private:
 	bool m_options_menu_open = false;
 	bool m_animation_editor_first = true;
 	bool m_animation_editor_visible = false;
+
+    int m_selected_texture = -1;
 
 	std::string m_chunk_dir;
 };

@@ -3,6 +3,7 @@
 #include "BinaryReader.h"
 #include "GUITypes.h"
 #include "dti_types.h"
+#include "Texture.h"
 
 #include <string>
 
@@ -29,5 +30,7 @@ struct GUITexture {
 	vector2 InvSize;
 	std::string Path;
 	std::string Name;
+
+    Texture RenderTexture;
 };
 
