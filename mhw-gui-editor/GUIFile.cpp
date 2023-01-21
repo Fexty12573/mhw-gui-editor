@@ -3,6 +3,8 @@
 
 #include "GUITypes.h"
 
+#include <filesystem>
+
 
 GUIFile::GUIFile() = default;
 
@@ -110,7 +112,7 @@ void GUIFile::load_from(BinaryReader& stream) {
 void GUIFile::load_resources(const std::string& chunk_path, ID3D11Device* device, ID3D11DeviceContext* context) {
     for (auto& texture : m_textures) {
         try {
-            BinaryReader stream(chunk_path + texture.Path + ".tex");
+            BinaryReader stream(std::filesystem::path(chunk_path) / (texture.Path + ".tex"));
             texture.RenderTexture.load_from(stream, device, context);
         } catch (...) { }
     }

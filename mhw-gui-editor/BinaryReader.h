@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <fstream>
 #include <string>
 #include <span>
@@ -7,6 +8,7 @@
 class BinaryReader {
 public:
 	explicit BinaryReader(const std::string& path);
+    explicit BinaryReader(const std::filesystem::path& path);
 
 	// ----------------------------------
 	// Methods for reading data
@@ -72,7 +74,7 @@ public:
 	void seek_relative(std::streamoff offset);
 
 	[[nodiscard]] std::streampos tell();
-	[[nodiscard]] size_t size() const;
+	[[nodiscard]] size_t size() const noexcept;
 
 private:
 	std::ifstream m_file;

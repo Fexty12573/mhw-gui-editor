@@ -23,10 +23,12 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
         
         
     } });
+
+    m_settings.load();
 }
 
-void GUIEditor::add_menu_item(const std::string& menu, MenuItem item) {
-    m_menu_items[menu].push_back(std::move(item));
+void GUIEditor::add_menu_item(const std::string& menu, const MenuItem& item) {
+    m_menu_items[menu].push_back(item);
 }
 
 void GUIEditor::render(u32 dockspace_id) {
@@ -102,12 +104,36 @@ void GUIEditor::render(u32 dockspace_id) {
     }
 
     if (ImGui::BeginPopupModal("Options##OptionsWindow", &m_options_menu_open, ImGuiWindowFlags_NoDocking)) {
-        ImGui::InputText("Chunk Directory", &m_chunk_dir);
+        ImGui::InputText("Chunk Directory", &m_settings.ChunkPath);
         ImGui::SameLine();
         if (ImGui::Button("Choose Folder")) {
             select_chunk_dir();
         }
 
+        ImGui::NewLine();
+        if (ImGui::Button("OK")) {
+            m_settings.save();
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Apply")) {
+            m_settings.save();
+        }
+
+        ImGui::EndPopup();
+    }
+
+    if (m_error_popup_select_file_open) {
+        ImGui::OpenPopup("Error##SelectFile");
+        m_error_popup_select_file_open = false;
+    }
+
+    if (ImGui::BeginPopup("Error##SelectFile")) {
+        ImGui::Text("Error: File paths have to be relative to the chunk directory.\nSet your chunk directory first in the options menu.");
+        if (ImGui::Button("Ok")) {
+            ImGui::CloseCurrentPopup();
+        }
         ImGui::EndPopup();
     }
 
@@ -130,7 +156,7 @@ void GUIEditor::open_file() {
         FOS_STRICTFILETYPES | FOS_PATHMUSTEXIST | FOS_FILEMUSTEXIST
     ));
 
-    if (dialog->Show(nullptr) == ERROR_CANCELLED) {
+    if (dialog->Show(nullptr) == HRESULT_FROM_WIN32(ERROR_CANCELLED)) {
         return;
     }
 
@@ -144,8 +170,8 @@ void GUIEditor::open_file() {
     BinaryReader reader{ std::string{ wpath.begin(), wpath.end() } };
     m_file.load_from(reader);
 
-    if (!m_chunk_dir.empty()) {
-        m_file.load_resources(m_chunk_dir, m_owner->get_device().Get(), m_owner->get_context().Get());
+    if (!m_settings.ChunkPath.empty()) {
+        m_file.load_resources(m_settings.ChunkPath, m_owner->get_device().Get(), m_owner->get_context().Get());
     }
 
     update_indices();
@@ -232,10 +258,64 @@ void GUIEditor::render_overview() {
 void GUIEditor::render_resource_manager() {
     ImGui::Begin("Resource Manager");
 
+    constexpr ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+    constexpr u32 u32_step = 1;
+    constexpr u32 u32_fast_step = 10;
+
     for (auto i = 0; i < m_file.m_textures.size(); ++i) {
-        const auto& tex = m_file.m_textures[i];
-        if (ImGui::Selectable(tex.Name.c_str(), m_selected_texture == i)) {
+        ImGuiTreeNodeFlags node_flags = flags;
+
+        auto& tex = m_file.m_textures[i];
+
+        if (m_selected_texture == i) {
+            node_flags |= ImGuiTreeNodeFlags_Selected;
+        }
+
+        const bool open = ImGui::TreeNodeEx(tex.Name.c_str(), node_flags);
+        if (ImGui::IsItemClicked()) {
             m_selected_texture = i;
+        }
+
+        if (open) {
+            ImGui::InputScalar("ID", ImGuiDataType_U32, &tex.ID, &u32_step, &u32_fast_step);
+
+            ImGui::InputScalarN("Texture Rect (XYWH)", ImGuiDataType_U16, &tex.Left, 4, &u32_step, &u32_fast_step);
+
+            ImGui::InputFloat4("Clamp", &tex.Clamp[0], "%.3f");
+            ImGui::InputFloat2("InvSize", &tex.InvSize.x, "%.3f");
+
+            ImGui::InputText("Name", &tex.Name);
+            ImGui::InputText("Path", &tex.Path);
+            ImGui::SameLine();
+            if (ImGui::Button("...")) {
+                if (m_settings.ChunkPath.empty()) {
+                    m_error_popup_select_file_open = true;
+                } else {
+                    const auto path = open_file_dialog(L"Select Texture", { {L"TEX Files", L"*.tex"} }, L"tex");
+                    if (!path.empty()) {
+                        auto relpath = std::filesystem::relative(path, m_settings.ChunkPath);
+                        tex.Path = relpath.replace_extension().generic_string();
+
+                        BinaryReader reader(path);
+                        tex.RenderTexture.load_from(reader, m_owner->get_device().Get(), m_owner->get_context().Get());
+                    }
+                }
+            }
+
+            ImGui::NewLine();
+            if (ImGui::Button("Reload")) {
+                if (m_settings.ChunkPath.empty()) {
+                    m_error_popup_select_file_open = true;
+                } else {
+                    auto path = std::filesystem::path(m_settings.ChunkPath) / tex.Path;
+                    path.replace_extension("tex");
+
+                    BinaryReader reader(path);
+                    tex.RenderTexture.load_from(reader, m_owner->get_device().Get(), m_owner->get_context().Get());
+                }
+            }
+
+            ImGui::TreePop();
         }
     }
 
@@ -249,6 +329,9 @@ void GUIEditor::render_texture_viewer() {
         const auto& tex = m_file.m_textures[m_selected_texture];
         if (tex.RenderTexture.is_valid()) {
             ImGui::Image(tex.RenderTexture.get_view().Get(), ImVec2{ static_cast<float>(tex.Width), static_cast<float>(tex.Height) });
+        } else {
+            ImGui::TextColored({ 1.0f, 0.2f, 0.2f, 1.0f }, "Error: Couldn't load texture!");
+            ImGui::Text("Make sure the file exists and you have the correct chunk path set under Tools -> Options");
         }
     }
 
@@ -486,7 +569,32 @@ void GUIEditor::select_chunk_dir() {
     HR_ASSERT(item->GetDisplayName(SIGDN_FILESYSPATH, &path));
 
     std::wstring wpath = path;
-    m_chunk_dir = { wpath.begin(), wpath.end() };
+    m_settings.ChunkPath = { wpath.begin(), wpath.end() };
+}
+
+std::filesystem::path GUIEditor::open_file_dialog(std::wstring_view title, 
+    const std::vector<COMDLG_FILTERSPEC>& filters, std::wstring_view default_ext) const {
+    HR_INIT(S_OK);
+
+    Microsoft::WRL::ComPtr<IFileOpenDialog> dialog;
+    HR_ASSERT(CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&dialog)));
+    HR_ASSERT(dialog->SetOptions(FOS_PATHMUSTEXIST | FOS_FILEMUSTEXIST | FOS_STRICTFILETYPES));
+
+    HR_ASSERT(dialog->SetTitle(title.data()));
+    HR_ASSERT(dialog->SetFileTypes(filters.size(), filters.data()));
+    HR_ASSERT(dialog->SetDefaultExtension(default_ext.data()));
+
+    if (dialog->Show(nullptr) == HRESULT_FROM_WIN32(ERROR_CANCELLED)) {
+        return {};
+    }
+
+    Microsoft::WRL::ComPtr<IShellItem> item;
+    LPWSTR path;
+
+    HR_ASSERT(dialog->GetResult(&item));
+    HR_ASSERT(item->GetDisplayName(SIGDN_FILESYSPATH, &path));
+
+    return path;
 }
 
 #undef UPDATE_INDEX_LOOP

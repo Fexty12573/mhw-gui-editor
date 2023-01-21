@@ -11,6 +11,16 @@ BinaryReader::BinaryReader(const std::string& path) : m_file(path, std::ios::bin
 	m_file.seekg(0, std::ios::beg);
 }
 
+BinaryReader::BinaryReader(const std::filesystem::path& path) : m_file(path, std::ios::binary) {
+	if (!m_file.is_open()) {
+        throw std::runtime_error("Failed to open file: " + path.string());
+	}
+
+	m_file.seekg(0, std::ios::end);
+	m_size = m_file.tellg();
+	m_file.seekg(0, std::ios::beg);
+}
+
 std::string BinaryReader::read_string(std::streamsize length) {
 	std::string result;
 	result.resize(length + 1); // +1 for null terminator
@@ -93,6 +103,6 @@ std::streampos BinaryReader::tell() {
 	return m_file.tellg();
 }
 
-size_t BinaryReader::size() const {
+size_t BinaryReader::size() const noexcept {
 	return m_size;
 }

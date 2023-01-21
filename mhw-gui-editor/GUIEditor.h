@@ -1,11 +1,14 @@
 #pragma once
 
 #include "GUIFile.h"
-#include "Texture.h"
+#include "Settings.h"
 
+#include <filesystem>
 #include <functional>
 #include <map>
 #include <vector>
+
+#include <ShObjIdl.h>
 
 class App;
 
@@ -19,7 +22,7 @@ class GUIEditor {
 public:
     GUIEditor(App* owner);
 
-	void add_menu_item(const std::string& menu, MenuItem item);
+	void add_menu_item(const std::string& menu, const MenuItem& item);
 
 	void render(u32 dockspace_id = 0);
 	void open_file();
@@ -42,6 +45,7 @@ private:
 	void update_indices();
 
 	void select_chunk_dir();
+    std::filesystem::path open_file_dialog(std::wstring_view title, const std::vector<COMDLG_FILTERSPEC>& filters, std::wstring_view default_ext = L"") const;
 
 	void open_animation_editor();
 
@@ -53,10 +57,11 @@ private:
 
 	bool m_first_render = true;
 	bool m_options_menu_open = false;
+    bool m_error_popup_select_file_open = false;
 	bool m_animation_editor_first = true;
 	bool m_animation_editor_visible = false;
 
     int m_selected_texture = -1;
 
-	std::string m_chunk_dir;
+	Settings m_settings;
 };
