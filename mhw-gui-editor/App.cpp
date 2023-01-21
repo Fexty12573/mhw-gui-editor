@@ -16,8 +16,6 @@ App::App([[maybe_unused]] const std::string& commandline) : m_window("MHW GUI Ed
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-	ImGui::StyleColorsDark();
-
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
 		ImGuiStyle& style = ImGui::GetStyle();
 		style.WindowRounding = 0.0f;

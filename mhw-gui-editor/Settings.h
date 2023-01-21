@@ -12,5 +12,6 @@ struct Settings {
     bool save();
 
     std::string ChunkPath;
+    std::string Theme;
 };
 

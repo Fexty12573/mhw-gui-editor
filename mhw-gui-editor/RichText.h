@@ -54,6 +54,10 @@ template<typename ...Args>
 bool RichTextTreeNode(std::string_view str_id, std::string_view fmt, Args&&... args) {
     const bool open = TreeNodeEx(str_id.data(), ImGuiTreeNodeFlags_SpanFullWidth , ""); // Display only the arrow
 
+    if (!IsItemVisible()) { // If the node is not visible, don't bother formatting the text
+        return open;
+    }
+
     const std::string formatted = std::vformat(fmt, std::make_format_args(args...));
     const auto tagged = Internal::ParseRichText(formatted);
 

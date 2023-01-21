@@ -20,6 +20,7 @@ bool Settings::load() {
     }
 
     ChunkPath = result["General"]["ChunkDirectory"].value_or("");
+    Theme = result["General"]["Theme"].value_or("");
 
     return true;
 }
@@ -28,7 +29,8 @@ bool Settings::save() {
     toml::table config{};
 
     config.insert("General", toml::table{
-        {"ChunkDirectory", ChunkPath}
+        {"ChunkDirectory", ChunkPath},
+        {"Theme", Theme}
     });
 
     try {

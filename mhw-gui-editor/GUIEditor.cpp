@@ -29,7 +29,11 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
     m_theme_manager.set_theme_directory("./themes");
     m_theme_manager.refresh();
 
-    m_theme_manager.apply_style("Default");
+    if (m_settings.Theme.empty()) {
+        m_theme_manager.apply_style("Default");
+    } else {
+        m_theme_manager.apply_style(m_settings.Theme);
+    }
 }
 
 void GUIEditor::add_menu_item(const std::string& menu, const MenuItem& item) {
@@ -97,11 +101,15 @@ void GUIEditor::render(u32 dockspace_id) {
 
                 if (ImGui::MenuItem("Default")) {
                     m_theme_manager.apply_default_style();
+                    m_settings.Theme = "";
+                    m_settings.save();
                 }
 
                 for (const auto& name : m_theme_manager.get_styles() | std::views::keys) {
                     if (ImGui::MenuItem(name.c_str())) {
                         m_theme_manager.apply_style(name);
+                        m_settings.Theme = name;
+                        m_settings.save();
                     }
                 }
 
