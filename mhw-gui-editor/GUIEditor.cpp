@@ -2,6 +2,8 @@
 #include "GUIEditor.h"
 #include "HrException.h"
 #include "RichText.h"
+#include "App.h"
+#include "IconFontAwesome.h"
 
 #include <fmt/format.h>
 #include <imgui_internal.h>
@@ -12,13 +14,12 @@
 #include <DirectXTex.h>
 #include <ranges>
 
-#include "App.h"
 
 GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
     HR_INIT(S_OK);
     HR_ASSERT(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
     
-    add_menu_item("File", { "Open", "Ctrl+O", [](GUIEditor* e) { e->open_file(); } });
+    add_menu_item(ICON_FA_FILE "File", { "Open", "Ctrl+O", [](GUIEditor* e) { e->open_file(); } });
     add_menu_item("View", { "Animation Editor", "Ctrl+Shift+A", [this](GUIEditor* e) {
         m_animation_editor_visible = true;
         
@@ -36,7 +37,15 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
     }
 
     const auto fonts = ImGui::GetIO().Fonts;
+
     fonts->AddFontFromFileTTF("./fonts/CascadiaMono.ttf", 16.0f);
+
+    ImFontConfig config;
+    config.MergeMode = true;
+    config.GlyphMinAdvanceX = 13.0f;
+    static constexpr ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+
+    fonts->AddFontFromFileTTF("./fonts/Font Awesome 6 Free-Regular-400.otf", 16.0f, &config, icon_ranges);
     fonts->Build();
 }
 
@@ -288,6 +297,8 @@ void GUIEditor::render_overview() {
     ImGui::RichText("<C FFC6913F>Message Count:</C> {}", m_file.m_messages.size());
     ImGui::RichText("<C FFC6913F>Resource Count:</C> {}", m_file.m_resources.size());
     ImGui::RichText("<C FFC6913F>GeneralResource Count:</C> {}", m_file.m_general_resources.size());
+
+    ImGui::Text("Icon Test: " ICON_FA_FILE);
 
     ImGui::End();
 }
