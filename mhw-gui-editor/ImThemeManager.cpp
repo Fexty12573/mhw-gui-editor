@@ -33,6 +33,16 @@ ImGuiStyle ImThemeManager::read_theme(const std::filesystem::path& path) {
 
         return def;
     };
+    auto read_vec2 = []<typename T>(const T & table, const std::string & key, const ImVec2 & def) {
+        if (const auto v = table[key].as_array()) {
+            return ImVec2{
+                v->get(0)->value_or(def.x),
+                v->get(1)->value_or(def.y)
+            };
+        }
+
+        return def;
+    };
 
     ImGuiStyle style{};
     toml::parse_result result;
@@ -50,57 +60,27 @@ ImGuiStyle ImThemeManager::read_theme(const std::filesystem::path& path) {
     style.Alpha = general["Alpha"].value_or(m_default_style.Alpha);
     style.DisabledAlpha = general["DisabledAlpha"].value_or(m_default_style.DisabledAlpha);
 
-    style.WindowPadding = {
-        general["WindowPaddingX"].value_or(m_default_style.WindowPadding.x),
-        general["WindowPaddingY"].value_or(m_default_style.WindowPadding.y)
-    };
+    style.WindowPadding = read_vec2(general, "WindowPadding", m_default_style.WindowPadding);
 
     style.WindowRounding = general["WindowRounding"].value_or(m_default_style.WindowRounding);
     style.WindowBorderSize = general["WindowBorderSize"].value_or(m_default_style.WindowBorderSize);
 
-    style.WindowMinSize = {
-        general["WindowMinSizeX"].value_or(m_default_style.WindowMinSize.x),
-        general["WindowMinSizeY"].value_or(m_default_style.WindowMinSize.y),
-    };
+    style.WindowMinSize = read_vec2(general, "WindowMinSize", m_default_style.WindowMinSize);
 
-    style.WindowTitleAlign = {
-        general["WindowTitleAlignX"].value_or(m_default_style.WindowTitleAlign.x),
-        general["WindowTitleAlignY"].value_or(m_default_style.WindowTitleAlign.y),
-    };
+    style.WindowTitleAlign = read_vec2(general, "WindowTitleAlign", m_default_style.WindowTitleAlign);
 
     style.WindowMenuButtonPosition = general["WindowMenuButtonPosition"].value_or(m_default_style.WindowMenuButtonPosition);
     style.ChildRounding = general["ChildRounding"].value_or(m_default_style.ChildRounding);
     style.ChildBorderSize = general["ChildBorderSize"].value_or(m_default_style.ChildBorderSize);
     style.PopupRounding = general["PopupRounding"].value_or(m_default_style.PopupRounding);
     style.PopupBorderSize = general["PopupBorderSize"].value_or(m_default_style.PopupBorderSize);
-
-    style.FramePadding = {
-        general["FramePaddingX"].value_or(m_default_style.FramePadding.x),
-        general["FramePaddingY"].value_or(m_default_style.FramePadding.y),
-    };
-
+    style.FramePadding = read_vec2(general, "FramePadding", m_default_style.FramePadding);
     style.FrameRounding = general["FrameRounding"].value_or(m_default_style.FrameRounding);
     style.FrameBorderSize = general["FrameBorderSize"].value_or(m_default_style.FrameBorderSize);
-
-    style.ItemSpacing = {
-        general["ItemSpacingX"].value_or(m_default_style.ItemSpacing.x),
-        general["ItemSpacingY"].value_or(m_default_style.ItemSpacing.y),
-    };
-
-    style.ItemInnerSpacing = {
-        general["ItemInnerSpacingX"].value_or(m_default_style.ItemInnerSpacing.x),
-        general["ItemInnerSpacingY"].value_or(m_default_style.ItemInnerSpacing.y),
-    };
-
-    style.CellPadding = {
-        general["CellPaddingX"].value_or(m_default_style.CellPadding.x),
-        general["CellPaddingY"].value_or(m_default_style.CellPadding.y),
-    };
-
-    style.TouchExtraPadding = {
-        general["TouchExtraPaddingX"].value_or(m_default_style.TouchExtraPadding.x),
-        general["TouchExtraPaddingY"].value_or(m_default_style.TouchExtraPadding.y),
-    };
+    style.ItemSpacing = read_vec2(general, "ItemSpacing", m_default_style.ItemSpacing);
+    style.ItemInnerSpacing = read_vec2(general, "ItemInnerSpacing", m_default_style.ItemInnerSpacing);
+    style.CellPadding = read_vec2(general, "CellPadding", m_default_style.CellPadding);
+    style.TouchExtraPadding = read_vec2(general, "TouchExtraPadding", m_default_style.TouchExtraPadding);
 
     style.IndentSpacing = general["IndentSpacing"].value_or(m_default_style.IndentSpacing);
     style.ColumnsMinSpacing = general["ColumnsMinSpacing"].value_or(m_default_style.ColumnsMinSpacing);
@@ -114,25 +94,13 @@ ImGuiStyle ImThemeManager::read_theme(const std::filesystem::path& path) {
     style.TabMinWidthForCloseButton = general["TabMinWidthForCloseButton"].value_or(m_default_style.TabMinWidthForCloseButton);
     style.ColorButtonPosition = general["ColorButtonPosition"].value_or(m_default_style.ColorButtonPosition);
 
-    style.ButtonTextAlign = {
-        general["ButtonTextAlignX"].value_or(m_default_style.ButtonTextAlign.x),
-        general["ButtonTextAlignY"].value_or(m_default_style.ButtonTextAlign.y),
-    };
+    style.ButtonTextAlign = read_vec2(general, "ButtonTextAlign", m_default_style.ButtonTextAlign);
 
-    style.SelectableTextAlign = {
-        general["SelectableTextAlignX"].value_or(m_default_style.SelectableTextAlign.x),
-        general["SelectableTextAlignY"].value_or(m_default_style.SelectableTextAlign.y),
-    };
+    style.SelectableTextAlign = read_vec2(general, "SelectableTextAlign", m_default_style.SelectableTextAlign);
 
-    style.DisplayWindowPadding = {
-        general["DisplayWindowPaddingX"].value_or(m_default_style.DisplayWindowPadding.x),
-        general["DisplayWindowPaddingY"].value_or(m_default_style.DisplayWindowPadding.y),
-    };
+    style.DisplayWindowPadding = read_vec2(general, "DisplayWindowPadding", m_default_style.DisplayWindowPadding);
 
-    style.DisplaySafeAreaPadding = {
-        general["DisplaySafeAreaPaddingX"].value_or(m_default_style.DisplaySafeAreaPadding.x),
-        general["DisplaySafeAreaPaddingY"].value_or(m_default_style.DisplaySafeAreaPadding.y),
-    };
+    style.DisplaySafeAreaPadding = read_vec2(general, "DisplaySafeAreaPadding", m_default_style.DisplaySafeAreaPadding);
 
     style.MouseCursorScale = general["MouseCursorScale"].value_or(m_default_style.MouseCursorScale);
     style.AntiAliasedLines = general["AntiAliasedLines"].value_or(m_default_style.AntiAliasedLines);
