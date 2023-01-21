@@ -11,9 +11,6 @@ App::App([[maybe_unused]] const std::string& commandline) : m_window("MHW GUI Ed
 	m_context = m_window.m_context;
 	m_main_rtv = m_window.m_main_rtv;
 
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-
 	auto& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;

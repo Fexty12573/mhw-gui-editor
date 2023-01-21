@@ -19,6 +19,10 @@ void ImThemeManager::refresh() {
     }
 }
 
+void ImThemeManager::apply_default_style() const {
+    ImGui::GetStyle() = m_default_style;
+}
+
 
 ImGuiStyle ImThemeManager::read_theme(const std::filesystem::path& path) {
     auto read_vec4 = []<typename T>(const T& table, const std::string& key, const ImVec4& def) {

@@ -103,6 +103,9 @@ Window::Window(std::string title, int width, int height)
 	HR_ASSERT(m_device->CreateRenderTargetView(back_buffer.Get(), nullptr, &m_main_rtv));
 
 	UpdateWindow(m_window);
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
 }
 
 Window::~Window() {

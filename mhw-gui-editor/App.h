@@ -10,7 +10,7 @@ class App {
 	template<class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 public:
-	App(const std::string& commandline = "");
+    explicit App(const std::string& commandline = "");
 	~App();
 
 	int run();

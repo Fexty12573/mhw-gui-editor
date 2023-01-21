@@ -10,6 +10,7 @@
 #include <ShObjIdl.h>
 #include <wrl.h>
 #include <DirectXTex.h>
+#include <ranges>
 
 #include "App.h"
 
@@ -87,6 +88,26 @@ void GUIEditor::render(u32 dockspace_id) {
         }
 
         if (ImGui::BeginMenu("Tools")) {
+            if (ImGui::BeginMenu("Themes")) {
+                if (ImGui::MenuItem("Refresh")) {
+                    m_theme_manager.refresh();
+                }
+
+                ImGui::Separator();
+
+                if (ImGui::MenuItem("Default")) {
+                    m_theme_manager.apply_default_style();
+                }
+
+                for (const auto& name : m_theme_manager.get_styles() | std::views::keys) {
+                    if (ImGui::MenuItem(name.c_str())) {
+                        m_theme_manager.apply_style(name);
+                    }
+                }
+
+                ImGui::EndMenu();
+            }
+
             if (ImGui::MenuItem("Options")) {
                 open_options_window = true;
             }
@@ -141,7 +162,7 @@ void GUIEditor::render(u32 dockspace_id) {
         ImGui::EndPopup();
     }
 
-    //ImGui::ShowDemoWindow();
+    ImGui::ShowDemoWindow();
 }
 
 void GUIEditor::open_file() {

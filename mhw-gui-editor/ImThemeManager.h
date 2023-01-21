@@ -13,6 +13,7 @@ public:
     void set_theme_directory(const std::filesystem::path& dir);
     void refresh();
 
+    void apply_default_style() const;
     void apply_style(const std::string& name) const;
     const ImGuiStyle& get_style(const std::string& name) const;
     const auto& get_styles() const { return m_styles; }
