@@ -34,6 +34,10 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
     } else {
         m_theme_manager.apply_style(m_settings.Theme);
     }
+
+    const auto fonts = ImGui::GetIO().Fonts;
+    fonts->AddFontFromFileTTF("./fonts/CascadiaMono.ttf", 16.0f);
+    fonts->Build();
 }
 
 void GUIEditor::add_menu_item(const std::string& menu, const MenuItem& item) {
