@@ -175,6 +175,7 @@
     <ClCompile Include="GUISequence.cpp" />
     <ClCompile Include="GUITexture.cpp" />
     <ClCompile Include="HrException.cpp" />
+    <ClCompile Include="ImThemeManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="RichText.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="GUITexture.h" />
     <ClInclude Include="GUITypes.h" />
     <ClInclude Include="HrException.h" />
+    <ClInclude Include="ImThemeManager.h" />
     <ClInclude Include="MinWindows.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="RichText.h" />

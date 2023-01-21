@@ -25,6 +25,10 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
     } });
 
     m_settings.load();
+    m_theme_manager.set_theme_directory("./themes");
+    m_theme_manager.refresh();
+
+    m_theme_manager.apply_style("Default");
 }
 
 void GUIEditor::add_menu_item(const std::string& menu, const MenuItem& item) {

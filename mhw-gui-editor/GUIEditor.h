@@ -2,6 +2,7 @@
 
 #include "GUIFile.h"
 #include "Settings.h"
+#include "ImThemeManager.h"
 
 #include <filesystem>
 #include <functional>
@@ -51,6 +52,7 @@ private:
 
 private:
     App* m_owner;
+    ImThemeManager m_theme_manager;
 
 	GUIFile m_file;
 	std::map<std::string, std::vector<MenuItem>> m_menu_items;
