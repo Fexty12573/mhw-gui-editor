@@ -19,7 +19,7 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
     HR_INIT(S_OK);
     HR_ASSERT(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
     
-    add_menu_item(ICON_FA_FILE "File", { "Open", "Ctrl+O", [](GUIEditor* e) { e->open_file(); } });
+    add_menu_item(ICON_FA_FILE " File", { "Open", "Ctrl+O", [](GUIEditor* e) { e->open_file(); } });
     add_menu_item("View", { "Animation Editor", "Ctrl+Shift+A", [this](GUIEditor* e) {
         m_animation_editor_visible = true;
         
@@ -50,7 +50,14 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
 }
 
 void GUIEditor::add_menu_item(const std::string& menu, const MenuItem& item) {
-    m_menu_items[menu].push_back(item);
+    for (auto& m : m_menu_items) {
+        if (m.Name == menu) {
+            m.Items.push_back(item);
+            return;
+        }
+    }
+
+    m_menu_items.emplace_back(menu, std::vector{ item });
 }
 
 void GUIEditor::render(u32 dockspace_id) {

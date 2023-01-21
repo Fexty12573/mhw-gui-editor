@@ -27,7 +27,7 @@ App::App([[maybe_unused]] const std::string& commandline) : m_window("MHW GUI Ed
 	ImGui_ImplWin32_Init(m_window.get_window());
 	ImGui_ImplDX11_Init(m_device.Get(), m_context.Get());
 
-	m_editor.add_menu_item(ICON_FA_FILE "File", { "Exit", "Alt+F4", [](GUIEditor*) {PostQuitMessage(0); } });
+	m_editor.add_menu_item(ICON_FA_FILE " File", { "Exit", "Alt+F4", [](GUIEditor*) {PostQuitMessage(0); } });
 }
 
 App::~App() {

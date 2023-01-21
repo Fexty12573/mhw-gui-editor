@@ -18,6 +18,10 @@ struct MenuItem {
 	const char* Shortcut;
 	std::function<void(GUIEditor*)> Callback;
 };
+struct Menu {
+    std::string Name;
+    std::vector<MenuItem> Items;
+};
 
 class GUIEditor {
 public:
@@ -55,7 +59,7 @@ private:
     ImThemeManager m_theme_manager;
 
 	GUIFile m_file;
-	std::map<std::string, std::vector<MenuItem>> m_menu_items;
+	std::vector<Menu> m_menu_items;
 
 	bool m_first_render = true;
 	bool m_options_menu_open = false;
