@@ -20,7 +20,8 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
     HR_INIT(S_OK);
     HR_ASSERT(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
     
-    add_menu_item(ICON_FA_FILE " File", { "Open", "Ctrl+O", [](GUIEditor* e) { e->open_file(); } });
+    add_menu_item("File", { ICON_FA_FILE " Open", "Ctrl+O", [](GUIEditor* e) { e->open_file(); } });
+    add_menu_item("File", { ICON_FA_FLOPPY_DISK " Save", "Ctrl+S", [](GUIEditor* e) { /* TODO */ }});
     add_menu_item("View", { "Animation Editor", "Ctrl+Shift+A", [this](GUIEditor* e) {
         m_animation_editor_visible = true;
         
@@ -43,7 +44,8 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
 
     ImFontConfig config;
     config.MergeMode = true;
-    config.GlyphMinAdvanceX = 13.0f;
+    config.GlyphMinAdvanceX = 16.0f;
+    config.GlyphMaxAdvanceX = 16.0f;
     static constexpr ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
 
     fonts->AddFontFromFileTTF("./fonts/Font Awesome 6 Free-Solid-900.otf", 16.0f, &config, icon_ranges);
@@ -113,7 +115,7 @@ void GUIEditor::render(u32 dockspace_id) {
         }
 
         if (ImGui::BeginMenu("Tools")) {
-            if (ImGui::BeginMenu("Themes")) {
+            if (ImGui::BeginMenu(ICON_FA_PALETTE " Themes")) {
                 if (ImGui::MenuItem("Refresh")) {
                     m_theme_manager.refresh();
                 }
@@ -137,7 +139,7 @@ void GUIEditor::render(u32 dockspace_id) {
                 ImGui::EndMenu();
             }
 
-            if (ImGui::MenuItem("Options")) {
+            if (ImGui::MenuItem(ICON_FA_GEARS " Options")) {
                 open_options_window = true;
             }
 
@@ -854,7 +856,7 @@ void GUIEditor::select_chunk_dir() {
     HR_ASSERT(CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&dialog)));
     HR_ASSERT(dialog->SetOptions(FOS_PATHMUSTEXIST | FOS_PICKFOLDERS));
 
-    if (dialog->Show(nullptr) == ERROR_CANCELLED) {
+    if (dialog->Show(nullptr) == HRESULT_FROM_WIN32(ERROR_CANCELLED)) {
         return;
     }
 
