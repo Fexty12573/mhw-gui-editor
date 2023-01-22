@@ -1,6 +1,7 @@
 #pragma once
 #include "dti_types.h"
 
+#include <array>
 #include <string>
 
 struct GUIHeader {
@@ -81,6 +82,7 @@ struct GUIHeader {
 
 enum class ObjectType : u32
 {
+    None = 0xCCCCCCCC,
     cGUIObjRoot = 473969240,
     cGUIObjColorAdjust = 122938906,
     cGUIObj2D = 351760238,
@@ -345,65 +347,65 @@ enum class FontStyle : u32 {
     MOJI_YELLOW_SELECTED2 = 14,
     MOJI_YELLOW_DISABLE = 15,
     MOJI_ORANGE_DEFAULT = 16,
-    MOJI_ORANGE_SELECTED = 18,
     MOJI_ORANGE_SELECTED2 = 17,
+    MOJI_ORANGE_SELECTED = 18,
     MOJI_ORANGE_DISABLE = 19,
-    MOJI_GREEN_DEFAULT = 21,
     MOJI_GREEN_SELECTED = 20,
+    MOJI_GREEN_DEFAULT = 21,
     MOJI_GREEN_SELECTED2 = 22,
     MOJI_GREEN_DISABLE = 23,
-    MOJI_SLGREEN_DEFAULT = 53,
-    MOJI_SLGREEN_SELECTED = 54,
-    MOJI_SLGREEN_SELECTED2 = 55,
-    MOJI_SLGREEN_DISABLE = 56,
-    MOJI_SLGREEN2_DEFAULT = 58,
-    MOJI_SLGREEN2_SELECTED = 59,
-    MOJI_SLGREEN2_SELECTED2 = 60,
-    MOJI_SLGREEN2_DISABLE = 61,
     MOJI_LIGHTBLUE_DEFAULT = 25,
     MOJI_LIGHTBLUE_SELECTED2 = 26,
     MOJI_LIGHTBLUE_SELECTED = 27,
-    MOJI_LIGHTBLUE_DISABLE = 43,
     MOJI_LIGHTBLUE2_DEFAULT = 28,
     MOJI_LIGHTBLUE2_SELECTED2 = 29,
     MOJI_LIGHTBLUE2_SELECTED = 30,
-    MOJI_LIGHTBLUE2_DISABLE = 44,
     MOJI_LIGHTGREEN_DEFAULT = 31,
     MOJI_LIGHTGREEN_SELECTED = 32,
-    MOJI_LIGHTGREEN_SELECTED2 = 57,
     MOJI_LIGHTGREEN_DISABLE = 33,
+    MOJI_BROWN_DEFAULT = 34,
+    MOJI_BROWN_SELECTED2 = 35,
+    MOJI_BROWN_SELECTED = 36,
+    MOJI_YELLOW2_DEFAULT = 37,
+    MOJI_YELLOW2_SELECTED2 = 38,
+    MOJI_ORENGE2_DEFAULT = 39,
+    MOJI_ORENGE2_SELECTED2 = 40,
+    MOJI_ORENGE2_DISABLE = 41,
+    MOJI_ORENGE2_SELECTED = 42,
+    MOJI_LIGHTBLUE_DISABLE = 43,
+    MOJI_LIGHTBLUE2_DISABLE = 44,
+    MOJI_BROWN_DISABLE = 46,
+    MOJI_YELLOW2_SELECTED = 47,
+    MOJI_YELLOW2_DISABLE = 48,
     MOJI_LIGHTYELLOW_DEFAULT = 49,
     MOJI_LIGHTYELLOW_SELECTED = 50,
     MOJI_LIGHTYELLOW_SELECTED2 = 51,
     MOJI_LIGHTYELLOW_DISABLE = 52,
+    MOJI_SLGREEN_DEFAULT = 53,
+    MOJI_SLGREEN_SELECTED = 54,
+    MOJI_SLGREEN_SELECTED2 = 55,
+    MOJI_SLGREEN_DISABLE = 56,
+    MOJI_LIGHTGREEN_SELECTED2 = 57,
+    MOJI_SLGREEN2_DEFAULT = 58,
+    MOJI_SLGREEN2_SELECTED = 59,
+    MOJI_SLGREEN2_SELECTED2 = 60,
+    MOJI_SLGREEN2_DISABLE = 61,
     MOJI_LIGHTYELLOW2_DEFAULT = 62,
     MOJI_LIGHTYELLOW2_SELECTED = 63,
     MOJI_LIGHTYELLOW2_SELECTED2 = 64,
     MOJI_LIGHTYELLOW2_DISABLE = 65,
-    MOJI_BROWN_DEFAULT = 34,
-    MOJI_BROWN_SELECTED2 = 35,
-    MOJI_BROWN_SELECTED = 36,
-    MOJI_BROWN_DISABLE = 46,
-    MOJI_YELLOW2_DEFAULT = 37,
-    MOJI_YELLOW2_SELECTED = 47,
-    MOJI_YELLOW2_SELECTED2 = 38,
-    MOJI_YELLOW2_DISABLE = 48,
-    MOJI_ORENGE2_DEFAULT = 39,
-    MOJI_ORENGE2_SELECTED = 42,
-    MOJI_ORENGE2_SELECTED2 = 40,
-    MOJI_ORENGE2_DISABLE = 41,
     MOJI_PURPLE_DEFAULT = 67,
+    MOJI_PURPLE_DISABLE = 68,
     MOJI_PURPLE_SELECTED = 69,
     MOJI_PURPLE_SELECTED2 = 70,
-    MOJI_PURPLE_DISABLE = 68,
     MOJI_RED2_DEFAULT = 71,
     MOJI_RED2_SELECTED = 72,
     MOJI_RED2_SELECTED2 = 73,
     MOJI_RED2_DISABLE = 74,
-    MOJI_BLUE_DEFAULT = 78,
-    MOJI_BLUE_SELECTED = 77,
-    MOJI_BLUE_SELECTED2 = 76,
     MOJI_BLUE_DISABLE = 75,
+    MOJI_BLUE_SELECTED2 = 76,
+    MOJI_BLUE_SELECTED = 77,
+    MOJI_BLUE_DEFAULT = 78,
     MOJI_PALEBLUE_DEFAULT = 79,
     MOJI_PALEBLUE_SELECTED = 80,
     MOJI_PALEBLUE_SELECTED2 = 81,
@@ -684,25 +686,25 @@ constexpr const char* enum_to_string(KeyMode v) {
 
 constexpr const char* enum_to_string(ParamType v) {
     switch (v) {
-    case ParamType::UNKNOWN: return "UNKNOWN"; 
-    case ParamType::INT: return "INT"; 
-    case ParamType::FLOAT: return "FLOAT"; 
-    case ParamType::BOOL: return "BOOL"; 
-    case ParamType::VECTOR: return "VECTOR"; 
-    case ParamType::RESOURCE: return "RESOURCE"; 
-    case ParamType::STRING: return "STRING"; 
-    case ParamType::TEXTURE: return "TEXTURE"; 
-    case ParamType::FONT: return "FONT"; 
-    case ParamType::MESSAGE: return "MESSAGE"; 
-    case ParamType::VARIABLE: return "VARIABLE"; 
-    case ParamType::ANIMATION: return "ANIMATION"; 
-    case ParamType::EVENT: return "EVENT"; 
-    case ParamType::GUIRESOURCE: return "GUIRESOURCE"; 
-    case ParamType::FONT_FILTER: return "FONT_FILTER"; 
-    case ParamType::ANIMEVENT: return "ANIMEVENT"; 
-    case ParamType::SEQUENCE: return "SEQUENCE"; 
-    case ParamType::INIT_BOOL: return "INIT_BOOL"; 
-    case ParamType::INIT_INT: return "INIT_INT"; 
+    case ParamType::UNKNOWN: return "UNKNOWN";
+    case ParamType::INT: return "INT";
+    case ParamType::FLOAT: return "FLOAT";
+    case ParamType::BOOL: return "BOOL";
+    case ParamType::VECTOR: return "VECTOR";
+    case ParamType::RESOURCE: return "RESOURCE";
+    case ParamType::STRING: return "STRING";
+    case ParamType::TEXTURE: return "TEXTURE";
+    case ParamType::FONT: return "FONT";
+    case ParamType::MESSAGE: return "MESSAGE";
+    case ParamType::VARIABLE: return "VARIABLE";
+    case ParamType::ANIMATION: return "ANIMATION";
+    case ParamType::EVENT: return "EVENT";
+    case ParamType::GUIRESOURCE: return "GUIRESOURCE";
+    case ParamType::FONT_FILTER: return "FONT_FILTER";
+    case ParamType::ANIMEVENT: return "ANIMEVENT";
+    case ParamType::SEQUENCE: return "SEQUENCE";
+    case ParamType::INIT_BOOL: return "INIT_BOOL";
+    case ParamType::INIT_INT: return "INIT_INT";
     case ParamType::GENERALRESOURCE: return "GENERALRESOURCE";
     }
 
@@ -793,3 +795,278 @@ constexpr const char* enum_to_string(FontStyle v) {
 
     return "INVALID";
 }
+
+inline constexpr std::array FlowTypeNames = {
+    "START",
+    "END_0",
+    "PROCESS",
+    "INPUT",
+    "SWITCH",
+    "FUNCTION",
+};
+
+inline constexpr std::array BlendStateNames = {
+    "DEFAULT",
+    "BlendAlpha",
+    "BlendInvAlpha",
+    "Add",
+    "Mul",
+    "AddAlpha",
+    "AddInvAlpha",
+    "BlendFactor",
+    "BlendFactorAlpha",
+    "Max",
+    "AddColor",
+    "BlendColor",
+    "RevSubAlpha",
+    "RevSubInvAlpha",
+    "RevSubBlendAlpha",
+    "RevSubColor",
+    "RevSubBlendColor",
+    "RevSub",
+    "ColorBlendAlphaAdd",
+    "AddRGB",
+    "AddInvColor",
+};
+
+inline constexpr std::array SamplerStateNames = {
+    "WrapLinear",
+    "ClampLinear",
+    "WrapPoint",
+    "ClampPoint",
+};
+
+inline constexpr std::array AlignmentNames = {
+    "N/A",
+    "LT",
+    "CT",
+    "RT",
+    "LC",
+    "CC",
+    "RC",
+    "LB",
+    "CB",
+    "RB",
+};
+
+inline constexpr std::array ResolutionAdjustNames = {
+    "FOLLOW",
+    "NONE",
+    "VARIABLE",
+    "VARIABLE_STRETCH",
+    "VARIABLE_SHRINK",
+    "SMALLPROP",
+    "SMALLPROP_STRETCH",
+    "SMALLPROP_SHRINK",
+    "BIGPROP",
+    "BIGPROP_STRETCH",
+    "BIGPROP_SHRINK",
+};
+
+inline constexpr std::array AutoWrapNames = {
+    "NONE",
+    "WIDTH",
+    "POINT",
+};
+
+inline constexpr std::array ColorControlNames = {
+    "SCALING",
+    "ATTRIBUTE",
+    "NONE",
+};
+
+inline constexpr std::array EndConditionTypeNames = {
+    "FLOW_ANIMATION_END",
+    "FRAME_COUNT",
+    "INFINITE_",
+    "CHANGE_VARIABLE",
+    "ANIMATION_END",
+};
+
+inline constexpr std::array LetterHAlignNames = {
+    "LEFT",
+    "CENTER",
+    "RIGHT",
+};
+
+inline constexpr std::array LetterVAlignNames = {
+    "TOP",
+    "CENTER",
+    "BOTTOM",
+    "BASELINE",
+};
+
+inline constexpr std::array DepthStateNames = {
+    "FOLLOW",
+    "DISABLE",
+    "TEST",
+    "WRITE",
+    "TEST_WRITE",
+};
+
+inline constexpr std::array BillboardNames = {
+    "NONE",
+    "XYZ",
+    "Y",
+};
+
+inline constexpr std::array DrawPassNames = {
+    "FOLLOW",
+    "SOLID",
+    "SCREEN",
+    "TRANSPARENT_",
+    "NUM",
+    "N/A",
+    "N/A",
+    "N/A",
+    "N/A",
+    "N/A",
+    "N/A",
+    "N/A",
+    "N/A",
+    "N/A",
+    "N/A",
+    "N/A",
+    "USER_OFFSET",
+};
+
+inline constexpr std::array MaskTypeNames = {
+    "NONE",
+    "ON",
+    "REVERSE",
+    "ALPHA",
+    "ON_ADD",
+    "REVERSE_ADD",
+    "ALPHA_ADD",
+};
+
+inline constexpr std::array TilingModeNames = {
+    "TILING_NONE",
+    "TILING_SCALE",
+    "TILING_NO_SCALE",
+    "TILING_NUM",
+};
+
+inline constexpr std::array KeyModeNames = {
+    "CONSTANT_0",
+    "OFFSET_0",
+    "TRIGGER_0",
+    "LINEAR_0",
+    "OFFSET_F_0",
+    "HERMITE_0",
+    "EASEIN",
+    "EASEOUT",
+    "HERMITE2",
+    "NUM_8",
+    "SUMMARY",
+    "DEFAULT_10",
+};
+
+inline constexpr std::array ParamTypeNames = {
+    "UNKNOWN",
+    "INT",
+    "FLOAT",
+    "BOOL",
+    "VECTOR",
+    "RESOURCE",
+    "STRING",
+    "TEXTURE",
+    "FONT",
+    "MESSAGE",
+    "VARIABLE",
+    "ANIMATION",
+    "EVENT",
+    "GUIRESOURCE",
+    "FONT_FILTER",
+    "ANIMEVENT",
+    "SEQUENCE",
+    "INIT_BOOL",
+    "INIT_INT",
+    "GENERALRESOURCE",
+};
+
+inline constexpr std::array FontStyleNames = {
+    "N/A",
+    "MOJI_WHITE_DEFAULT",
+    "MOJI_WHITE_SELECTED",
+    "N/A",
+    "MOJI_WHITE_SELECTED2",
+    "MOJI_WHITE_DISABLE",
+    "MOJI_WHITE_DEFAULT2",
+    "MOJI_BLACK_DEFAULT",
+    "MOJI_RED_DEFAULT",
+    "MOJI_RED_SELECTED",
+    "MOJI_RED_SELECTED2",
+    "MOJI_RED_DISABLE",
+    "MOJI_YELLOW_DEFAULT",
+    "MOJI_YELLOW_SELECTED",
+    "MOJI_YELLOW_SELECTED2",
+    "MOJI_YELLOW_DISABLE",
+    "MOJI_ORANGE_DEFAULT",
+    "MOJI_ORANGE_SELECTED2",
+    "MOJI_ORANGE_SELECTED",
+    "MOJI_ORANGE_DISABLE",
+    "MOJI_GREEN_SELECTED",
+    "MOJI_GREEN_DEFAULT",
+    "MOJI_GREEN_SELECTED2",
+    "MOJI_GREEN_DISABLE",
+    "N/A",
+    "MOJI_LIGHTBLUE_DEFAULT",
+    "MOJI_LIGHTBLUE_SELECTED2",
+    "MOJI_LIGHTBLUE_SELECTED",
+    "MOJI_LIGHTBLUE2_DEFAULT",
+    "MOJI_LIGHTBLUE2_SELECTED2",
+    "MOJI_LIGHTBLUE2_SELECTED",
+    "MOJI_LIGHTGREEN_DEFAULT",
+    "MOJI_LIGHTGREEN_SELECTED",
+    "MOJI_LIGHTGREEN_DISABLE",
+    "MOJI_BROWN_DEFAULT",
+    "MOJI_BROWN_SELECTED2",
+    "MOJI_BROWN_SELECTED",
+    "MOJI_YELLOW2_DEFAULT",
+    "MOJI_YELLOW2_SELECTED2",
+    "MOJI_ORENGE2_DEFAULT",
+    "MOJI_ORENGE2_SELECTED2",
+    "MOJI_ORENGE2_DISABLE",
+    "MOJI_ORENGE2_SELECTED",
+    "MOJI_LIGHTBLUE_DISABLE",
+    "MOJI_LIGHTBLUE2_DISABLE",
+    "N/A",
+    "MOJI_BROWN_DISABLE",
+    "MOJI_YELLOW2_SELECTED",
+    "MOJI_YELLOW2_DISABLE",
+    "MOJI_LIGHTYELLOW_DEFAULT",
+    "MOJI_LIGHTYELLOW_SELECTED",
+    "MOJI_LIGHTYELLOW_SELECTED2",
+    "MOJI_LIGHTYELLOW_DISABLE",
+    "MOJI_SLGREEN_DEFAULT",
+    "MOJI_SLGREEN_SELECTED",
+    "MOJI_SLGREEN_SELECTED2",
+    "MOJI_SLGREEN_DISABLE",
+    "MOJI_LIGHTGREEN_SELECTED2",
+    "MOJI_SLGREEN2_DEFAULT",
+    "MOJI_SLGREEN2_SELECTED",
+    "MOJI_SLGREEN2_SELECTED2",
+    "MOJI_SLGREEN2_DISABLE",
+    "MOJI_LIGHTYELLOW2_DEFAULT",
+    "MOJI_LIGHTYELLOW2_SELECTED",
+    "MOJI_LIGHTYELLOW2_SELECTED2",
+    "MOJI_LIGHTYELLOW2_DISABLE",
+    "N/A",
+    "MOJI_PURPLE_DEFAULT",
+    "MOJI_PURPLE_DISABLE",
+    "MOJI_PURPLE_SELECTED",
+    "MOJI_PURPLE_SELECTED2",
+    "MOJI_RED2_DEFAULT",
+    "MOJI_RED2_SELECTED",
+    "MOJI_RED2_SELECTED2",
+    "MOJI_RED2_DISABLE",
+    "MOJI_BLUE_DISABLE",
+    "MOJI_BLUE_SELECTED2",
+    "MOJI_BLUE_SELECTED",
+    "MOJI_BLUE_DEFAULT",
+    "MOJI_PALEBLUE_DEFAULT",
+    "MOJI_PALEBLUE_SELECTED",
+    "MOJI_PALEBLUE_SELECTED2",
+    "MOJI_PALEBLUE_DISABLE",
+};

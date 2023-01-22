@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "GUIInitParam.h"
+#include "crc32.h"
 
 #include <fmt/format.h>
 
@@ -7,7 +8,8 @@ GUIInitParam GUIInitParam::read(BinaryReader& reader, const GUIHeader& header) {
 	GUIInitParam result = {
 		.Type = reader.read<ParamType>(),
 		.Use = reader.read_skip<bool>(14),
-		.Name = reader.abs_offset_read_string(static_cast<s64>(header.stringOffset) + reader.read_skip<u32>(4))
+		.Name = reader.abs_offset_read_string(static_cast<s64>(header.stringOffset) + reader.read_skip<u32>(4)),
+        .NameCRC = crc::crc32(result.Name.c_str(), result.Name.size()),
 	};
 
 	result.ValueVector = {};

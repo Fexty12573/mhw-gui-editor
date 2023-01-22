@@ -26,6 +26,7 @@ struct GUIInitParam {
 	// Should be part of the union but that deletes the implicit constructor and I don't wanna deal with that
     std::string ValueString; 
 
+	u32 NameCRC;
 	u32 Index;
 };
 

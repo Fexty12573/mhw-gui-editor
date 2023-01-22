@@ -4,6 +4,7 @@
 #include "RichText.h"
 #include "App.h"
 #include "IconFontAwesome.h"
+#include "crc32.h"
 
 #include <fmt/format.h>
 #include <imgui_internal.h>
@@ -45,7 +46,7 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
     config.GlyphMinAdvanceX = 13.0f;
     static constexpr ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
 
-    fonts->AddFontFromFileTTF("./fonts/Font Awesome 6 Free-Regular-400.otf", 16.0f, &config, icon_ranges);
+    fonts->AddFontFromFileTTF("./fonts/Font Awesome 6 Free-Solid-900.otf", 16.0f, &config, icon_ranges);
     fonts->Build();
 }
 
@@ -337,7 +338,7 @@ void GUIEditor::render_resource_manager() {
             ImGui::InputScalarN("Texture Rect (XYWH)", ImGuiDataType_U16, &tex.Left, 4, &u32_step, &u32_fast_step);
 
             ImGui::InputFloat4("Clamp", &tex.Clamp[0], "%.3f");
-            ImGui::InputFloat2("InvSize", &tex.InvSize.x, "%.3f");
+            ImGui::InputFloat2("InvSize", &tex.InvSize.x, "%.8f");
 
             ImGui::InputText("Name", &tex.Name);
             ImGui::InputText("Path", &tex.Path);
@@ -357,8 +358,7 @@ void GUIEditor::render_resource_manager() {
                 }
             }
 
-            ImGui::NewLine();
-            if (ImGui::Button("Reload")) {
+            if (ImGui::Button(ICON_FA_ARROW_ROTATE_RIGHT " Reload")) {
                 if (m_settings.ChunkPath.empty()) {
                     m_error_popup_select_file_open = true;
                 } else {
@@ -368,6 +368,16 @@ void GUIEditor::render_resource_manager() {
                     BinaryReader reader(path);
                     tex.RenderTexture.load_from(reader, m_owner->get_device().Get(), m_owner->get_context().Get());
                 }
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Populate dimensions from Texture") && tex.RenderTexture.is_valid()) {
+                tex.Left = 0;
+                tex.Top = 0;
+                tex.Width = static_cast<u16>(tex.RenderTexture.get_width());
+                tex.Height = static_cast<u16>(tex.RenderTexture.get_height());
+                tex.InvSize.x = 1.0f / tex.Width;
+                tex.InvSize.y = 1.0f / tex.Height;
             }
 
             ImGui::TreePop();
@@ -558,6 +568,7 @@ void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq) {
 }
 
 void GUIEditor::render_init_param(GUIInitParam& param) {
+    using namespace crc::literals;
     constexpr u32 u32_step = 1;
     constexpr u32 u32_fast_step = 10;
 
@@ -566,8 +577,122 @@ void GUIEditor::render_init_param(GUIInitParam& param) {
 
     if (ImGui::RichTextTreeNode("InitParam", param.get_preview(param.Index))) {
         ImGui::Checkbox("Use", &param.Use);
-        ImGui::InputScalar("Type", ImGuiDataType_U8, &param.Type, &u32_step, &u32_fast_step);
+        ImGui::RichTextCombo("Type", reinterpret_cast<u8*>(&param.Type), ParamTypeNames, 0xFFB0C94E);
         ImGui::InputText("Name", &param.Name);
+
+        switch (param.Type) {
+        case ParamType::UNKNOWN:
+            break;
+        case ParamType::INT:
+            ImGui::InputScalar("Value", ImGuiDataType_U32, &param.Value32, &u32_step, &u32_fast_step);
+            break;
+        case ParamType::FLOAT:
+            ImGui::InputFloat("Value", &param.ValueFloat, 0.01f, 0.1f, "%.3f");
+            break;
+        case ParamType::BOOL:
+            ImGui::Checkbox("Value", &param.ValueBool);
+            break;
+        case ParamType::VECTOR:
+            ImGui::ColorEdit4("Value", &param.ValueVector.x, ImGuiColorEditFlags_Float);
+            break;
+        case ParamType::RESOURCE:
+            ImGui::InputScalar("Value", ImGuiDataType_U32, &param.Value32, &u32_step, &u32_fast_step);
+            for (const auto& res : m_file.m_resources) {
+                if (res.ID == param.Value32) {
+                    ImGui::SameLine();
+                    ImGui::Text("Resource: %s", res.Path.c_str());
+                    break;
+                }
+            }
+            break;
+        case ParamType::STRING:
+            ImGui::InputText("Value", &param.ValueString);
+            break;
+        case ParamType::TEXTURE:
+            ImGui::InputScalar("Value", ImGuiDataType_U32, &param.Value32, &u32_step, &u32_fast_step);
+            for (const auto& tex : m_file.m_textures) {
+                if (tex.ID == param.Value32) {
+                    ImGui::SameLine();
+                    ImGui::Text("Texture: %s", tex.Path.c_str());
+                    break;
+                }
+            }
+            break;
+        case ParamType::GUIRESOURCE:
+            ImGui::InputScalar("Value", ImGuiDataType_U32, &param.Value32, &u32_step, &u32_fast_step);
+            for (const auto& res : m_file.m_resources) {
+                if (res.ID == param.Value32) {
+                    ImGui::SameLine();
+                    ImGui::Text("GUIResource: %s", res.Path.c_str());
+                    break;
+                }
+            }
+            break;
+        case ParamType::GENERALRESOURCE:
+            ImGui::InputScalar("Value", ImGuiDataType_U32, &param.Value32, &u32_step, &u32_fast_step);
+            for (const auto& res : m_file.m_general_resources) {
+                if (res.ID == param.Value32) {
+                    ImGui::SameLine();
+                    ImGui::Text("GeneralResource: %s", res.Path.c_str());
+                    break;
+                }
+            }
+            break;
+        case ParamType::FONT: [[fallthrough]];
+        case ParamType::MESSAGE: [[fallthrough]];
+        case ParamType::VARIABLE: [[fallthrough]]; 
+        case ParamType::ANIMATION: [[fallthrough]]; 
+        case ParamType::EVENT: [[fallthrough]]; 
+        case ParamType::FONT_FILTER: [[fallthrough]];
+        case ParamType::ANIMEVENT: [[fallthrough]]; 
+        case ParamType::SEQUENCE: 
+            ImGui::InputScalar("Value", ImGuiDataType_U32, &param.Value32, &u32_step, &u32_fast_step);
+            break;
+        case ParamType::INIT_BOOL:
+            ImGui::Checkbox("Value", &param.ValueBool);
+            break;
+        case ParamType::INIT_INT:
+            switch (param.NameCRC) {
+            case "BlendState"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, BlendStateNames, 0xFFA3D7B8);
+                break;
+            case "Alignment"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, AlignmentNames, 0xFFA3D7B8);
+                break;
+            case "ResolutionAdjust"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, ResolutionAdjustNames, 0xFFA3D7B8);
+                break;
+            case "AutoWrap"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, AutoWrapNames, 0xFFA3D7B8);
+                break;
+            case "ColorControl"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, ColorControlNames, 0xFFA3D7B8);
+                break;
+            case "LetterHAlign"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, LetterHAlignNames, 0xFFA3D7B8);
+                break;
+            case "LetterVAlign"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, LetterVAlignNames, 0xFFA3D7B8);
+                break;
+            case "DepthState"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, DepthStateNames, 0xFFA3D7B8);
+                break;
+            case "Billboard"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, BillboardNames, 0xFFA3D7B8);
+                break;
+            case "DrawPass"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, DrawPassNames, 0xFFA3D7B8);
+                break;
+            case "Mask"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, MaskTypeNames, 0xFFA3D7B8);
+                break;
+            default:
+                ImGui::InputScalar("Value", ImGuiDataType_U8, &param.Value8, &u32_step, &u32_fast_step);
+                break;
+            }
+
+            break;
+        }
 
         ImGui::TreePop();
     }
@@ -577,6 +702,7 @@ void GUIEditor::render_init_param(GUIInitParam& param) {
 }
 
 void GUIEditor::render_param(GUIParam& param) {
+    using namespace crc::literals;
     constexpr u32 u32_step = 1;
     constexpr u32 u32_fast_step = 10;
 
@@ -584,9 +710,123 @@ void GUIEditor::render_param(GUIParam& param) {
     ImGui::PushID(param.Index);
 
     if (ImGui::RichTextTreeNode("Param", param.get_preview(param.Index))) {
-        ImGui::InputScalar("Type", ImGuiDataType_U8, &param.Type, &u32_step, &u32_fast_step);
+        ImGui::RichTextCombo("Type", reinterpret_cast<u8*>(&param.Type), ParamTypeNames, 0xFFB0C94E);
         ImGui::InputScalar("Count", ImGuiDataType_U8, &param.ValueCount, &u32_step, &u32_fast_step);
         ImGui::InputText("Name", &param.Name);
+
+        switch (param.Type) {
+        case ParamType::UNKNOWN:
+            break;
+        case ParamType::INT:
+            ImGui::InputScalar("Value", ImGuiDataType_U32, &param.Value32, &u32_step, &u32_fast_step);
+            break;
+        case ParamType::FLOAT:
+            ImGui::InputFloat("Value", &param.ValueFloat, 0.01f, 0.1f, "%.3f");
+            break;
+        case ParamType::BOOL:
+            ImGui::Checkbox("Value", &param.ValueBool);
+            break;
+        case ParamType::VECTOR:
+            ImGui::ColorEdit4("Value", &param.ValueVector.x, ImGuiColorEditFlags_Float);
+            break;
+        case ParamType::RESOURCE:
+            ImGui::InputScalar("Value", ImGuiDataType_U32, &param.Value32, &u32_step, &u32_fast_step);
+            for (const auto& res : m_file.m_resources) {
+                if (res.ID == param.Value32) {
+                    ImGui::SameLine();
+                    ImGui::Text("Resource: %s", res.Path.c_str());
+                    break;
+                }
+            }
+            break;
+        case ParamType::STRING:
+            ImGui::InputText("Value", &param.ValueString);
+            break;
+        case ParamType::TEXTURE:
+            ImGui::InputScalar("Value", ImGuiDataType_U32, &param.Value32, &u32_step, &u32_fast_step);
+            for (const auto& tex : m_file.m_textures) {
+                if (tex.ID == param.Value32) {
+                    ImGui::SameLine();
+                    ImGui::Text("Texture: %s", tex.Path.c_str());
+                    break;
+                }
+            }
+            break;
+        case ParamType::GUIRESOURCE:
+            ImGui::InputScalar("Value", ImGuiDataType_U32, &param.Value32, &u32_step, &u32_fast_step);
+            for (const auto& res : m_file.m_resources) {
+                if (res.ID == param.Value32) {
+                    ImGui::SameLine();
+                    ImGui::Text("GUIResource: %s", res.Path.c_str());
+                    break;
+                }
+            }
+            break;
+        case ParamType::GENERALRESOURCE:
+            ImGui::InputScalar("Value", ImGuiDataType_U32, &param.Value32, &u32_step, &u32_fast_step);
+            for (const auto& res : m_file.m_general_resources) {
+                if (res.ID == param.Value32) {
+                    ImGui::SameLine();
+                    ImGui::Text("GeneralResource: %s", res.Path.c_str());
+                    break;
+                }
+            }
+            break;
+        case ParamType::FONT: [[fallthrough]];
+        case ParamType::MESSAGE: [[fallthrough]];
+        case ParamType::VARIABLE: [[fallthrough]]; 
+        case ParamType::ANIMATION: [[fallthrough]]; 
+        case ParamType::EVENT: [[fallthrough]]; 
+        case ParamType::FONT_FILTER: [[fallthrough]];
+        case ParamType::ANIMEVENT: [[fallthrough]]; 
+        case ParamType::SEQUENCE: 
+            ImGui::InputScalar("Value", ImGuiDataType_U32, &param.Value32, &u32_step, &u32_fast_step);
+            break;
+        case ParamType::INIT_BOOL:
+            ImGui::Checkbox("Value", &param.ValueBool);
+            break;
+        case ParamType::INIT_INT:
+            switch (param.NameCRC) {
+            case "BlendState"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, BlendStateNames, 0xFFA3D7B8);
+                break;
+            case "Alignment"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, AlignmentNames, 0xFFA3D7B8);
+                break;
+            case "ResolutionAdjust"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, ResolutionAdjustNames, 0xFFA3D7B8);
+                break;
+            case "AutoWrap"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, AutoWrapNames, 0xFFA3D7B8);
+                break;
+            case "ColorControl"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, ColorControlNames, 0xFFA3D7B8);
+                break;
+            case "LetterHAlign"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, LetterHAlignNames, 0xFFA3D7B8);
+                break;
+            case "LetterVAlign"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, LetterVAlignNames, 0xFFA3D7B8);
+                break;
+            case "DepthState"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, DepthStateNames, 0xFFA3D7B8);
+                break;
+            case "Billboard"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, BillboardNames, 0xFFA3D7B8);
+                break;
+            case "DrawPass"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, DrawPassNames, 0xFFA3D7B8);
+                break;
+            case "Mask"_crc:
+                ImGui::RichTextCombo("Value", &param.Value8, MaskTypeNames, 0xFFA3D7B8);
+                break;
+            default:
+                ImGui::InputScalar("Value", ImGuiDataType_U8, &param.Value8, &u32_step, &u32_fast_step);
+                break;
+            }
+
+            break;
+        }
 
         ImGui::TreePop();
     }

@@ -5,9 +5,8 @@
 
 #include <algorithm>
 #include <format>
-#include <stack>
+#include <span>
 #include <vector>
-#include <stdexcept>
 
 namespace ImGui {
 
@@ -73,6 +72,28 @@ bool RichTextTreeNode(std::string_view str_id, std::string_view fmt, Args&&... a
 	NewLine();
 
     return open;
+}
+
+template<typename IndexT> requires std::is_integral_v<IndexT>
+bool RichTextCombo(std::string_view label, IndexT* selected, std::span<const char* const> items, ImColor item_color) {
+    PushStyleColor(ImGuiCol_Text, item_color.Value);
+    if (!BeginCombo(label.data(), items[*selected])) {
+        PopStyleColor();
+        return false;
+    }
+
+    bool value_changed = false;
+    for (IndexT i = 0; i < items.size(); ++i) {
+        if (Selectable(items[i], i == *selected)) {
+            value_changed = true;
+            *selected = i;
+        }
+    }
+
+    EndCombo();
+    PopStyleColor();
+
+    return value_changed;
 }
 
 }

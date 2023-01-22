@@ -58,6 +58,9 @@ std::shared_ptr<GUIFontFilter> GUIFontFilter::read(BinaryReader& reader, const G
 
 		return filter;
 	}
+	case ObjectType::None: {
+		return nullptr;
+	}
 	default: break;
 		
 	}

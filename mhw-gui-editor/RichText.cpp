@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "RichText.h"
 
+#include <stack>
+
 namespace ImGui::Internal {
 
 std::vector<TaggedText> ParseRichText(const std::string& text) {

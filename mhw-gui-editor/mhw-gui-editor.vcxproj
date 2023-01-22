@@ -187,6 +187,7 @@
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="BinaryReader.h" />
+    <ClInclude Include="crc32.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="dti_types.h" />
     <ClInclude Include="GUIAnimation.h" />
