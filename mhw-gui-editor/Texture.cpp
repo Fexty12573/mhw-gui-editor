@@ -102,9 +102,9 @@ void Texture::load_from(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceCon
     }
 
     reader.seek_absolute(0x14);
-    const auto mip_count = reader.read<u32>();
-    const auto width = reader.read<u32>();
-    const auto height = reader.read<u32>();
+    m_mip_count = reader.read<u32>();
+    m_width = reader.read<u32>();
+    m_height = reader.read<u32>();
     const auto format = reader.abs_offset_read<FORMAT>(0x24, false);
     const auto dxformat = convert_format(format);
     const auto offset = reader.abs_offset_read<s64>(0xB8, false);
@@ -122,19 +122,19 @@ void Texture::load_from(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceCon
     DDS_EXTENDED_HEADER header{};
     header.hdr.size = sizeof(DDS_HEADER);
     header.hdr.flags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT | DDSD_MIPMAPCOUNT | DDSD_LINEARSIZE;
-    header.hdr.height = height;
-    header.hdr.width = width;
+    header.hdr.height = m_height;
+    header.hdr.width = m_width;
 
     if (is_4bpp(format)) {
-        header.hdr.pitchOrLinearSize = width * height / 2;
+        header.hdr.pitchOrLinearSize = m_width * m_height / 2;
     } else if (is_16bpp(format)) {
-        header.hdr.pitchOrLinearSize = width * height * 2;
+        header.hdr.pitchOrLinearSize = m_width * m_height * 2;
     } else {
-        header.hdr.pitchOrLinearSize = width * height;
+        header.hdr.pitchOrLinearSize = m_width * m_height;
     }
 
     header.hdr.depth = 1;
-    header.hdr.mipMapCount = mip_count;
+    header.hdr.mipMapCount = m_mip_count;
     header.hdr.ddspf.size = sizeof(DDS_PIXELFORMAT);
     header.hdr.ddspf.flags = DDPF_FOURCC;
     header.hdr.ddspf.fourCC = format_to_fourcc(format);

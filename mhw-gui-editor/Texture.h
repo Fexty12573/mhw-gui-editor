@@ -37,8 +37,16 @@ public:
     [[nodiscard]] bool is_valid() const { return m_texture && m_view; }
     [[nodiscard]] auto& get_view() const { return m_view; }
 
+    [[nodiscard]] u32 get_width() const { return m_width; }
+    [[nodiscard]] u32 get_height() const { return m_height; }
+    [[nodiscard]] u32 get_mip_count() const { return m_mip_count; }
+
 private:
     Microsoft::WRL::ComPtr<ID3D11Resource> m_texture;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_view;
+
+    u32 m_width;
+    u32 m_height;
+    u32 m_mip_count;
 };
 
