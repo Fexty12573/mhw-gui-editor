@@ -153,6 +153,7 @@ void GUIEditor::render(u32 dockspace_id) {
     render_tree_viewer();
     render_resource_manager();
     render_texture_viewer();
+    render_object_editor();
 
     if (open_options_window) {
         ImGui::OpenPopup("Options##OptionsWindow");
@@ -194,6 +195,18 @@ void GUIEditor::render(u32 dockspace_id) {
     }
 
     ImGui::ShowDemoWindow();
+}
+
+void GUIEditor::render_object_editor() {
+    if (m_selected_object == -1) {
+        return;
+    }
+
+    if (!ImGui::Begin("Object Editor", &m_object_editor_visible)) {
+        return;
+    }
+
+    ImGui::End();
 }
 
 void GUIEditor::open_file() {
@@ -457,12 +470,34 @@ void GUIEditor::render_object(GUIObject& obj, u32 seq_count) {
     ImGui::PushID("Object");
     ImGui::PushID(obj.Index);
 
-    if (ImGui::RichTextTreeNode("Obj", obj.get_preview(obj.Index))) {
+    const bool open = ImGui::RichTextTreeNode("Obj", obj.get_preview(obj.Index));
+
+    if (ImGui::BeginPopupContextItem("Object Context Menu")) {
+        if (ImGui::MenuItem("Add Default InitParams")) {
+            
+        }
+
+        if (ImGui::MenuItem("Delete")) {
+            // TODO: Delete object
+        }
+
+        ImGui::EndPopup();
+    }
+
+    if (open) {
         ImGui::InputScalar("ID", ImGuiDataType_U32, &obj.ID, &u32_step, &u32_fast_step);
         ImGui::InputInt("Child Index", &obj.ChildIndex);
         ImGui::InputInt("Next Index", &obj.NextIndex);
         ImGui::InputText("Name", &obj.Name);
-        ImGui::Text("Type: %s", enum_to_string(obj.Type));
+        if (ImGui::BeginCombo("Type", ObjectTypeNames.at(obj.Type))) {
+            for (const auto& [type, name] : ObjectTypeNames) {
+                if (ImGui::Selectable(name, obj.Type == type)) {
+                    obj.Type = type;
+                }
+            }
+
+            ImGui::EndCombo();
+        }
 
         if (obj.ChildIndex != -1) {
             auto object = &m_file.m_objects[obj.ChildIndex];
@@ -479,6 +514,10 @@ void GUIEditor::render_object(GUIObject& obj, u32 seq_count) {
                 const u64 max = std::min(static_cast<u64>(obj.InitParamIndex + obj.InitParamNum), m_file.m_init_params.size());
                 for (auto i = obj.InitParamIndex; i < max; ++i) {
                     render_init_param(m_file.m_init_params[i]);
+                }
+
+                if (obj.InitParamIndex + static_cast<u64>(obj.InitParamNum) > m_file.m_init_params.size()) {
+                    ImGui::TextColored({ 1.0f, 1.0f, 0.2f, 1.0f }, "Warning: InitParamNum goes out of bounds!");
                 }
 
                 ImGui::TreePop();
@@ -545,6 +584,10 @@ void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq) {
                     render_init_param(initparams[i]);
                 }
 
+                if (objseq.InitParamIndex + static_cast<u64>(objseq.InitParamNum) > m_file.m_init_params.size()) {
+                    ImGui::TextColored({ 1.0f, 1.0f, 0.2f, 1.0f }, "Warning: InitParamNum goes out of bounds!");
+                }
+
                 ImGui::TreePop();
             }
         }
@@ -558,6 +601,10 @@ void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq) {
                     render_param(params[i]);
                 }
 
+                if (objseq.ParamIndex + static_cast<u64>(objseq.ParamNum) > m_file.m_init_params.size()) {
+                    ImGui::TextColored({ 1.0f, 1.0f, 0.2f, 1.0f }, "Warning: ParamNum goes out of bounds!");
+                }
+                
                 ImGui::TreePop();
             }
         }

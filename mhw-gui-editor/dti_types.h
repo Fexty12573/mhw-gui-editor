@@ -121,6 +121,72 @@ struct vector3
 struct vector4
 {
     f32 x, y, z, w;
+    vector4& operator+=(const vector4& v) {
+        x += v.x;
+        y += v.y;
+        z += v.z;
+        w += v.w;
+        return *this;
+    }
+    vector4& operator-=(const vector4& v) {
+        x -= v.x;
+        y -= v.y;
+        z -= v.z;
+        w -= v.w;
+        return *this;
+    }
+    vector4& operator*=(float v) {
+        x *= v;
+        y *= v;
+        z *= v;
+        w *= v;
+        return *this;
+    }
+    vector4& operator/=(float v) {
+        x /= v;
+        y /= v;
+        z /= v;
+        w /= v;
+        return *this;
+    }
+    vector4& operator+=(float v) {
+        x += v;
+        y += v;
+        z += v;
+        w += v;
+        return *this;
+    }
+    vector4& operator-=(float v) {
+        x -= v;
+        y -= v;
+        z -= v;
+        w -= v;
+        return *this;
+    }
+
+    vector4 operator+(const vector4& v) const { return vector4(*this) += v; }
+    vector4 operator-(const vector4& v) const { return vector4(*this) -= v; }
+    vector4 operator+(float v) const { return vector4(*this) += v; }
+    vector4 operator-(float v) const { return vector4(*this) -= v; }
+    vector4 operator*(float v) const { return vector4(*this) *= v; }
+    vector4 operator/(float v) const { return vector4(*this) /= v; }
+    vector4 operator-() const { return { -x, -y, -z, -w }; }
+    float operator*(const vector4& v) const { return dot(v); }
+
+    bool operator==(const vector4& v) const { return x == v.x && y == v.y && z == v.z && w == v.w; }
+    bool operator!=(const vector4& v) const { return !(*this == v); }
+
+    [[nodiscard]] float lensq() const { return x * x + y * y + z * z + w * w; }
+    [[nodiscard]] float len() const { return sqrtf(lensq()); }
+
+    [[nodiscard]] float dot(const vector4& v) const { return x * v.x + y * v.y + z * v.z + w * v.w; }
+
+    vector4& normalize() { return (*this) /= len(); }
+    [[nodiscard]] vector4 normalized() const { return vector4(*this) /= len(); }
+
+    vector4& set_length(float length) { return normalize() *= length; }
+    vector4& limit(float length) { return lensq() > (length * length) ? set_length(length) : *this; }
+    [[nodiscard]] float* data() { return &x; }
 };
 struct quaternion
 {

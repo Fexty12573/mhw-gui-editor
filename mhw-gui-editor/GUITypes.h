@@ -2,6 +2,7 @@
 #include "dti_types.h"
 
 #include <array>
+#include <map>
 #include <string>
 
 struct GUIHeader {
@@ -1069,4 +1070,55 @@ inline constexpr std::array FontStyleNames = {
     "MOJI_PALEBLUE_SELECTED",
     "MOJI_PALEBLUE_SELECTED2",
     "MOJI_PALEBLUE_DISABLE",
+};
+
+inline const std::map<ObjectType, const char*> ObjectTypeNames = {
+    { ObjectType::None, "None" },
+    { ObjectType::cGUIObjRoot, "cGUIObjRoot" },
+    { ObjectType::cGUIObjColorAdjust, "cGUIObjColorAdjust" },
+    { ObjectType::cGUIObj2D, "cGUIObj2D" },
+    { ObjectType::cGUIObjScissorMask, "cGUIObjScissorMask" },
+    { ObjectType::cGUIObjNull, "cGUIObjNull" },
+    { ObjectType::cGUIObjChildAnimationRoot, "cGUIObjChildAnimationRoot" },
+    { ObjectType::cGUIObjPolygon, "cGUIObjPolygon" },
+    { ObjectType::cGUIObjTexture, "cGUIObjTexture" },
+    { ObjectType::cGUIObjTextureSet, "cGUIObjTextureSet" },
+    { ObjectType::cGUIObjMaterial, "cGUIObjMaterial" },
+    { ObjectType::cGUIObjMessage, "cGUIObjMessage" },
+    { ObjectType::cGUIObjText, "cGUIObjText" },
+    { ObjectType::cGUIObjEffect, "cGUIObjEffect" },
+    { ObjectType::cGUIObjBaseModel, "cGUIObjBaseModel" },
+    { ObjectType::cGUIObjHitRect, "cGUIObjHitRect" },
+    { ObjectType::cGUIObjModel, "cGUIObjModel" },
+    { ObjectType::cGUIObjSizeAdjustMessage, "cGUIObjSizeAdjustMessage" },
+    { ObjectType::cGUIInstAnimVariable, "cGUIInstAnimVariable" },
+    { ObjectType::cGUIInstAnimControl, "cGUIInstAnimControl" },
+    { ObjectType::cGUIInstRoot, "cGUIInstRoot" },
+    { ObjectType::cGUIInstNull, "cGUIInstNull" },
+    { ObjectType::cGUIInstScissorMask, "cGUIInstScissorMask" },
+    { ObjectType::cGUIInstAnimation, "cGUIInstAnimation" },
+    { ObjectType::cGUIInstGauge, "cGUIInstGauge" },
+    { ObjectType::cGUIInstAutoAnimation, "cGUIInstAutoAnimation" },
+    { ObjectType::cGUIInstInput, "cGUIInstInput" },
+    { ObjectType::cGUIInstButtonList, "cGUIInstButtonList" },
+    { ObjectType::cGUIInstScrollBar, "cGUIInstScrollBar" },
+    { ObjectType::cGUIInstSlider, "cGUIInstSlider" },
+    { ObjectType::cGUIInstText, "cGUIInstText" },
+    { ObjectType::cGUIInstButtonGrid, "cGUIInstButtonGrid" },
+    { ObjectType::cGUIInstButtonGridLink, "cGUIInstButtonGridLink" },
+    { ObjectType::cGUIInstButtonTree, "cGUIInstButtonTree" },
+    { ObjectType::cGUIInstChangeNumInput, "cGUIInstChangeNumInput" },
+    { ObjectType::cGUIInstColorPallet, "cGUIInstColorPallet" },
+    { ObjectType::cGUIInstCursor, "cGUIInstCursor" },
+    { ObjectType::cGUIInstFreeCursor, "cGUIInstFreeCursor" },
+    { ObjectType::cGUIInstItemGrid, "cGUIInstItemGrid" },
+    { ObjectType::cGUIInstMessage, "cGUIInstMessage" },
+    { ObjectType::cGUIInstMouseOverFilter, "cGUIInstMouseOverFilter" },
+    { ObjectType::cGUIFontFilterShadow, "cGUIFontFilterShadow" },
+    { ObjectType::cGUIFontFilterBorder, "cGUIFontFilterBorder" },
+    { ObjectType::cGUIFontFilterShading, "cGUIFontFilterShading" },
+    { ObjectType::cGUIFontFilterGradationOverlay, "cGUIFontFilterGradationOverlay" },
+    { ObjectType::cGUIFontFilterTextureBlend, "cGUIFontFilterTextureBlend" },
+    { ObjectType::cGUIFontFilterDistanceField, "cGUIFontFilterDistanceField" },
+    { ObjectType::rEffectAsset, "rEffectAsset" }
 };

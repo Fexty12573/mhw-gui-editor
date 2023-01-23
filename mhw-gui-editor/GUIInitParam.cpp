@@ -41,7 +41,7 @@ GUIInitParam GUIInitParam::read(BinaryReader& reader, const GUIHeader& header) {
 		break;
 
 	case 4:
-		result.ValueVector = reader.abs_offset_read<vector4>(static_cast<s64>(header.keyValue32Offset) + offset);
+		result.ValueVector = reader.abs_offset_read<vector4>(static_cast<s64>(header.keyValue128Offset) + offset);
 		break;
 
 	case 6:
@@ -52,6 +52,10 @@ GUIInitParam GUIInitParam::read(BinaryReader& reader, const GUIHeader& header) {
 	default:
 		result.Value32 = reader.abs_offset_read<u32>(static_cast<s64>(header.keyValue32Offset) + offset);
 		break;
+	}
+
+	if (result.Name.contains("Color") && result.Type == ParamType::VECTOR) {
+		result.ValueVector /= 255.0f;
 	}
 
 	return result;

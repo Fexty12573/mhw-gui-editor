@@ -39,6 +39,7 @@ private:
 	void render_overview();
 	void render_resource_manager();
 	void render_texture_viewer();
+	void render_object_editor();
 
 	void render_animation(GUIAnimation& anim);
 	void render_object(GUIObject& obj, u32 seq_count = 0);
@@ -66,7 +67,9 @@ private:
     bool m_error_popup_select_file_open = false;
 	bool m_animation_editor_first = true;
 	bool m_animation_editor_visible = false;
+	bool m_object_editor_visible = false;
 
+	int m_selected_object = -1;
     int m_selected_texture = -1;
 
 	Settings m_settings;

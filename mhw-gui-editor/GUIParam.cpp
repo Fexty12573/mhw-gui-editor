@@ -19,8 +19,8 @@ GUIParam GUIParam::read(BinaryReader& reader, const GUIHeader& header) {
 	case 3: [[fallthrough]];
 	case 17:
 	case 18:
-	result.Value8 = reader.abs_offset_read<u8>(static_cast<s64>(header.keyValue8Offset) + offset);
-	break;
+	    result.Value8 = reader.abs_offset_read<u8>(static_cast<s64>(header.keyValue8Offset) + offset);
+	    break;
 
 	case 1: [[fallthrough]];
 	case 7: [[fallthrough]];
@@ -32,27 +32,32 @@ GUIParam GUIParam::read(BinaryReader& reader, const GUIHeader& header) {
 	case 16: [[fallthrough]];
 	case 19: [[fallthrough]];
 	case 20:
-	result.Value32 = reader.abs_offset_read<u32>(static_cast<s64>(header.keyValue32Offset) + offset);
-	break;
+	    result.Value32 = reader.abs_offset_read<u32>(static_cast<s64>(header.keyValue32Offset) + offset);
+	    break;
 
 	case 2: [[fallthrough]];
 	case 15:
-	result.ValueFloat = reader.abs_offset_read<float>(static_cast<s64>(header.keyValue32Offset) + offset);
-	break;
+	    result.ValueFloat = reader.abs_offset_read<float>(static_cast<s64>(header.keyValue32Offset) + offset);
+	    break;
 
 	case 4:
-	result.ValueVector = reader.abs_offset_read<vector4>(static_cast<s64>(header.keyValue32Offset) + offset);
-	break;
+        result.ValueVector = reader.abs_offset_read<vector4>(static_cast<s64>(header.keyValue128Offset) + offset);
+	    break;
 
 	case 6:
-	result.ValueString = reader.abs_offset_read_string(static_cast<s64>(header.stringOffset) +
-		reader.abs_offset_read<s64>(static_cast<s64>(header.keyValue32Offset) + offset));
-	break;
+	    result.ValueString = reader.abs_offset_read_string(static_cast<s64>(header.stringOffset) +
+		    reader.abs_offset_read<s64>(static_cast<s64>(header.keyValue32Offset) + offset));
+	    break;
 
 	default:
-	result.Value32 = reader.abs_offset_read<u32>(static_cast<s64>(header.keyValue32Offset) + offset);
-	break;
+	    result.Value32 = reader.abs_offset_read<u32>(static_cast<s64>(header.keyValue32Offset) + offset);
+	    break;
 	}
+
+    if (result.Name.contains("Color") && result.Type == ParamType::VECTOR) {
+        // Normalize color values
+        result.ValueVector /= 255.0f;
+    }
 
 	return result;
 }
