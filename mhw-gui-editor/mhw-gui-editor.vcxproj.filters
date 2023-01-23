@@ -25,6 +25,12 @@
     <Filter Include="Source Files\rTexture">
       <UniqueIdentifier>{f96be62b-5397-4917-b26a-8e86b5a3ec82}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Utility">
+      <UniqueIdentifier>{16c2fe27-1ec2-4cf6-b487-2243da0c6e4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utility">
+      <UniqueIdentifier>{d3b9a520-f586-47c3-beba-7a558bafe14a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md">
@@ -96,9 +102,6 @@
     <ClCompile Include="GUIGeneralResource.cpp">
       <Filter>Source Files\rGUI</Filter>
     </ClCompile>
-    <ClCompile Include="BinaryReader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GUIMessage.cpp">
       <Filter>Source Files\rGUI</Filter>
     </ClCompile>
@@ -116,6 +119,15 @@
     </ClCompile>
     <ClCompile Include="Settings.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryReader.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryWriter.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="StringBuffer.cpp">
+      <Filter>Source Files\Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -185,9 +197,6 @@
     <ClInclude Include="GUIGeneralResource.h">
       <Filter>Header Files\rGUI</Filter>
     </ClInclude>
-    <ClInclude Include="BinaryReader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GUITypes.h">
       <Filter>Header Files\rGUI</Filter>
     </ClInclude>
@@ -214,6 +223,15 @@
     </ClInclude>
     <ClInclude Include="crc32.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryReader.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryWriter.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="StringBuffer.h">
+      <Filter>Header Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

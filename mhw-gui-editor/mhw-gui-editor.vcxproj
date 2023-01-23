@@ -157,6 +157,7 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="BinaryReader.cpp" />
+    <ClCompile Include="BinaryWriter.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="GUIAnimation.cpp" />
     <ClCompile Include="GUIEditor.cpp" />
@@ -181,12 +182,14 @@
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="RichText.cpp" />
     <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="StringBuffer.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="BinaryReader.h" />
+    <ClInclude Include="BinaryWriter.h" />
     <ClInclude Include="crc32.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="dti_types.h" />
@@ -215,6 +218,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="RichText.h" />
     <ClInclude Include="Settings.h" />
+    <ClInclude Include="StringBuffer.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
