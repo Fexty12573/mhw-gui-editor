@@ -13,10 +13,6 @@ void BinaryWriter::write(const char* str, size_t size) {
     m_file.write(str, size);
 }
 
-void BinaryWriter::write(std::span<const uint8_t> data) {
-    m_file.write(reinterpret_cast<const char*>(data.data()), data.size());
-}
-
 void BinaryWriter::seek_absolute(std::streamoff offset) {
     if (offset < 0) {
         m_file.seekp(offset + 1, std::ios::end); // Seek from end

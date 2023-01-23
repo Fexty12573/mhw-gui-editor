@@ -21,7 +21,11 @@ public:
 
     void write(const std::string& v, bool nullterminator = true);
     void write(const char* str, size_t size);
-    void write(std::span<const uint8_t> data);
+
+    template<typename T>
+    void write(std::span<const T> data) {
+        m_file.write(reinterpret_cast<const char*>(data.data()), data.size_bytes());
+    }
 
     void seek_absolute(std::streamoff offset);
     void seek_relative(std::streamoff offset);
