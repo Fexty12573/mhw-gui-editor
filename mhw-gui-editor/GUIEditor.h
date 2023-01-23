@@ -31,6 +31,8 @@ public:
 
 	void render(u32 dockspace_id = 0);
 	void open_file();
+	void save_file();
+	void save_file_as();
 
 	[[nodiscard]] GUIFile& get_file() { return m_file; }
 

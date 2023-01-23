@@ -1,6 +1,8 @@
 #pragma once
 
 #include "BinaryReader.h"
+#include "BinaryWriter.h"
+#include "StringBuffer.h"
 #include "GUITypes.h"
 #include "dti_types.h"
 #include "Texture.h"
@@ -10,6 +12,8 @@
 struct GUITexture {
 	static constexpr size_t size = 64;
 	static GUITexture read(BinaryReader& reader, const GUIHeader& header);
+
+	void write(BinaryWriter& writer, StringBuffer& buffer) const;
 
 	u32 ID;
 	union {

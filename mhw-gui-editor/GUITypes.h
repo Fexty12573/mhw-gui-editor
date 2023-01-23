@@ -81,6 +81,13 @@ struct GUIHeader {
     u64 padding;
 };
 
+struct KeyValueBuffers {
+    std::vector<u8> KeyValue8;
+    std::vector<u32> KeyValue32;
+    std::vector<vector4> KeyValue128;
+    std::vector<u8> ExtendData;
+};
+
 enum class ObjectType : u32
 {
     None = 0xCCCCCCCC,

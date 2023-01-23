@@ -21,7 +21,8 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
     HR_ASSERT(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
     
     add_menu_item("File", { ICON_FA_FILE " Open", "Ctrl+O", [](GUIEditor* e) { e->open_file(); } });
-    add_menu_item("File", { ICON_FA_FLOPPY_DISK " Save", "Ctrl+S", [](GUIEditor* e) { /* TODO */ }});
+    add_menu_item("File", { ICON_FA_FLOPPY_DISK " Save", "Ctrl+S", [](GUIEditor* e) { e->save_file(); } });
+    add_menu_item("File", { "Save As...", "Ctrl+Shift+S", [](GUIEditor* e) {e->save_file_as(); }});
     add_menu_item("View", { "Animation Editor", "Ctrl+Shift+A", [this](GUIEditor* e) {
         m_animation_editor_visible = true;
         
@@ -246,6 +247,42 @@ void GUIEditor::open_file() {
     update_indices();
 
     m_first_render = true;
+}
+
+void GUIEditor::save_file() {
+    
+}
+
+void GUIEditor::save_file_as() {
+    HR_INIT(S_OK);
+
+    Microsoft::WRL::ComPtr<IFileSaveDialog> dialog;
+    HR_ASSERT(CoCreateInstance(CLSID_FileSaveDialog, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&dialog)));
+
+    constexpr COMDLG_FILTERSPEC filters[] = {
+        { L"MHW GUI Files", L"*.gui" }
+    };
+
+    HR_ASSERT(dialog->SetFileTypes(ARRAYSIZE(filters), filters));
+    HR_ASSERT(dialog->SetDefaultExtension(L"gui"));
+    HR_ASSERT(dialog->SetOptions(
+        FOS_STRICTFILETYPES | FOS_PATHMUSTEXIST
+    ));
+
+    if (dialog->Show(nullptr) == HRESULT_FROM_WIN32(ERROR_CANCELLED)) {
+        return;
+    }
+
+    Microsoft::WRL::ComPtr<IShellItem> item;
+    HR_ASSERT(dialog->GetResult(&item));
+
+    LPWSTR file_name;
+    HR_ASSERT(item->GetDisplayName(SIGDN_FILESYSPATH, &file_name));
+
+    const std::wstring wpath = file_name;
+    BinaryWriter writer(wpath);
+
+    m_file.save_to(writer);
 }
 
 void GUIEditor::render_tree_viewer() {
@@ -553,6 +590,8 @@ void GUIEditor::render_sequence(GUISequence& seq) {
         ImGui::InputScalar("ID", ImGuiDataType_U32, &seq.ID, &u32_step, &u32_fast_step);
         ImGui::InputText("Name", &seq.Name);
         ImGui::InputScalar("Frame Count", ImGuiDataType_U32, &seq.FrameCount, &u32_step, &u32_fast_step);
+
+        ImGui::TreePop();
     }
 
     ImGui::PopID();

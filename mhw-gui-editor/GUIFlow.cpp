@@ -10,3 +10,11 @@ GUIFlow GUIFlow::read(BinaryReader& reader, const GUIHeader& header) {
 		.FlowProcessIndex = reader.read_skip<u32>(4)
 	};
 }
+
+void GUIFlow::write(BinaryWriter& writer, StringBuffer& buffer) const {
+	writer.write(ID);
+	writer.write(Type);
+	writer.write<u64>(Attr);
+    writer.write(buffer.append_no_duplicate(Name));
+    writer.write<u64>(FlowProcessIndex);
+}

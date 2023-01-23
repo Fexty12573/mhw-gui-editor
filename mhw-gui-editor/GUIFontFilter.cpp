@@ -67,3 +67,47 @@ std::shared_ptr<GUIFontFilter> GUIFontFilter::read(BinaryReader& reader, const G
 
 	throw std::runtime_error("Unknown font filter type");
 }
+
+void GUIFontFilter::write(BinaryWriter& writer, StringBuffer& buffer) const {
+    writer.write(Type);
+    writer.write(ID);
+}
+
+void GUIFontFilterDistanceField::write(BinaryWriter& writer, StringBuffer& buffer) const {
+    GUIFontFilter::write(writer, buffer);
+
+	writer.write(ParamNum);
+
+    for (u32 i = 0; i < 2; ++i) {
+        writer.write(Params[i]);
+    }
+
+    writer.write(Offset);
+    writer.write(OffsetAngle);
+    writer.write(Blending);
+	writer.write<u16>(0);
+	writer.write<u8>(0);
+}
+
+void GUIFontFilterGradationOverlay::write(BinaryWriter& writer, StringBuffer& buffer) const {
+    GUIFontFilter::write(writer, buffer);
+
+    writer.write(TextureIndex);
+    writer.write(buffer.append_no_duplicate(Name));
+}
+
+void GUIFontFilterBorder::write(BinaryWriter& writer, StringBuffer& buffer) const {
+    GUIFontFilter::write(writer, buffer);
+
+    writer.write(BorderType);
+    writer.write(Distance);
+    writer.write(Color);
+}
+
+void GUIFontFilterShadow::write(BinaryWriter& writer, StringBuffer& buffer) const {
+    GUIFontFilter::write(writer, buffer);
+
+    writer.write(Distance);
+    writer.write(Rotation);
+    writer.write(Color);
+}

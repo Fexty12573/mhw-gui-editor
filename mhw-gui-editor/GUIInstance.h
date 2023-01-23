@@ -1,6 +1,8 @@
 #pragma once
 
 #include "BinaryReader.h"
+#include "BinaryWriter.h"
+#include "StringBuffer.h"
 #include "GUITypes.h"
 #include "dti_types.h"
 
@@ -9,6 +11,8 @@
 struct GUIInstance {
 	static constexpr size_t size = 56;
 	static GUIInstance read(BinaryReader& reader, const GUIHeader& header);
+
+    void write(BinaryWriter& writer, StringBuffer& buffer) const;
 
 	u32 ID;
 	u32 Attr;

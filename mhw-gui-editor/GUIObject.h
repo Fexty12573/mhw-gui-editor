@@ -1,6 +1,8 @@
 #pragma once
 
 #include "BinaryReader.h"
+#include "BinaryWriter.h"
+#include "StringBuffer.h"
 #include "GUITypes.h"
 #include "dti_types.h"
 
@@ -10,6 +12,7 @@ struct GUIObject {
 	static constexpr size_t size = 56;
 	static GUIObject read(BinaryReader& reader, const GUIHeader& header);
 
+	void write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const;
 	[[nodiscard]] std::string get_preview(u32 index = 0xFFFFFFFF) const;
 
 	u32 ID;

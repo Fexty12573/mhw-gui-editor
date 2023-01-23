@@ -1,6 +1,8 @@
 #pragma once
 
 #include "BinaryReader.h"
+#include "BinaryWriter.h"
+#include "StringBuffer.h"
 #include "GUITypes.h"
 #include "dti_types.h"
 
@@ -9,6 +11,8 @@
 struct GUIFlowProcess {
 	static constexpr size_t size = 48;
 	static GUIFlowProcess read(BinaryReader& reader, const GUIHeader& header);
+
+	void write(BinaryWriter& writer, StringBuffer& buffer) const;
 
 	union {
 		struct {

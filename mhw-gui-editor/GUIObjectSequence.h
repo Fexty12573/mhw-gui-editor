@@ -1,6 +1,8 @@
 #pragma once
 
 #include "BinaryReader.h"
+#include "BinaryWriter.h"
+#include "StringBuffer.h"
 #include "dti_types.h"
 
 #include <string>
@@ -9,6 +11,7 @@ struct GUIObjectSequence {
 	static constexpr size_t size = 24;
 	static GUIObjectSequence read(BinaryReader& reader);
 
+    void write(BinaryWriter& writer, StringBuffer& buffer) const;
 	[[nodiscard]] std::string get_preview(u32 index = 0xFFFFFFFF) const;
 
 	u16 Attr;

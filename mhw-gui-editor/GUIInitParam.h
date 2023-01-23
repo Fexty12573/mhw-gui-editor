@@ -1,6 +1,8 @@
 #pragma once
 
 #include "BinaryReader.h"
+#include "BinaryWriter.h"
+#include "StringBuffer.h"
 #include "GUITypes.h"
 #include "dti_types.h"
 
@@ -10,7 +12,8 @@ struct GUIInitParam {
 	static constexpr size_t size = 32;
 	static GUIInitParam read(BinaryReader& reader, const GUIHeader& header);
 
-	[[nodiscard]] std::string get_preview(u32 index = 0xFFFFFFFF) const;
+    void write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kvbuffers) const;
+    [[nodiscard]] std::string get_preview(u32 index = 0xFFFFFFFF) const;
 
 	ParamType Type;
 	bool Use;

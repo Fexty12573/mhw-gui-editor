@@ -1,6 +1,8 @@
 #pragma once
 
 #include "BinaryReader.h"
+#include "BinaryWriter.h"
+#include "StringBuffer.h"
 #include "GUITypes.h"
 #include "dti_types.h"
 
@@ -8,7 +10,9 @@
 
 struct GUIKey {
 	static constexpr size_t size = 16;
-	static GUIKey read(BinaryReader& reader);
+    static GUIKey read(BinaryReader& reader, const GUIHeader& header);
+
+	void write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const;
 
 	union {
 		struct {
@@ -24,5 +28,6 @@ struct GUIKey {
 		u32 Full;
 	} Data;
 	u32 CurveOffset;
+    hermitecurve Curve;
 };
 

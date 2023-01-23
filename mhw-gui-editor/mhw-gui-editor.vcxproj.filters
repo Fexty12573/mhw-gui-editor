@@ -129,6 +129,9 @@
     <ClCompile Include="StringBuffer.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="GUIVertex.cpp">
+      <Filter>Source Files\rGUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -232,6 +235,9 @@
     </ClInclude>
     <ClInclude Include="StringBuffer.h">
       <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIVertex.h">
+      <Filter>Header Files\rGUI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

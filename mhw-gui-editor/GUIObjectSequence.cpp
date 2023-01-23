@@ -15,6 +15,16 @@ GUIObjectSequence GUIObjectSequence::read(BinaryReader& reader) {
 	};
 }
 
+void GUIObjectSequence::write(BinaryWriter& writer, StringBuffer& buffer) const {
+	writer.write(Attr);
+    writer.write(InitParamNum);
+    writer.write(ParamNum);
+    writer.write(LoopStart);
+    writer.write(FrameCount);
+	writer.write<u64>(InitParamIndex);
+    writer.write<u64>(ParamIndex);
+}
+
 std::string GUIObjectSequence::get_preview(u32 index) const {
 	if (index == 0xFFFFFFFF) {
 		return std::format("ObjectSequence: I: <C FFA3D7B8>{}</C>, P: <C FFA3D7B8>{}</C>, LoopStart: <C FFA3D7B8>{}</C>, FrameCount: <C FFA3D7B8>{}</C>", InitParamNum, ParamNum, LoopStart, FrameCount);

@@ -16,6 +16,17 @@ GUIAnimation GUIAnimation::read(BinaryReader& stream, std::streamoff text_offset
 	};
 }
 
+void GUIAnimation::write(BinaryWriter& stream, StringBuffer& buffer) const {
+	stream.write(ID);
+	stream.write(ObjectNum);
+    stream.write(SequenceNum);
+    stream.write(DrawableObjectNum);
+    stream.write(AnimateParamNum);
+    stream.write(RootObjectIndex);
+    stream.write(buffer.append_no_duplicate(Name));
+    stream.write<u64>(SequenceIndex);
+}
+
 std::string GUIAnimation::get_preview(u32 index) const {
 	if (index == 0xFFFFFFFF) {
 		return std::format("Animation<<C FFA3D7B8>{}</C>> <C FFFEDC9C>{}</C>", ID, Name);

@@ -106,6 +106,20 @@ void GUIFile::load_from(BinaryReader& stream) {
         m_general_resources.emplace_back(GUIGeneralResource::read(stream, header));
     }
 
+    stream.seek_absolute(static_cast<s64>(header.keyOffset));
+    for (auto i = 0u; i < header.keyNum; ++i) {
+        m_keys.emplace_back(GUIKey::read(stream));
+    }
+
+    stream.seek_absolute(static_cast<s64>(header.vertexOffset));
+    for (auto i = 0u; i < header.vertexBufferSize / GUIVertex::size; ++i) {
+        m_vertices.emplace_back(GUIVertex::read(stream));
+    }
+
+    stream.seek_absolute(static_cast<s64>(header.extendDataOffset));
+    m_extend_data.resize(header.stringOffset - header.extendDataOffset); // TODO: Implement this properly, this is just a hack
+    stream.read_bytes(m_extend_data);
+
     m_header = header;
 }
 
@@ -118,4 +132,156 @@ void GUIFile::load_resources(const std::string& chunk_path, ID3D11Device* device
     }
 
     // TODO: load other kinds of resources
+}
+
+void GUIFile::save_to(BinaryWriter& stream) {
+    GUIHeader header = {
+        .fileType = {'G', 'U', 'I', '\0'},
+        .guiVersion = m_version,
+        .fileSize = 0,
+        .attr = m_attr,
+        .revisionDate = std::time(nullptr),
+        .instanceID = m_instance_id,
+        .flowID = m_flow_id,
+        .variableID = m_variable_id,
+        .startInstanceIndex = m_start_instance_index,
+        .animationNum = static_cast<u32>(m_animations.size()),
+        .sequenceNum = static_cast<u32>(m_sequences.size()),
+        .objectNum = static_cast<u32>(m_objects.size()),
+        .objSequenceNum = static_cast<u32>(m_obj_sequences.size()),
+        .initParamNum = static_cast<u32>(m_init_params.size()),
+        .paramNum = static_cast<u32>(m_params.size()),
+        .keyNum = static_cast<u32>(m_keys.size()),
+        .instanceNum = static_cast<u32>(m_instances.size()),
+        .flowNum = static_cast<u32>(m_flows.size()),
+        .flowProcessNum = static_cast<u32>(m_flow_processes.size()),
+        .flowInputNum = 0,
+        .flowSwitchNum = 0,
+        .flowFunctionNum = 0,
+        .actionNum = 0,
+        .inputConditionNum = 0,
+        .switchConditionNum = 0,
+        .switchOperatorNum = 0,
+        .variableNum = 0,
+        .textureNum = static_cast<u32>(m_textures.size()),
+        .fontNum = 0,
+        .fontFilterNum = static_cast<u32>(m_font_filters.size()),
+        .messageNum = static_cast<u32>(m_messages.size()),
+        .guiResourceNum = static_cast<u32>(m_resources.size()),
+        .generalResourceNum = static_cast<u32>(m_general_resources.size()),
+        .cameraSettingNum = 0,
+        .instExeParamNum = 0,
+        .vertexBufferSize = 0,
+        .optionBitFlag = m_header.optionBitFlag,
+        .viewSize_Width = m_header.viewSize_Width,
+        .viewSize_Height = m_header.viewSize_Height,
+        .startFlowIndex = m_header.startFlowIndex
+        // Rest of the fields will be filled later
+    };
+
+    stream.write(header);
+
+    StringBuffer string_buffer;
+    KeyValueBuffers kv_buffers;
+
+    header.animationOffset = stream.tell();
+    for (const auto& animation : m_animations) {
+        animation.write(stream, string_buffer);
+    }
+
+    header.sequenceOffset = stream.tell();
+    for (const auto& sequence : m_sequences) {
+        sequence.write(stream, string_buffer);
+    }
+
+    header.objectOffset = stream.tell();
+    for (const auto& object : m_objects) {
+        object.write(stream, string_buffer);
+    }
+
+    header.objSequenceOffset = stream.tell();
+    for (const auto& obj_sequence : m_obj_sequences) {
+        obj_sequence.write(stream, string_buffer);
+    }
+
+    header.initParamOffset = stream.tell();
+    for (const auto& init_param : m_init_params) {
+        init_param.write(stream, string_buffer, kv_buffers);
+    }
+
+    header.paramOffset = stream.tell();
+    for (const auto& param : m_params) {
+        param.write(stream, string_buffer, kv_buffers);
+    }
+
+    header.keyOffset = stream.tell();
+    for (const auto& key : m_keys) {
+        key.write(stream, string_buffer);
+    }
+
+    header.instanceOffset = stream.tell();
+    for (const auto& instance : m_instances) {
+        instance.write(stream, string_buffer);
+    }
+
+    header.flowOffset = stream.tell();
+    for (const auto& flow : m_flows) {
+        flow.write(stream, string_buffer);
+    }
+
+    header.flowProcessOffset = stream.tell();
+    for (const auto& flow_process : m_flow_processes) {
+        flow_process.write(stream, string_buffer);
+    }
+
+    header.textureOffset = stream.tell();
+    for (const auto& texture : m_textures) {
+        texture.write(stream, string_buffer);
+    }
+
+    header.fontFilterOffset = stream.tell();
+    for (const auto& font_filter : m_font_filters) {
+        font_filter->write(stream, string_buffer);
+    }
+
+    header.messageOffset = stream.tell();
+    for (const auto& message : m_messages) {
+        message.write(stream, string_buffer);
+    }
+
+    header.guiResourceOffset = stream.tell();
+    for (const auto& resource : m_resources) {
+        resource.write(stream, string_buffer);
+    }
+
+    header.generalResourceOffset = stream.tell();
+    for (const auto& general_resource : m_general_resources) {
+        general_resource.write(stream, string_buffer);
+    }
+
+    header.extendDataOffset = stream.tell();
+    stream.write(m_extend_data);
+
+    header.stringOffset = stream.tell();
+    stream.write(string_buffer.data(), string_buffer.size() + 1); // +1 for the null terminator
+
+    header.keyValue8Offset = stream.tell();
+    stream.write(std::span<const u8>(kv_buffers.KeyValue8));
+
+    header.keyValue32Offset = stream.tell();
+    stream.write(std::span<const u32>(kv_buffers.KeyValue32));
+
+    header.keyValue128Offset = stream.tell();
+    stream.write(std::span<const vector4>(kv_buffers.KeyValue128));
+
+    header.vertexOffset = stream.tell();
+    header.vertexBufferSize = m_vertices.size() * GUIVertex::size;
+    for (const auto& vertex : m_vertices) {
+        vertex.write(stream, string_buffer);
+    }
+
+    header.fileSize = stream.tell();
+
+    stream.seek_absolute(0);
+    stream.write(header);
 }

@@ -14,3 +14,15 @@ GUIFlowProcess GUIFlowProcess::read(BinaryReader& reader, const GUIHeader& heade
 		.ActionIndex = reader.read_skip<u32>(4)
 	};
 }
+
+void GUIFlowProcess::write(BinaryWriter& writer, StringBuffer& buffer) const {
+    writer.write(LoopData.Raw);
+    writer.write(TotalFrameCount);
+    writer.write(ParamNum);
+    writer.write(ParamIndex);
+    writer.write(ActionNum);
+    writer.write(EndCondition);
+    writer.write<u64>(EndConditionParam);
+    writer.write<u64>(NextIndex);
+    writer.write<u64>(ActionIndex);
+}

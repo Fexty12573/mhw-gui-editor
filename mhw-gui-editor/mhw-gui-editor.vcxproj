@@ -176,6 +176,7 @@
     <ClCompile Include="GUIResource.cpp" />
     <ClCompile Include="GUISequence.cpp" />
     <ClCompile Include="GUITexture.cpp" />
+    <ClCompile Include="GUIVertex.cpp" />
     <ClCompile Include="HrException.cpp" />
     <ClCompile Include="ImThemeManager.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -211,6 +212,7 @@
     <ClInclude Include="GUISequence.h" />
     <ClInclude Include="GUITexture.h" />
     <ClInclude Include="GUITypes.h" />
+    <ClInclude Include="GUIVertex.h" />
     <ClInclude Include="HrException.h" />
     <ClInclude Include="IconFontAwesome.h" />
     <ClInclude Include="ImThemeManager.h" />

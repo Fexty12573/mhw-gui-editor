@@ -1,6 +1,8 @@
 #pragma once
 
 #include "BinaryReader.h"
+#include "BinaryWriter.h"
+#include "StringBuffer.h"
 #include "GUITypes.h"
 #include "dti_types.h"
 
@@ -11,12 +13,16 @@ struct GUIFontFilter {
 	static constexpr size_t size = 8;
 	static std::shared_ptr<GUIFontFilter> read(BinaryReader& reader, const GUIHeader& header);
 
+	virtual void write(BinaryWriter& writer, StringBuffer& buffer) const;
+
 	ObjectType Type;
 	u32 ID;
 };
 
 struct GUIFontFilterDistanceField : GUIFontFilter {
 	static constexpr size_t size = 64;
+
+    void write(BinaryWriter& writer, StringBuffer& buffer) const override;
 
 	u32 ParamNum;
 	struct {
@@ -36,12 +42,16 @@ struct GUIFontFilterDistanceField : GUIFontFilter {
 struct GUIFontFilterGradationOverlay : GUIFontFilter {
 	static constexpr size_t size = 16;
 
+	void write(BinaryWriter& writer, StringBuffer& buffer) const override;
+
 	u32 TextureIndex;
 	std::string Name;
 };
 
 struct GUIFontFilterBorder : GUIFontFilter {
 	static constexpr size_t size = 20;
+
+	void write(BinaryWriter& writer, StringBuffer& buffer) const override;
 
 	u32 BorderType;
 	s32 Distance;
@@ -50,6 +60,8 @@ struct GUIFontFilterBorder : GUIFontFilter {
 
 struct GUIFontFilterShadow : GUIFontFilter {
 	static constexpr size_t size = 20;
+
+	void write(BinaryWriter& writer, StringBuffer& buffer) const override;
 
 	s32 Distance;
 	s32 Rotation;

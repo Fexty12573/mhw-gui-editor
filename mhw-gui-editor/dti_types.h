@@ -266,7 +266,8 @@ struct rangeu16
 };
 struct hermitecurve
 {
-    f32 values[16];
+    f32 x[8];
+    f32 y[8];
 };
 struct vector2
 {

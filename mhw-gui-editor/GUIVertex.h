@@ -8,16 +8,16 @@
 
 #include <string>
 
-struct GUIFlow {
-	static constexpr size_t size = 32;
-	static GUIFlow read(BinaryReader& reader, const GUIHeader& header);
+struct GUIVertex {
+	static constexpr size_t size = 24;
+	static GUIVertex read(BinaryReader& reader);
 
 	void write(BinaryWriter& writer, StringBuffer& buffer) const;
 
-	u32 ID;
-	FlowType Type;
-	u32 Attr;
-	std::string Name;
-	u32 FlowProcessIndex;
+	vector3 Position;
+	color Color32;
+	vector2 UV;
+
+	vector4 Color;
 };
 

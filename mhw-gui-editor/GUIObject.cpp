@@ -18,6 +18,20 @@ GUIObject GUIObject::read(BinaryReader& reader, const GUIHeader& header) {
 	};
 }
 
+void GUIObject::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const {
+	writer.write(ID);
+    writer.write(InitParamNum);
+    writer.write(AnimateParamNum);
+	writer.write<u16>(0);
+    writer.write(NextIndex);
+    writer.write(ChildIndex);
+	writer.write(buffer.append_no_duplicate(Name));
+	writer.write(static_cast<u64>(Type));
+	writer.write<u64>(InitParamIndex);
+	writer.write<u64>(ObjectSequenceIndex);
+	writer.write<s64>(ExtendDataOffset);
+}
+
 std::string GUIObject::get_preview(u32 index) const {
 	if (index == 0xFFFFFFFF) {
 		return std::format("Object<<C FFA3D7B8>{}</C>>: <C FFB0C94E>{} </C><C FFFEDC9C>{}</C>", ID, enum_to_string(Type), Name);

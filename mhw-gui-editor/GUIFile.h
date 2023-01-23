@@ -2,6 +2,7 @@
 
 #include "dti_types.h"
 #include "BinaryReader.h"
+#include "BinaryWriter.h"
 
 #include "GUIAnimation.h"
 #include "GUISequence.h"
@@ -18,9 +19,11 @@
 #include "GUIMessage.h"
 #include "GUIResource.h"
 #include "GUIGeneralResource.h"
+#include "GUIVertex.h"
 
 #include <array>
 #include <vector>
+
 
 class GUIEditor;
 
@@ -30,6 +33,8 @@ public:
 
 	void load_from(BinaryReader& stream);
     void load_resources(const std::string& chunk_path, ID3D11Device* device, ID3D11DeviceContext* context);
+
+    void save_to(BinaryWriter& stream);
 
 	friend class GUIEditor;
 
@@ -60,5 +65,7 @@ private:
 	std::vector<GUIMessage> m_messages;
 	std::vector<GUIResource> m_resources;
 	std::vector<GUIGeneralResource> m_general_resources;
+    std::vector<GUIVertex> m_vertices;
+	std::vector<u8> m_extend_data;
 };
 

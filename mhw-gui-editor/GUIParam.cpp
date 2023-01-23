@@ -62,6 +62,64 @@ GUIParam GUIParam::read(BinaryReader& reader, const GUIHeader& header) {
 	return result;
 }
 
+void GUIParam::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kvbuffers) const {
+	writer.write(Type);
+	writer.write(ValueCount);
+	writer.write<u16>(0);
+	writer.write<u32>(0);
+	writer.write<u64>(0);
+    writer.write<u64>(ParentID);
+    writer.write(buffer.append_no_duplicate(Name));
+    writer.write<u64>(KeyIndex);
+
+	switch (Type) {
+	case ParamType::BOOL: [[fallthrough]];
+	case ParamType::INIT_BOOL: [[fallthrough]];
+	case ParamType::INIT_INT:
+		writer.write(kvbuffers.KeyValue8.size());
+		kvbuffers.KeyValue8.push_back(Value8);
+		break;
+	case ParamType::INT: [[fallthrough]];
+	case ParamType::FLOAT: [[fallthrough]];
+	case ParamType::RESOURCE: [[fallthrough]];
+	case ParamType::TEXTURE: [[fallthrough]];
+	case ParamType::FONT: [[fallthrough]];
+	case ParamType::MESSAGE: [[fallthrough]];
+	case ParamType::VARIABLE: [[fallthrough]];
+	case ParamType::ANIMATION: [[fallthrough]];
+	case ParamType::EVENT: [[fallthrough]];
+	case ParamType::GUIRESOURCE: [[fallthrough]];
+	case ParamType::FONT_FILTER: [[fallthrough]];
+	case ParamType::ANIMEVENT: [[fallthrough]];
+	case ParamType::SEQUENCE: [[fallthrough]];
+	case ParamType::GENERALRESOURCE:
+		writer.write(kvbuffers.KeyValue32.size());
+		kvbuffers.KeyValue32.push_back(Value32);
+		break;
+	case ParamType::STRING:
+	{
+		union {
+			u64 v64{};
+			u32 v32[2];
+		} offset;
+
+		writer.write(kvbuffers.KeyValue32.size());
+		offset.v64 = buffer.append_no_duplicate(ValueString);
+		kvbuffers.KeyValue32.push_back(offset.v32[0]);
+		kvbuffers.KeyValue32.push_back(offset.v32[1]);
+		break;
+	}
+	case ParamType::VECTOR:
+		writer.write(kvbuffers.KeyValue128.size());
+		kvbuffers.KeyValue128.push_back(ValueVector);
+		break;
+	default:
+		writer.write(kvbuffers.KeyValue32.size());
+		kvbuffers.KeyValue32.push_back(Value32);
+		break;
+	}
+}
+
 std::string GUIParam::get_preview(u32 index) const {
 	const std::string fmt = "Param: <C FFB0C94E>{}</C> <C FFFEDC9C>{}</C>";
 
