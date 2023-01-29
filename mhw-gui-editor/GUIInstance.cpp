@@ -2,7 +2,7 @@
 #include "GUIInstance.h"
 
 GUIInstance GUIInstance::read(BinaryReader& reader, const GUIHeader& header) {
-	return {
+	GUIInstance inst = {
 		.ID = reader.read<u32>(),
 		.Attr = reader.read<u32>(),
 		.ParentPassIndex = reader.read<s32>(),
@@ -13,9 +13,13 @@ GUIInstance GUIInstance::read(BinaryReader& reader, const GUIHeader& header) {
 		.InitParamIndex = reader.read_skip<u32>(4),
 		.ExtendDataOffset = reader.read_skip<s32>(4),
 	};
+
+    inst.ExtendData = GUIExtendData::read(reader, inst.Type, inst.ExtendDataOffset, header);
+
+    return inst;
 }
 
-void GUIInstance::write(BinaryWriter& writer, StringBuffer& buffer) const {
+void GUIInstance::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const {
 	writer.write(ID);
     writer.write(Attr);
     writer.write(ParentPassIndex);
@@ -25,5 +29,12 @@ void GUIInstance::write(BinaryWriter& writer, StringBuffer& buffer) const {
     writer.write(buffer.append_no_duplicate(Name));
     writer.write(static_cast<u64>(Type));
     writer.write<u64>(InitParamIndex);
-    writer.write<u64>(ExtendDataOffset);
+
+    if (ExtendDataOffset != -1) {
+        writer.write(kv_buffers.ExtendData.size());
+        ExtendData.write(kv_buffers, Type);
+    } else {
+        writer.write<s64>(-1);
+    }
+
 }

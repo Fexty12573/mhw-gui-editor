@@ -4,6 +4,7 @@
 #include "BinaryWriter.h"
 #include "StringBuffer.h"
 #include "GUITypes.h"
+#include "GUIExtendData.h"
 #include "dti_types.h"
 
 #include <string>
@@ -25,6 +26,8 @@ struct GUIObject {
     u32 InitParamIndex;
     u32 ObjectSequenceIndex;
 	s64 ExtendDataOffset;
+
+    GUIExtendData ExtendData;
 
 	u32 Index = 0;
 };

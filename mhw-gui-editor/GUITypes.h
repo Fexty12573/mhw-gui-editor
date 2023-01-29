@@ -3,7 +3,7 @@
 
 #include <array>
 #include <map>
-#include <string>
+#include <vector>
 
 struct GUIHeader {
     char fileType[4];

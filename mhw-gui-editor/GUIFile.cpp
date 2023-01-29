@@ -108,17 +108,13 @@ void GUIFile::load_from(BinaryReader& stream) {
 
     stream.seek_absolute(static_cast<s64>(header.keyOffset));
     for (auto i = 0u; i < header.keyNum; ++i) {
-        m_keys.emplace_back(GUIKey::read(stream));
+        m_keys.emplace_back(GUIKey::read(stream, header));
     }
 
     stream.seek_absolute(static_cast<s64>(header.vertexOffset));
     for (auto i = 0u; i < header.vertexBufferSize / GUIVertex::size; ++i) {
         m_vertices.emplace_back(GUIVertex::read(stream));
     }
-
-    stream.seek_absolute(static_cast<s64>(header.extendDataOffset));
-    m_extend_data.resize(header.stringOffset - header.extendDataOffset); // TODO: Implement this properly, this is just a hack
-    stream.read_bytes(m_extend_data);
 
     m_header = header;
 }
@@ -196,7 +192,7 @@ void GUIFile::save_to(BinaryWriter& stream) {
 
     header.objectOffset = stream.tell();
     for (const auto& object : m_objects) {
-        object.write(stream, string_buffer);
+        object.write(stream, string_buffer, kv_buffers);
     }
 
     header.objSequenceOffset = stream.tell();
@@ -216,12 +212,12 @@ void GUIFile::save_to(BinaryWriter& stream) {
 
     header.keyOffset = stream.tell();
     for (const auto& key : m_keys) {
-        key.write(stream, string_buffer);
+        key.write(stream, string_buffer, kv_buffers);
     }
 
     header.instanceOffset = stream.tell();
     for (const auto& instance : m_instances) {
-        instance.write(stream, string_buffer);
+        instance.write(stream, string_buffer, kv_buffers);
     }
 
     header.flowOffset = stream.tell();
@@ -259,9 +255,6 @@ void GUIFile::save_to(BinaryWriter& stream) {
         general_resource.write(stream, string_buffer);
     }
 
-    header.extendDataOffset = stream.tell();
-    stream.write(m_extend_data);
-
     header.stringOffset = stream.tell();
     stream.write(string_buffer.data(), string_buffer.size() + 1); // +1 for the null terminator
 
@@ -273,6 +266,9 @@ void GUIFile::save_to(BinaryWriter& stream) {
 
     header.keyValue128Offset = stream.tell();
     stream.write(std::span<const vector4>(kv_buffers.KeyValue128));
+
+    header.extendDataOffset = stream.tell();
+    stream.write(std::span<const u8>(kv_buffers.ExtendData));
 
     header.vertexOffset = stream.tell();
     header.vertexBufferSize = m_vertices.size() * GUIVertex::size;

@@ -1,21 +1,27 @@
 #include "pch.h"
 #include "GUIObject.h"
+#include "GUIVertex.h"
 
 #include <format>
 
+
 GUIObject GUIObject::read(BinaryReader& reader, const GUIHeader& header) {
-	return {
-		.ID = reader.read<u32>(),
-		.InitParamNum = reader.read<u8>(),
-		.AnimateParamNum = reader.read_skip<u8>(2),
-		.NextIndex = reader.read<s32>(),
-		.ChildIndex = reader.read<s32>(),
-		.Name = reader.abs_offset_read_string(header.stringOffset + reader.read_skip<u32>(4)),
-		.Type = reader.read_skip<ObjectType>(4),
-		.InitParamIndex = reader.read_skip<u32>(4),
-		.ObjectSequenceIndex = reader.read_skip<u32>(4),
-		.ExtendDataOffset = reader.read_skip<s32>(4)
-	};
+    GUIObject obj = {
+        .ID = reader.read<u32>(),
+        .InitParamNum = reader.read<u8>(),
+        .AnimateParamNum = reader.read_skip<u8>(2),
+        .NextIndex = reader.read<s32>(),
+        .ChildIndex = reader.read<s32>(),
+        .Name = reader.abs_offset_read_string(header.stringOffset + reader.read_skip<u32>(4)),
+        .Type = reader.read_skip<ObjectType>(4),
+        .InitParamIndex = reader.read_skip<u32>(4),
+        .ObjectSequenceIndex = reader.read_skip<u32>(4),
+        .ExtendDataOffset = reader.read_skip<s32>(4),
+    };
+
+    obj.ExtendData = GUIExtendData::read(reader, obj.Type, obj.ExtendDataOffset, header);
+
+    return obj;
 }
 
 void GUIObject::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const {
@@ -29,7 +35,13 @@ void GUIObject::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffer
 	writer.write(static_cast<u64>(Type));
 	writer.write<u64>(InitParamIndex);
 	writer.write<u64>(ObjectSequenceIndex);
-	writer.write<s64>(ExtendDataOffset);
+
+    if (ExtendDataOffset != -1) {
+        writer.write<s64>(kv_buffers.ExtendData.size());
+        ExtendData.write(kv_buffers, Type);
+    } else {
+        writer.write<s64>(-1);
+    }
 }
 
 std::string GUIObject::get_preview(u32 index) const {

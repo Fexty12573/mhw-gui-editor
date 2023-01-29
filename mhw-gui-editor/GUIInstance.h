@@ -4,6 +4,7 @@
 #include "BinaryWriter.h"
 #include "StringBuffer.h"
 #include "GUITypes.h"
+#include "GUIExtendData.h"
 #include "dti_types.h"
 
 #include <string>
@@ -12,7 +13,7 @@ struct GUIInstance {
 	static constexpr size_t size = 56;
 	static GUIInstance read(BinaryReader& reader, const GUIHeader& header);
 
-    void write(BinaryWriter& writer, StringBuffer& buffer) const;
+    void write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const;
 
 	u32 ID;
 	u32 Attr;
@@ -23,4 +24,6 @@ struct GUIInstance {
 	ObjectType Type;
 	u32 InitParamIndex;
 	s64 ExtendDataOffset;
+
+    GUIExtendData ExtendData;
 };

@@ -161,6 +161,7 @@
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="GUIAnimation.cpp" />
     <ClCompile Include="GUIEditor.cpp" />
+    <ClCompile Include="GUIExtendData.cpp" />
     <ClCompile Include="GUIFile.cpp" />
     <ClCompile Include="GUIFlow.cpp" />
     <ClCompile Include="GUIFlowProcess.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="dti_types.h" />
     <ClInclude Include="GUIAnimation.h" />
     <ClInclude Include="GUIEditor.h" />
+    <ClInclude Include="GUIExtendData.h" />
     <ClInclude Include="GUIFile.h" />
     <ClInclude Include="GUIFlow.h" />
     <ClInclude Include="GUIFlowProcess.h" />
