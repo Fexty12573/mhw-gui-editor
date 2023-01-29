@@ -1,11 +1,17 @@
 #include "pch.h"
 #include "GUIVertex.h"
 
-#define VEC4_TO_COLOR(vec) (u32)(vec.x * 255) | ((u32)(vec.y * 255) << 8) | ((u32)(vec.z * 255) << 16) | ((u32)(vec.w * 255) << 24)
+#define VEC4_TO_COLOR(vec) ((u32)((vec).x * 255) | ((u32)((vec).y * 255) << 8) | ((u32)((vec).z * 255) << 16) | ((u32)((vec).w * 255) << 24))
 
 GUIVertex GUIVertex::read(BinaryReader& reader) {
-    GUIVertex vertex{};
+    return {
+        .A = reader.read<vector4>(),
+        .B = reader.read<vector4>()
+    };
 
+    /*GUIVertex vertex{};
+
+    
     vertex.Position = reader.read<vector3>();
     vertex.Color32 = reader.read<color>();
     vertex.UV = reader.read<vector2>();
@@ -17,11 +23,10 @@ GUIVertex GUIVertex::read(BinaryReader& reader) {
         .w = ((vertex.Color32 >> 24) & 0xFF) / 255.0f
     };
 
-    return vertex;
+    return vertex;*/
 }
 
 void GUIVertex::write(BinaryWriter& writer, StringBuffer& buffer) const {
-    writer.write(Position);
-    writer.write(VEC4_TO_COLOR(Color));
-    writer.write(UV);
+    writer.write(A);
+    writer.write(B);
 }

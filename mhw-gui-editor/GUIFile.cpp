@@ -24,6 +24,7 @@ void GUIFile::load_from(BinaryReader& stream) {
     m_messages.clear();
     m_resources.clear();
     m_general_resources.clear();
+    m_vertices.clear();
 
     const auto header = stream.read<GUIHeader>();
 
@@ -112,6 +113,11 @@ void GUIFile::load_from(BinaryReader& stream) {
     }
 
     stream.seek_absolute(static_cast<s64>(header.vertexOffset));
+
+    if (header.vertexBufferSize % GUIVertex::size != 0) {
+        throw std::runtime_error("Invalid vertex buffer size");
+    }
+
     for (auto i = 0u; i < header.vertexBufferSize / GUIVertex::size; ++i) {
         m_vertices.emplace_back(GUIVertex::read(stream));
     }
@@ -200,6 +206,8 @@ void GUIFile::save_to(BinaryWriter& stream) {
         obj_sequence.write(stream, string_buffer);
     }
 
+    stream.write<u64>(0); // Padding for alignment
+
     header.initParamOffset = stream.tell();
     for (const auto& init_param : m_init_params) {
         init_param.write(stream, string_buffer, kv_buffers);
@@ -271,12 +279,12 @@ void GUIFile::save_to(BinaryWriter& stream) {
     stream.write(std::span<const u8>(kv_buffers.ExtendData));
 
     header.vertexOffset = stream.tell();
-    header.vertexBufferSize = m_vertices.size() * GUIVertex::size;
+    header.vertexBufferSize = static_cast<u32>(m_vertices.size() * GUIVertex::size);
     for (const auto& vertex : m_vertices) {
         vertex.write(stream, string_buffer);
     }
 
-    header.fileSize = stream.tell();
+    header.fileSize = static_cast<u32>(stream.tell());
 
     stream.seek_absolute(0);
     stream.write(header);
