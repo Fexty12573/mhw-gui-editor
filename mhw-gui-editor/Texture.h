@@ -32,7 +32,7 @@ public:
     explicit Texture(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceContext* ctx);
     Texture();
 
-    void load_from(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceContext* ctx);
+    void load_from(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceContext* ctx) noexcept;
 
     [[nodiscard]] bool is_valid() const { return m_texture && m_view; }
     [[nodiscard]] auto& get_view() const { return m_view; }

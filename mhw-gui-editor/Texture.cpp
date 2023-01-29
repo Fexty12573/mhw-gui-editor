@@ -2,6 +2,7 @@
 #include "Texture.h"
 #include "DDSTextureLoader.h"
 #include "HrException.h"
+#include "Console.h"
 
 #include <vector>
 
@@ -96,9 +97,9 @@ Texture::Texture(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceContext* c
 
 Texture::Texture() = default;
 
-void Texture::load_from(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceContext* ctx) {
+void Texture::load_from(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceContext* ctx) noexcept {
     if (reader.read<u32>() != MAKEFOURCC("TEX\0") || reader.read<u32>() != 0x10) {
-        throw std::runtime_error("Invalid TEX file");
+        return spdlog::error("Invalid TEX file");
     }
 
     reader.seek_absolute(0x14);
@@ -116,7 +117,7 @@ void Texture::load_from(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceCon
     reader.read_bytes(data);
 
     if (dxformat == DXGI_FORMAT_UNKNOWN) {
-        throw std::runtime_error("Unknown texture format");
+        return spdlog::error("Unknown format: {}", static_cast<u32>(format));
     }
 
     DDS_EXTENDED_HEADER header{};

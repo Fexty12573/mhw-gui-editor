@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GUIParam.h"
 #include "crc32.h"
+#include "Console.h"
 
 #include <format>
 
@@ -50,6 +51,7 @@ GUIParam GUIParam::read(BinaryReader& reader, const GUIHeader& header) {
 	    break;
 
 	default:
+        spdlog::warn("Unknown param type: {}", static_cast<u8>(result.Type));
 	    result.Value32 = reader.abs_offset_read<u32>(static_cast<s64>(header.keyValue32Offset) + offset);
 	    break;
 	}

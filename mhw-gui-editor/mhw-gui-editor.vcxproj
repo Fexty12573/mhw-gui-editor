@@ -158,6 +158,7 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="BinaryReader.cpp" />
     <ClCompile Include="BinaryWriter.cpp" />
+    <ClCompile Include="Console.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="GUIAnimation.cpp" />
     <ClCompile Include="GUIEditor.cpp" />
@@ -192,6 +193,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="BinaryReader.h" />
     <ClInclude Include="BinaryWriter.h" />
+    <ClInclude Include="Console.h" />
     <ClInclude Include="crc32.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="dti_types.h" />

@@ -135,6 +135,9 @@
     <ClCompile Include="GUIExtendData.cpp">
       <Filter>Source Files\rGUI</Filter>
     </ClCompile>
+    <ClCompile Include="Console.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -244,6 +247,9 @@
     </ClInclude>
     <ClInclude Include="GUIExtendData.h">
       <Filter>Header Files\rGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Console.h">
+      <Filter>Header Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

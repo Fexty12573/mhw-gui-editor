@@ -2,6 +2,7 @@
 #include "GUIInitParam.h"
 #include "crc32.h"
 
+#include <spdlog/spdlog.h>
 #include <fmt/format.h>
 
 GUIInitParam GUIInitParam::read(BinaryReader& reader, const GUIHeader& header) {
@@ -50,6 +51,7 @@ GUIInitParam GUIInitParam::read(BinaryReader& reader, const GUIHeader& header) {
         break;
 
     default:
+        spdlog::warn("Unknown param type: {}\n", static_cast<u8>(result.Type));
         result.Value32 = reader.abs_offset_read<u32>(static_cast<s64>(header.keyValue32Offset) + offset);
         break;
     }

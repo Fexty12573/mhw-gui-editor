@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "GUIFile.h"
-
 #include "GUITypes.h"
+#include "Console.h"
 
 #include <filesystem>
 
@@ -115,7 +115,7 @@ void GUIFile::load_from(BinaryReader& stream) {
     stream.seek_absolute(static_cast<s64>(header.vertexOffset));
 
     if (header.vertexBufferSize % GUIVertex::size != 0) {
-        throw std::runtime_error("Invalid vertex buffer size");
+        spdlog::error("Vertex buffer size is not a multiple of vertex size");
     }
 
     for (auto i = 0u; i < header.vertexBufferSize / GUIVertex::size; ++i) {
