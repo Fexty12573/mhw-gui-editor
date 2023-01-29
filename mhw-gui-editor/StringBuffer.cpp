@@ -45,13 +45,35 @@ StringBuffer::size_type StringBuffer::size() const {
 }
 
 bool StringBuffer::contains(std::string_view str) const {
-    return std::ranges::search(m_buffer, str).begin() != m_buffer.end();
+    return find(str) != end();
 }
 
 StringBuffer::const_iterator StringBuffer::find(std::string_view str) const {
-    return std::ranges::search(m_buffer, str).begin();
+    const auto is_valid_match = [&](const auto& it) -> bool {
+        const auto size = static_cast<const_iterator::difference_type>(str.size());
+        return (it == begin() || *(it - 1) == '\0') && 
+            (it + size == end() || *(it + size) == '\0');
+    };
+
+    auto it = std::search(begin(), end(), str.begin(), str.end());
+    while (it != end() && !is_valid_match(it)) {
+        it = std::search(it + 1, end(), str.begin(), str.end());
+    }
+
+    return it;
 }
 
-inline StringBuffer::iterator StringBuffer::find(std::string_view str) {
-    return std::ranges::search(m_buffer, str).begin();
+StringBuffer::iterator StringBuffer::find(std::string_view str) {
+    const auto is_valid_match = [&](const auto& it) -> bool {
+        const auto size = static_cast<iterator::difference_type>(str.size());
+        return (it == begin() || *(it - 1) == '\0') &&
+            (it + size == end() || *(it + size) == '\0');
+    };
+
+    auto it = std::search(begin(), end(), str.begin(), str.end());
+    while (it != end() && !is_valid_match(it)) {
+        it = std::search(it + 1, end(), str.begin(), str.end());
+    }
+
+    return it;
 }
