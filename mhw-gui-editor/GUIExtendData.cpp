@@ -17,6 +17,7 @@ GUIExtendData GUIExtendData::read(BinaryReader& reader, ObjectType type, s64 off
     case ObjectType::cGUIObjChildAnimationRoot:
         data.ChildAnimationRoot.GUIResourceId = reader.read<s32>();
         data.ChildAnimationRoot.AnimationId = reader.read<s32>();
+        data.ChildAnimationRoot._pad = reader.read<u64>();
         break;
     case ObjectType::cGUIObjTextureSet:
         data.TextureSet.DataNum = reader.read<u32>();
@@ -39,18 +40,17 @@ GUIExtendData GUIExtendData::read(BinaryReader& reader, ObjectType type, s64 off
 }
 
 void GUIExtendData::write(KeyValueBuffers& kv_buffers, ObjectType type) const {
+    auto as_bytes = [](const auto& data) {
+        return std::span(reinterpret_cast<const u8*>(&data), sizeof data);
+    };
+
     switch (type) {
     case ObjectType::cGUIObjChildAnimationRoot:
-        kv_buffers.ExtendData.insert(kv_buffers.ExtendData.end(),
-            ChildAnimationRoot.begin<u8>(),
-            ChildAnimationRoot.end<u8>()
-        );
+        kv_buffers.ExtendData.insert_range(kv_buffers.ExtendData.end(), as_bytes(ChildAnimationRoot.GUIResourceId));
+        kv_buffers.ExtendData.insert_range(kv_buffers.ExtendData.end(), as_bytes(ChildAnimationRoot.AnimationId));
+        kv_buffers.ExtendData.insert_range(kv_buffers.ExtendData.end(), as_bytes(ChildAnimationRoot._pad));
         break;
     case ObjectType::cGUIObjTextureSet:
-        auto as_bytes = [](const auto& data) {
-            return std::span(reinterpret_cast<const u8*>(&data), sizeof data);
-        };
-
         kv_buffers.ExtendData.insert_range(kv_buffers.ExtendData.end(), as_bytes(TextureSet.DataNum));
         kv_buffers.ExtendData.insert_range(kv_buffers.ExtendData.end(), as_bytes(TextureSet.VertexIndex * GUIVertex::size));
         kv_buffers.ExtendData.insert_range(kv_buffers.ExtendData.end(), as_bytes(TextureSet.Data[0]));

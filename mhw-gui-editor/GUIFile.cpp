@@ -130,7 +130,11 @@ void GUIFile::load_resources(const std::string& chunk_path, ID3D11Device* device
         try {
             BinaryReader stream(std::filesystem::path(chunk_path) / (texture.Path + ".tex"));
             texture.RenderTexture.load_from(stream, device, context);
-        } catch (...) { }
+        } catch (const std::runtime_error& e) { 
+            spdlog::error(e.what());
+        } catch (...) {
+            continue;
+        }
     }
 
     // TODO: load other kinds of resources

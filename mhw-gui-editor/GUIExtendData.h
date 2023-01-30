@@ -14,7 +14,7 @@ struct GUIExtendData {
         struct {
             s32 GUIResourceId;
             s32 AnimationId;
-            u32 _pad;
+            u64 _pad;
 
             template<typename T> [[nodiscard]] T* begin() { return reinterpret_cast<T*>(&GUIResourceId); }
             template<typename T> [[nodiscard]] const T* begin() const { return reinterpret_cast<const T*>(&GUIResourceId); }
