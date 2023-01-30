@@ -243,6 +243,8 @@ void GUIEditor::open_file() {
         m_file.load_resources(m_settings.ChunkPath, m_owner->get_device().Get(), m_owner->get_context().Get());
     }
 
+    m_file.run_data_usage_analysis(true);
+
     update_indices();
 
     m_first_render = true;

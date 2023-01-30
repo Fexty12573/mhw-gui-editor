@@ -34,5 +34,11 @@ struct GUIParam {
 	// Meta values
 	u32 NameCRC;
 	u32 Index = 0;
+
+#ifdef GUI_FILE_ANALYSIS
+	u32 OrgValueOffset;
+	u32 OrgStringOffset;
+	KeyValueType ValueOffsetType;
+#endif
 };
 

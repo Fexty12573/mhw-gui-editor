@@ -15,21 +15,37 @@ GUIParam GUIParam::read(BinaryReader& reader, const GUIHeader& header) {
         .NameCRC = crc::crc32(result.Name.c_str(), result.Name.size())
 	};
 
+	const auto offset = reader.read_skip<u32>(4);
+#ifdef GUI_FILE_ANALYSIS
+	result.OrgValueOffset = offset;
+
+	reader.seek_relative(-24); // Back to Name offset
+	result.OrgStringOffset = reader.read_skip<u32>(20);
+
+#define SET_KV_TYPE(VAR, TYPE) (VAR).ValueOffsetType = TYPE
+#else
+#define SET_KV_TYPE(VAR, TYPE) 
+#endif
+
 	switch (result.Type) {
 	case ParamType::UNKNOWN:
 		spdlog::warn("Unknown ParamType encountered: {}\n", result.Name);
 		return result;
 	case ParamType::FLOAT: [[fallthough]];
 	case ParamType::ANIMEVENT: 
+		SET_KV_TYPE(result, KeyValueType::KV32);
 		result.Values = std::vector<f32>{};
 		break;
 	case ParamType::BOOL: 
+		SET_KV_TYPE(result, KeyValueType::KV8);
 		result.Values = std::vector<bool>{};
 		break;
 	case ParamType::VECTOR: 
+		SET_KV_TYPE(result, KeyValueType::KV128);
 		result.Values = std::vector<vector4>{};
 		break;
 	case ParamType::STRING: 
+		SET_KV_TYPE(result, KeyValueType::KV32);
 		result.Values = std::vector<std::string>{};
 		break;
 	case ParamType::INT: [[fallthough]];
@@ -45,18 +61,19 @@ GUIParam GUIParam::read(BinaryReader& reader, const GUIHeader& header) {
 	case ParamType::SEQUENCE: [[fallthough]];
 	case ParamType::GENERALRESOURCE: [[fallthough]];
 	case ParamType::INIT_INT32: 
+		SET_KV_TYPE(result, KeyValueType::KV32);
 		result.Values = std::vector<u32>{};
 		break;
 	case ParamType::INIT_BOOL: [[fallthough]];
 	case ParamType::INIT_INT: 
+		SET_KV_TYPE(result, KeyValueType::KV8);
 		result.Values = std::vector<u8>{};
 		break;
 	default: 
+		SET_KV_TYPE(result, KeyValueType::KV32);
 		spdlog::warn("Unknown param type: {}\n", static_cast<u8>(result.Type));
 		break;
 	}
-
-	const auto offset = reader.read_skip<u32>(4);
 
 #define GET_VEC(TT, v) std::get<std::vector<TT>>(v)
 

@@ -88,6 +88,14 @@ struct KeyValueBuffers {
     std::vector<u8> ExtendData;
 };
 
+enum class KeyValueType {
+    KV8,
+    KV32,
+    KV128,
+    String,
+    Extend
+};
+
 enum class ObjectType : u32
 {
     None = 0xCCCCCCCC,
@@ -420,6 +428,19 @@ enum class FontStyle : u32 {
     MOJI_PALEBLUE_SELECTED2 = 81,
     MOJI_PALEBLUE_DISABLE = 82
 };
+
+constexpr const char* enum_to_string(KeyValueType v) {
+    switch (v) {
+    case KeyValueType::KV8: return "KV8";
+    case KeyValueType::KV32: return "KV32";
+    case KeyValueType::KV128: return "KV128";
+    case KeyValueType::String: return "String";
+    case KeyValueType::Extend: return "Extend";
+    default: break;
+    }
+
+    return "INVALID";
+}
 
 constexpr const char* enum_to_string(ObjectType v) {
     switch (v) {

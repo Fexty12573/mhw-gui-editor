@@ -4,7 +4,7 @@
 #include "Console.h"
 
 #include <filesystem>
-
+#include <ranges>
 
 GUIFile::GUIFile() = default;
 
@@ -138,6 +138,68 @@ void GUIFile::load_resources(const std::string& chunk_path, ID3D11Device* device
     }
 
     // TODO: load other kinds of resources
+}
+
+void GUIFile::run_data_usage_analysis(bool log_overlapping_offsets) const {
+#ifdef GUI_FILE_ANALYSIS
+    spdlog::info("Analyzing GUIFile...");
+
+    std::unordered_map<KeyValueType, std::unordered_map<u32, u32>> p_offsets;
+    std::unordered_map<KeyValueType, std::unordered_map<u32, u32>> ip_offsets;
+
+    for (const auto& param : m_params) {
+        if (param.ValueCount > 0) {
+            p_offsets[param.ValueOffsetType][param.OrgValueOffset] += 1;
+        }
+    }
+
+    std::unordered_map<u32, u32> ip_val_offsets;
+    for (const auto& param : m_init_params) {
+        ip_offsets[param.ValueOffsetType][param.OrgValueOffset] += 1;
+    }
+
+    for (auto i = 0u; i < 3; ++i) {
+        const auto kvt = static_cast<KeyValueType>(i);
+
+        const std::unordered_map<u32, u32>& param_data = p_offsets[kvt];
+        const std::unordered_map<u32, u32>& iparam_data = p_offsets[kvt];
+
+        const auto p_keys = param_data | std::views::keys;
+        const auto p_values = param_data | std::views::values;
+        const auto ip_keys = iparam_data | std::views::keys;
+        const auto ip_values = iparam_data | std::views::values;
+
+        const ptrdiff_t p_overlaps = std::ranges::count_if(p_values, [](u32 v) { return v > 0; });
+        const ptrdiff_t ip_overlaps = std::ranges::count_if(ip_values, [](u32 v) {return v > 0; });
+        const u32 p_max_overlap = *std::ranges::max_element(p_values);
+        const u32 ip_max_overlap = *std::ranges::max_element(ip_values);
+
+        std::vector<u32> overlapping_offsets{};
+        std::ranges::set_intersection(p_keys, ip_keys, std::back_inserter(overlapping_offsets));
+
+        spdlog::info("[Param] {} total overlapping {} Offsets. (Highest: {})", p_overlaps, enum_to_string(kvt), p_max_overlap);
+        spdlog::info("[InitParam] {} total overlapping {} Offsets. (Highest: {})", ip_overlaps, enum_to_string(kvt), ip_max_overlap);
+        spdlog::info("[Param & InitParam] share {} common {} offsets", overlapping_offsets.size(), enum_to_string(kvt));
+
+        if (log_overlapping_offsets) {
+            for (const u32 offset : overlapping_offsets) {
+                spdlog::info("{:08X}", offset);
+            }
+
+            spdlog::info("[Param] The following {} offsets are used multiple times:", enum_to_string(kvt));
+            for (const auto& [offset, count] : param_data) {
+                spdlog::info("{:08X}: {} times", offset, count);
+            }
+
+            spdlog::info("[InitParam] The following {} offsets are used multiple times:", enum_to_string(kvt));
+            for (const auto& [offset, count] : iparam_data) {
+                spdlog::info("{:08X}: {} times", offset, count);
+            }
+        }
+    }
+#else
+    spdlog::info("GUIFile Analysis disabled. Skipping analysis.");
+#endif
 }
 
 void GUIFile::save_to(BinaryWriter& stream) {

@@ -13,13 +13,25 @@ GUIInitParam GUIInitParam::read(BinaryReader& reader, const GUIHeader& header) {
         .NameCRC = crc::crc32(result.Name.c_str(), result.Name.size()),
     };
 
+    const auto offset = reader.read_skip<u32>(4);
+#ifdef GUI_FILE_ANALYSIS
+    result.OrgValueOffset = offset;
+
+    reader.seek_relative(-16); // Back to Name offset
+    result.OrgStringOffset = reader.read_skip<u32>(12);
+
+#define SET_KV_TYPE(VAR, TYPE) (VAR).ValueOffsetType = TYPE
+#else
+#define SET_KV_TYPE(VAR, TYPE) 
+#endif
+
     result.ValueVector = {};
 
-    const auto offset = reader.read_skip<u32>(4);
     switch (static_cast<u8>(result.Type)) {
     case 3: [[fallthrough]];
     case 17:
     case 18:
+        SET_KV_TYPE(result, KeyValueType::KV8);
         result.Value8 = reader.abs_offset_read<u8>(static_cast<s64>(header.keyValue8Offset) + offset);
         break;
 
@@ -33,24 +45,29 @@ GUIInitParam GUIInitParam::read(BinaryReader& reader, const GUIHeader& header) {
     case 16: [[fallthrough]];
     case 19: [[fallthrough]];
     case 20:
+        SET_KV_TYPE(result, KeyValueType::KV32);
         result.Value32 = reader.abs_offset_read<u32>(static_cast<s64>(header.keyValue32Offset) + offset);
         break;
 
     case 2: [[fallthrough]];
     case 15:
+        SET_KV_TYPE(result, KeyValueType::KV32);
         result.ValueFloat = reader.abs_offset_read<float>(static_cast<s64>(header.keyValue32Offset) + offset);
         break;
 
     case 4:
+        SET_KV_TYPE(result, KeyValueType::KV128);
         result.ValueVector = reader.abs_offset_read<vector4>(static_cast<s64>(header.keyValue128Offset) + offset);
         break;
 
     case 6:
+        SET_KV_TYPE(result, KeyValueType::KV32);
         result.ValueString = reader.abs_offset_read_string(static_cast<s64>(header.stringOffset) +
             reader.abs_offset_read<s64>(static_cast<s64>(header.keyValue32Offset) + offset));
         break;
 
     default:
+        SET_KV_TYPE(result, KeyValueType::KV32);
         spdlog::warn("Unknown param type: {}\n", static_cast<u8>(result.Type));
         result.Value32 = reader.abs_offset_read<u32>(static_cast<s64>(header.keyValue32Offset) + offset);
         break;
