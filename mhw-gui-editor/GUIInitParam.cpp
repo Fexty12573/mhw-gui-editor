@@ -73,7 +73,7 @@ GUIInitParam GUIInitParam::read(BinaryReader& reader, const GUIHeader& header) {
         break;
     }
 
-    if (result.Name.contains("Color") && result.Type == ParamType::VECTOR) {
+    if (result.Name.contains("Color") && result.Name != "ColorScale" && result.Type == ParamType::VECTOR) {
         result.ValueVector /= 255.0f;
     }
 
@@ -110,28 +110,20 @@ void GUIInitParam::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuf
     case ParamType::GENERALRESOURCE: [[fallthrough]];
     case ParamType::INIT_INT32:
         writer.write(kvbuffers.insert32(Value32));
-        //kvbuffers.KeyValue32.push_back(Value32);
         break;
     case ParamType::STRING: {
         writer.write(kvbuffers.insert64(buffer.append_no_duplicate(ValueString)));
-        /*union {
-            u64 v64{};
-            u32 v32[2];
-        } offset;
-
-        writer.write(kvbuffers.KeyValue32.size() * sizeof(u32));
-        offset.v64 = buffer.append_no_duplicate(ValueString);
-        kvbuffers.KeyValue32.push_back(offset.v32[0]);
-        kvbuffers.KeyValue32.push_back(offset.v32[1]);*/
         break;
     }
     case ParamType::VECTOR:
-        writer.write(kvbuffers.insert128(ValueVector));
-        //kvbuffers.KeyValue128.push_back(ValueVector);
+        if (Name.contains("Color") && Name != "ColorScale") {
+            writer.write(kvbuffers.insert128(ValueVector * 255.0f));
+        } else {
+            writer.write(kvbuffers.insert128(ValueVector));
+        }
         break;
     default:
         writer.write(kvbuffers.insert32(Value32));
-        //kvbuffers.KeyValue32.push_back(Value32);
         break;
     }
 }

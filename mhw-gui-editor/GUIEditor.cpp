@@ -2,6 +2,7 @@
 #include "GUIEditor.h"
 #include "HrException.h"
 #include "RichText.h"
+#include "GroupPanel.h"
 #include "App.h"
 #include "IconFontAwesome.h"
 #include "crc32.h"
@@ -161,13 +162,27 @@ void GUIEditor::render(u32 dockspace_id) {
     }
 
     if (ImGui::BeginPopupModal("Options##OptionsWindow", &m_options_menu_open, ImGuiWindowFlags_NoDocking)) {
+
+        ImGui::BeginGroupPanel(ICON_FA_BARS " General");
+
         ImGui::InputText("Chunk Directory", &m_settings.ChunkPath);
         ImGui::SameLine();
         if (ImGui::Button("Choose Folder")) {
             select_chunk_dir();
         }
 
+        ImGui::EndGroupPanel();
+        ImGui::BeginGroupPanel(ICON_FA_BOLT " Optimization");
+
         ImGui::Text("Allow Multiple Referenes to data");
+
+        if (ImGui::IsItemHovered()) {
+            ImGui::BeginTooltip();
+            ImGui::Text("Prevents creating separate data entries for identical values.");
+            ImGui::Text("Turning this off makes editing with a hex editor easier but increases filesize.");
+            ImGui::EndTooltip();
+        }
+
         ImGui::Indent();
 
         ImGui::Checkbox("KeyValue8", &m_settings.AllowMultipleKV8References);
@@ -175,6 +190,7 @@ void GUIEditor::render(u32 dockspace_id) {
         ImGui::Checkbox("KeyValue128", &m_settings.AllowMultipleKV128References);
 
         ImGui::Unindent();
+        ImGui::EndGroupPanel();
 
         ImGui::NewLine();
         if (ImGui::Button("OK")) {
@@ -346,10 +362,18 @@ void GUIEditor::render_tree_viewer() {
         ImGui::TreePop();
     }
 
+    if (ImGui::TreeNodeEx("Instances", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+        for (auto& inst : m_file.m_instances) {
+            render_instance(inst);
+        }
+
+        ImGui::TreePop();
+    }
+
     ImGui::End();
 }
 
-void GUIEditor::render_overview() {
+void GUIEditor::render_overview() const {
     ImGui::Begin("Overview");
 
     ImGui::RichText("<C FFC6913F>Animation Count:</C> {}", m_file.m_animations.size());
@@ -449,7 +473,7 @@ void GUIEditor::render_resource_manager() {
     ImGui::End();
 }
 
-void GUIEditor::render_texture_viewer() {
+void GUIEditor::render_texture_viewer() const {
     ImGui::Begin("Texture Viewer");
 
     if (m_selected_texture != -1 && m_selected_texture < m_file.m_textures.size()) {
@@ -589,7 +613,7 @@ void GUIEditor::render_object(GUIObject& obj, u32 seq_count) {
     ImGui::PopID();
 }
 
-void GUIEditor::render_sequence(GUISequence& seq) {
+void GUIEditor::render_sequence(GUISequence& seq) const {
     constexpr u32 u32_step = 1;
     constexpr u32 u32_fast_step = 10;
 
@@ -665,7 +689,7 @@ void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq) {
     ImGui::PopID();
 }
 
-void GUIEditor::render_init_param(GUIInitParam& param) {
+void GUIEditor::render_init_param(GUIInitParam& param) const {
     using namespace crc::literals;
     constexpr u32 u32_step = 1;
     constexpr u32 u32_fast_step = 10;
@@ -808,7 +832,7 @@ void GUIEditor::render_init_param(GUIInitParam& param) {
 
 #define GET_VEC_V(V, TYPE, IDX) std::get<std::vector<TYPE>>(V)[IDX]
 
-void GUIEditor::render_param(GUIParam& param) {
+void GUIEditor::render_param(GUIParam& param) const {
     using namespace crc::literals;
     constexpr u32 u32_step = 1;
     constexpr u32 u32_fast_step = 10;
@@ -822,24 +846,25 @@ void GUIEditor::render_param(GUIParam& param) {
         ImGui::InputText("Name", &param.Name);
 
         for (auto i = 0u; i < param.ValueCount; ++i) {
+            const std::string name = fmt::format("Value[{}]", i);
             switch (param.Type) {
             case ParamType::UNKNOWN:
                 break;
             case ParamType::INT:
-                ImGui::InputScalar("Value", ImGuiDataType_U32, &GET_VEC_V(param.Values, u32, i), &u32_step, &u32_fast_step);
+                ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &GET_VEC_V(param.Values, u32, i), &u32_step, &u32_fast_step);
                 break;
             case ParamType::FLOAT:
-                ImGui::InputFloat("Value", &GET_VEC_V(param.Values, float, i), 0.01f, 0.1f, "%.3f");
+                ImGui::InputFloat(name.c_str(), &GET_VEC_V(param.Values, float, i), 0.01f, 0.1f, "%.3f");
                 break;
             case ParamType::BOOL:
-                ImGui::Checkbox("Value", reinterpret_cast<bool*>(&GET_VEC_V(param.Values, u8, i)));
+                ImGui::Checkbox(name.c_str(), reinterpret_cast<bool*>(&GET_VEC_V(param.Values, u8, i)));
                 break;
             case ParamType::VECTOR:
-                ImGui::ColorEdit4("Value", &GET_VEC_V(param.Values, vector4, i).x, ImGuiColorEditFlags_Float);
+                ImGui::ColorEdit4(name.c_str(), &GET_VEC_V(param.Values, vector4, i).x, ImGuiColorEditFlags_Float);
                 break;
             case ParamType::RESOURCE: {
                 auto v = GET_VEC_V(param.Values, u32, i);
-                ImGui::InputScalar("Value", ImGuiDataType_U32, &v, &u32_step, &u32_fast_step);
+                ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &v, &u32_step, &u32_fast_step);
                 for (const auto& res : m_file.m_resources) {
                     if (res.ID == v) {
                         ImGui::SameLine();
@@ -852,11 +877,11 @@ void GUIEditor::render_param(GUIParam& param) {
                 break;
             }
             case ParamType::STRING:
-                ImGui::InputText("Value", &GET_VEC_V(param.Values, std::string, i));
+                ImGui::InputText(name.c_str(), &GET_VEC_V(param.Values, std::string, i));
                 break;
             case ParamType::TEXTURE: {
                 auto v = GET_VEC_V(param.Values, u32, i);
-                ImGui::InputScalar("Value", ImGuiDataType_U32, &v, &u32_step, &u32_fast_step);
+                ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &v, &u32_step, &u32_fast_step);
                 for (const auto& tex : m_file.m_textures) {
                     if (tex.ID == v) {
                         ImGui::SameLine();
@@ -870,7 +895,7 @@ void GUIEditor::render_param(GUIParam& param) {
             }
             case ParamType::GUIRESOURCE: {
                 auto v = GET_VEC_V(param.Values, u32, i);
-                ImGui::InputScalar("Value", ImGuiDataType_U32, &v, &u32_step, &u32_fast_step);
+                ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &v, &u32_step, &u32_fast_step);
                 for (const auto& tex : m_file.m_resources) {
                     if (tex.ID == v) {
                         ImGui::SameLine();
@@ -884,7 +909,7 @@ void GUIEditor::render_param(GUIParam& param) {
             }
             case ParamType::GENERALRESOURCE: {
                 auto v = GET_VEC_V(param.Values, u32, i);
-                ImGui::InputScalar("Value", ImGuiDataType_U32, &v, &u32_step, &u32_fast_step);
+                ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &v, &u32_step, &u32_fast_step);
                 for (const auto& tex : m_file.m_general_resources) {
                     if (tex.ID == v) {
                         ImGui::SameLine();
@@ -904,53 +929,112 @@ void GUIEditor::render_param(GUIParam& param) {
             case ParamType::FONT_FILTER: [[fallthrough]];
             case ParamType::ANIMEVENT: [[fallthrough]];
             case ParamType::SEQUENCE:
-                ImGui::InputScalar("Value", ImGuiDataType_U32, &GET_VEC_V(param.Values, u32, i), &u32_step, &u32_fast_step);
+                ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &GET_VEC_V(param.Values, u32, i), &u32_step, &u32_fast_step);
                 break;
             case ParamType::INIT_BOOL:
-                ImGui::Checkbox("Value", reinterpret_cast<bool*>(&GET_VEC_V(param.Values, u8, i)));
+                ImGui::Checkbox(name.c_str(), reinterpret_cast<bool*>(&GET_VEC_V(param.Values, u8, i)));
                 break;
             case ParamType::INIT_INT:
                 switch (param.NameCRC) {
                 case "BlendState"_crc:
-                    ImGui::RichTextCombo("Value", &GET_VEC_V(param.Values, u8, i), BlendStateNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), BlendStateNames, 0xFFA3D7B8);
                     break;
                 case "Alignment"_crc:
-                    ImGui::RichTextCombo("Value", &GET_VEC_V(param.Values, u8, i), AlignmentNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), AlignmentNames, 0xFFA3D7B8);
                     break;
                 case "ResolutionAdjust"_crc:
-                    ImGui::RichTextCombo("Value", &GET_VEC_V(param.Values, u8, i), ResolutionAdjustNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), ResolutionAdjustNames, 0xFFA3D7B8);
                     break;
                 case "AutoWrap"_crc:
-                    ImGui::RichTextCombo("Value", &GET_VEC_V(param.Values, u8, i), AutoWrapNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), AutoWrapNames, 0xFFA3D7B8);
                     break;
                 case "ColorControl"_crc:
-                    ImGui::RichTextCombo("Value", &GET_VEC_V(param.Values, u8, i), ColorControlNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), ColorControlNames, 0xFFA3D7B8);
                     break;
                 case "LetterHAlign"_crc:
-                    ImGui::RichTextCombo("Value", &GET_VEC_V(param.Values, u8, i), LetterHAlignNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), LetterHAlignNames, 0xFFA3D7B8);
                     break;
                 case "LetterVAlign"_crc:
-                    ImGui::RichTextCombo("Value", &GET_VEC_V(param.Values, u8, i), LetterVAlignNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), LetterVAlignNames, 0xFFA3D7B8);
                     break;
                 case "DepthState"_crc:
-                    ImGui::RichTextCombo("Value", &GET_VEC_V(param.Values, u8, i), DepthStateNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), DepthStateNames, 0xFFA3D7B8);
                     break;
                 case "Billboard"_crc:
-                    ImGui::RichTextCombo("Value", &GET_VEC_V(param.Values, u8, i), BillboardNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), BillboardNames, 0xFFA3D7B8);
                     break;
                 case "DrawPass"_crc:
-                    ImGui::RichTextCombo("Value", &GET_VEC_V(param.Values, u8, i), DrawPassNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), DrawPassNames, 0xFFA3D7B8);
                     break;
                 case "Mask"_crc:
-                    ImGui::RichTextCombo("Value", &GET_VEC_V(param.Values, u8, i), MaskTypeNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), MaskTypeNames, 0xFFA3D7B8);
                     break;
                 default:
-                    ImGui::InputScalar("Value", ImGuiDataType_U8, &GET_VEC_V(param.Values, u8, i), &u32_step, &u32_fast_step);
+                    ImGui::InputScalar(name.c_str(), ImGuiDataType_U8, &GET_VEC_V(param.Values, u8, i), &u32_step, &u32_fast_step);
                     break;
                 }
 
                 break;
             }
+        }
+
+        ImGui::TreePop();
+    }
+
+    ImGui::PopID();
+    ImGui::PopID();
+}
+
+void GUIEditor::render_instance(GUIInstance& inst) {
+    constexpr u32 u32_step = 1;
+    constexpr u32 u32_fast_step = 10;
+
+    ImGui::PushID("Instance");
+    ImGui::PushID(inst.Index);
+
+    if (ImGui::RichTextTreeNode("Inst", inst.get_preview(inst.Index))) {
+        ImGui::InputScalar("ID", ImGuiDataType_U32, &inst.ID, &u32_step, &u32_fast_step);
+        ImGui::InputInt("Child Index", &inst.ChildIndex);
+        ImGui::InputInt("Next Index", &inst.NextIndex);
+        ImGui::InputText("Name", &inst.Name);
+        if (ImGui::BeginCombo("Type", ObjectTypeNames.at(inst.Type))) {
+            for (const auto& [type, name] : ObjectTypeNames) {
+                if (ImGui::Selectable(name, inst.Type == type)) {
+                    inst.Type = type;
+                }
+            }
+
+            ImGui::EndCombo();
+        }
+
+        if (inst.ChildIndex != -1) {
+            auto instance = &m_file.m_instances[inst.ChildIndex];
+            render_instance(*instance);
+
+            while (instance->NextIndex != -1) {
+                instance = &m_file.m_instances[instance->NextIndex];
+                render_instance(*instance);
+            }
+        }
+
+        if (inst.InitParamNum > 0) {
+            if (ImGui::TreeNodeEx("InitParams", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+                const u64 max = std::min(static_cast<u64>(inst.InitParamIndex + inst.InitParamNum), m_file.m_init_params.size());
+                for (auto i = inst.InitParamIndex; i < max; ++i) {
+                    render_init_param(m_file.m_init_params[i]);
+                }
+
+                if (inst.InitParamIndex + static_cast<u64>(inst.InitParamNum) > m_file.m_init_params.size()) {
+                    ImGui::TextColored({ 1.0f, 1.0f, 0.2f, 1.0f }, "Warning: InitParamNum goes out of bounds!");
+                }
+
+                ImGui::TreePop();
+            }
+        }
+
+        const auto param_idx = m_file.m_header.instanceParamEntryStartIndex + inst.Index;
+        if (param_idx < m_file.m_params.size()) {
+            render_param(m_file.m_params[param_idx]);
         }
 
         ImGui::TreePop();
@@ -971,6 +1055,7 @@ void GUIEditor::update_indices() {
     UPDATE_INDEX_LOOP(m_file.m_obj_sequences, Index);
     UPDATE_INDEX_LOOP(m_file.m_init_params, Index);
     UPDATE_INDEX_LOOP(m_file.m_params, Index);
+    UPDATE_INDEX_LOOP(m_file.m_instances, Index);
 }
 
 void GUIEditor::select_chunk_dir() {

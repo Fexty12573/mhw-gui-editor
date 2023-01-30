@@ -119,7 +119,7 @@ GUIParam GUIParam::read(BinaryReader& reader, const GUIHeader& header) {
 	}
 
 
-    if (result.Name.contains("Color") && result.Type == ParamType::VECTOR) {
+    if (result.Name.contains("Color") && result.Name != "ColorScale" && result.Type == ParamType::VECTOR) {
         // Normalize color values
 		auto& vec = GET_VEC(vector4, result.Values);
 		for (auto& val : vec) {
@@ -174,66 +174,18 @@ void GUIParam::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers
 		break;
 	}
 	case ParamType::VECTOR:
-        writer.write(kvbuffers.insert128(GET_VEC(vector4, Values)));
+		if (Name.contains("Color") && Name != "ColorScale") {
+			std::vector<vector4> denormalized;
+            std::ranges::transform(GET_VEC(vector4, Values), std::back_inserter(denormalized), [](const auto& v) { return v * 255.0f; });
+			writer.write(kvbuffers.insert128(denormalized));
+		} else {
+			writer.write(kvbuffers.insert128(GET_VEC(vector4, Values)));
+		}
 		break;
 	default:
 		writer.write(kvbuffers.insert32<u32>(GET_VEC(u32, Values)));
 		break;
 	}
-
-	//for (auto i = 0u; i < ValueCount; ++i) {
-	//	switch (Type) {
-	//	case ParamType::BOOL: 
-	//		kvbuffers.KeyValue8.push_back(GET_VEC(bool, Values)[i]);
-	//		break;
-	//	case ParamType::INIT_BOOL: [[fallthrough]];
-	//	case ParamType::INIT_INT:
-	//		kvbuffers.KeyValue8.push_back(GET_VEC(u8, Values)[i]);
-	//		break;
-	//	case ParamType::INT: [[fallthrough]];
-	//	case ParamType::RESOURCE: [[fallthrough]];
-	//	case ParamType::TEXTURE: [[fallthrough]];
-	//	case ParamType::FONT: [[fallthrough]];
-	//	case ParamType::MESSAGE: [[fallthrough]];
-	//	case ParamType::VARIABLE: [[fallthrough]];
-	//	case ParamType::ANIMATION: [[fallthrough]];
-	//	case ParamType::EVENT: [[fallthrough]];
-	//	case ParamType::GUIRESOURCE: [[fallthrough]];
-	//	case ParamType::FONT_FILTER: [[fallthrough]];
-	//	case ParamType::SEQUENCE: [[fallthrough]];
-	//	case ParamType::GENERALRESOURCE: [[fallthrough]];
-	//	case ParamType::INIT_INT32:
-	//		kvbuffers.KeyValue32.push_back(GET_VEC(u32, Values)[i]);
-	//		break;
-	//	case ParamType::FLOAT: [[fallthrough]];
-	//	case ParamType::ANIMEVENT: 
-	//		kvbuffers.KeyValue32.push_back(*reinterpret_cast<const u32*>(&GET_VEC(float, Values)[i])); // Awful I know
-	//		break;
-	//	case ParamType::STRING:
-	//	{
-	//		union {
-	//			u64 v64{};
-	//			u32 v32[2];
-	//		} offset;
-
-	//		offset.v64 = buffer.append_no_duplicate(GET_VEC(std::string, Values)[i]);
-	//		kvbuffers.KeyValue32.push_back(offset.v32[0]);
-	//		kvbuffers.KeyValue32.push_back(offset.v32[1]);
-	//		break;
-	//	}
-	//	case ParamType::VECTOR:
-	//		if (Name.contains("Color")) {
-	//			// Bring color values back into range [0.0f, 255.0f]
-	//			kvbuffers.KeyValue128.push_back(GET_VEC(vector4, Values)[i] * 255.0f);
-	//		} else {
-	//			kvbuffers.KeyValue128.push_back(GET_VEC(vector4, Values)[i]);
-	//		}
-	//		break;
-	//	default:
-	//		kvbuffers.KeyValue32.push_back(GET_VEC(u32, Values)[i]);
-	//		break;
-	//	}
-	//}
 }
 
 #undef GET_VEC

@@ -1,11 +1,13 @@
 #include "pch.h"
 #include "GUIInstance.h"
 
+#include <format>
+
 GUIInstance GUIInstance::read(BinaryReader& reader, const GUIHeader& header) {
 	GUIInstance inst = {
 		.ID = reader.read<u32>(),
 		.Attr = reader.read<u32>(),
-		.ParentPassIndex = reader.read<s32>(),
+		.NextIndex = reader.read<s32>(),
 		.ChildIndex = reader.read<s32>(),
 		.InitParamNum = reader.read_skip<u32>(4),
 		.Name = reader.abs_offset_read_string(header.stringOffset + reader.read_skip<u32>(4)),
@@ -22,7 +24,7 @@ GUIInstance GUIInstance::read(BinaryReader& reader, const GUIHeader& header) {
 void GUIInstance::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const {
 	writer.write(ID);
     writer.write(Attr);
-    writer.write(ParentPassIndex);
+    writer.write(NextIndex);
     writer.write(ChildIndex);
     writer.write(InitParamNum);
 	writer.write<u32>(0);
@@ -37,4 +39,12 @@ void GUIInstance::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuff
         writer.write<s64>(-1);
     }
 
+}
+
+std::string GUIInstance::get_preview(u32 index) const {
+    if (index == -1) {
+        return std::format("Instance<<C FFA3D7B8>{}</C>>: <C FFB0C94E>{} </C><C FFFEDC9C>{}</C>", ID, enum_to_string(Type), Name);
+    }
+
+    return std::format("[<C FFA3D7B8>{}</C>] Instance<<C FFA3D7B8>{}</C>>: <C FFB0C94E>{} </C><C FFFEDC9C>{}</C>", index, ID, enum_to_string(Type), Name);
 }

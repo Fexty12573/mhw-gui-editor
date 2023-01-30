@@ -38,17 +38,18 @@ public:
 
 private:
 	void render_tree_viewer();
-	void render_overview();
+	void render_overview() const;
 	void render_resource_manager();
-	void render_texture_viewer();
+	void render_texture_viewer() const;
 	void render_object_editor();
 
 	void render_animation(GUIAnimation& anim);
 	void render_object(GUIObject& obj, u32 seq_count = 0);
-	void render_sequence(GUISequence& seq);
+	void render_sequence(GUISequence& seq) const;
 	void render_obj_sequence(GUIObjectSequence& objseq);
-	void render_init_param(GUIInitParam& param);
-	void render_param(GUIParam& param);
+	void render_init_param(GUIInitParam& param) const;
+	void render_param(GUIParam& param) const;
+	void render_instance(GUIInstance& inst);
 
 	void update_indices();
 

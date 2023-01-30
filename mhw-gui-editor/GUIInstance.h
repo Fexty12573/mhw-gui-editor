@@ -14,10 +14,11 @@ struct GUIInstance {
 	static GUIInstance read(BinaryReader& reader, const GUIHeader& header);
 
     void write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const;
+    [[nodiscard]] std::string get_preview(u32 index = 0xFFFFFFFF) const;
 
 	u32 ID;
 	u32 Attr;
-	s32 ParentPassIndex;
+	s32 NextIndex;
 	s32 ChildIndex;
 	u32 InitParamNum;
 	std::string Name;
@@ -26,4 +27,6 @@ struct GUIInstance {
 	s64 ExtendDataOffset;
 
     GUIExtendData ExtendData;
+
+	u32 Index;
 };
