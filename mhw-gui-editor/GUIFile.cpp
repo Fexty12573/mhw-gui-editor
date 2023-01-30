@@ -181,7 +181,8 @@ void GUIFile::save_to(BinaryWriter& stream) {
         .optionBitFlag = m_header.optionBitFlag,
         .viewSize_Width = m_header.viewSize_Width,
         .viewSize_Height = m_header.viewSize_Height,
-        .startFlowIndex = m_header.startFlowIndex
+        .startFlowIndex = m_header.startFlowIndex,
+        .instanceParamEntryStartIndex = m_header.instanceParamEntryStartIndex
         // Rest of the fields will be filled later
     };
 
@@ -205,6 +206,8 @@ void GUIFile::save_to(BinaryWriter& stream) {
         object.write(stream, string_buffer, kv_buffers);
     }
 
+    stream.write<u64>(0); // Padding for alignment
+
     header.objSequenceOffset = stream.tell();
     for (const auto& obj_sequence : m_obj_sequences) {
         obj_sequence.write(stream, string_buffer);
@@ -222,15 +225,12 @@ void GUIFile::save_to(BinaryWriter& stream) {
         param.write(stream, string_buffer, kv_buffers);
     }
 
-    header.keyOffset = stream.tell();
-    for (const auto& key : m_keys) {
-        key.write(stream, string_buffer, kv_buffers);
-    }
-
     header.instanceOffset = stream.tell();
     for (const auto& instance : m_instances) {
         instance.write(stream, string_buffer, kv_buffers);
     }
+
+    stream.write<u64>(0); // Padding for alignment
 
     header.flowOffset = stream.tell();
     for (const auto& flow : m_flows) {
@@ -252,6 +252,12 @@ void GUIFile::save_to(BinaryWriter& stream) {
         font_filter->write(stream, string_buffer);
     }
 
+    // Align to 16 bytes
+    const auto n_align = (16 - stream.tell() % 16) / 4; // All font filters have a multiple of 4 size
+    for (auto i = 0u; i < n_align; ++i) {
+        stream.write<u32>(0);
+    }
+
     header.messageOffset = stream.tell();
     for (const auto& message : m_messages) {
         message.write(stream, string_buffer);
@@ -267,8 +273,10 @@ void GUIFile::save_to(BinaryWriter& stream) {
         general_resource.write(stream, string_buffer);
     }
 
-    header.stringOffset = stream.tell();
-    stream.write(string_buffer.data(), string_buffer.size() + 1); // +1 for the null terminator
+    header.keyOffset = stream.tell();
+    for (const auto& key : m_keys) {
+        key.write(stream, string_buffer, kv_buffers);
+    }
 
     header.keyValue8Offset = stream.tell();
     stream.write(std::span<const u8>(kv_buffers.KeyValue8));
@@ -281,6 +289,9 @@ void GUIFile::save_to(BinaryWriter& stream) {
 
     header.extendDataOffset = stream.tell();
     stream.write(std::span<const u8>(kv_buffers.ExtendData));
+    
+    header.stringOffset = stream.tell();
+    stream.write(string_buffer.data(), string_buffer.size() + 1); // +1 for the null terminator
 
     header.vertexOffset = stream.tell();
     header.vertexBufferSize = static_cast<u32>(m_vertices.size() * GUIVertex::size);

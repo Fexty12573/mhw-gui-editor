@@ -93,7 +93,7 @@ void GUIInitParam::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuf
     case ParamType::SEQUENCE: [[fallthrough]];
     case ParamType::GENERALRESOURCE: [[fallthrough]];
     case ParamType::INIT_INT32:
-        writer.write(kvbuffers.KeyValue32.size());
+        writer.write(kvbuffers.KeyValue32.size() * sizeof(u32));
         kvbuffers.KeyValue32.push_back(Value32);
         break;
     case ParamType::STRING: {
@@ -102,18 +102,18 @@ void GUIInitParam::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuf
             u32 v32[2];
         } offset;
 
-        writer.write(kvbuffers.KeyValue32.size());
+        writer.write(kvbuffers.KeyValue32.size() * sizeof(u32));
         offset.v64 = buffer.append_no_duplicate(ValueString);
         kvbuffers.KeyValue32.push_back(offset.v32[0]);
         kvbuffers.KeyValue32.push_back(offset.v32[1]);
         break;
     }
     case ParamType::VECTOR:
-        writer.write(kvbuffers.KeyValue128.size());
+        writer.write(kvbuffers.KeyValue128.size() * sizeof(vector4));
         kvbuffers.KeyValue128.push_back(ValueVector);
         break;
     default:
-        writer.write(kvbuffers.KeyValue32.size());
+        writer.write(kvbuffers.KeyValue32.size() * sizeof(u32));
         kvbuffers.KeyValue32.push_back(Value32);
         break;
     }

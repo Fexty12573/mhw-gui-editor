@@ -34,6 +34,8 @@ public:
 	void load_from(BinaryReader& stream);
     void load_resources(const std::string& chunk_path, ID3D11Device* device, ID3D11DeviceContext* context);
 
+	void run_data_usage_analysis() const;
+
     void save_to(BinaryWriter& stream);
 
 	friend class GUIEditor;

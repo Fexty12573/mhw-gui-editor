@@ -7,6 +7,7 @@
 #include "dti_types.h"
 
 #include <string>
+#include <variant>
 
 struct GUIParam {
 	static constexpr size_t size = 48;
@@ -20,17 +21,17 @@ struct GUIParam {
 	u32 ParentID;
 	std::string Name;
 	u32 KeyIndex;
-	union {
-		bool ValueBool;
-		u8 Value8;
-		u32 Value32;
-		u64 Value64;
-		f32 ValueFloat;
-		vector4 ValueVector;
-	};
-	// Should be part of the union but that deletes the implicit constructor and I don't wanna deal with that
-	std::string ValueString;
 
+	std::variant<
+		std::vector<bool>, 
+		std::vector<u8>, 
+		std::vector<u32>, 
+		std::vector<f32>, 
+		std::vector<vector4>, 
+		std::vector<std::string>
+	> Values;
+
+	// Meta values
 	u32 NameCRC;
 	u32 Index = 0;
 };
