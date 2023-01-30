@@ -1,8 +1,10 @@
 #include "pch.h"
 #include "HrException.h"
+#include "Console.h"
 
 #include <comdef.h>
 #include <fmt/format.h>
+
 
 HrException::HrException(HRESULT hr, const char* file, int line) : m_hr(hr), m_file(file), m_line(line) {
 	m_message = fmt::format(
@@ -12,6 +14,8 @@ HrException::HrException(HRESULT hr, const char* file, int line) : m_hr(hr), m_f
 		m_line,
 		get_error_string()
 	);
+
+	spdlog::critical(m_message);
 }
 
 const char* HrException::what() const noexcept {
