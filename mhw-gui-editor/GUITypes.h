@@ -3,6 +3,7 @@
 
 #include <array>
 #include <map>
+#include <span>
 #include <type_traits>
 #include <vector>
 
@@ -94,7 +95,7 @@ struct KeyValueBuffers {
         bool MultipleKV128Refs = false;
     } Config;
 
-    template<typename T> u32 insert8(const T& value) requires std::is_convertible_v<T, u8> {
+    template<typename T> size_t insert8(const T& value) requires std::is_convertible_v<T, u8> {
         if (Config.MultipleKV8Refs) {
             auto it = KeyValue8.end();
 
@@ -109,7 +110,7 @@ struct KeyValueBuffers {
             }
         }
 
-        const u32 idx = static_cast<u32>(KeyValue8.size());
+        const auto idx = KeyValue8.size();
         if constexpr (std::is_same_v<u8, T>) {
             KeyValue8.push_back(value);
         } else {
@@ -119,7 +120,7 @@ struct KeyValueBuffers {
         return idx * sizeof(u8);
     }
 
-    template<typename T> u32 insert8_n(std::span<const T> values) {
+    template<typename T> size_t insert8(std::span<const T> values) {
         if (Config.MultipleKV8Refs) {
             const auto it = std::ranges::search(KeyValue8, values).begin();
 
@@ -128,13 +129,13 @@ struct KeyValueBuffers {
             }
         }
 
-        const u32 idx = static_cast<u32>(KeyValue8.size());
+        const auto idx = KeyValue8.size();
         KeyValue8.insert_range(KeyValue8.end(), values);
 
         return idx * sizeof(u8);
     }
 
-    template<typename T> u32 insert32(const T& value) requires std::is_convertible_v<T, u32> {
+    template<typename T> size_t insert32(const T& value) requires std::is_convertible_v<T, u32> {
         if (Config.MultipleKV32Refs) {
             auto it = KeyValue32.end();
 
@@ -149,7 +150,7 @@ struct KeyValueBuffers {
             }
         }
 
-        const u32 idx = static_cast<u32>(KeyValue32.size());
+        const auto idx = KeyValue32.size();
         if constexpr (std::is_same_v<u32, T>) {
             KeyValue32.push_back(value);
         } else {
@@ -159,12 +160,12 @@ struct KeyValueBuffers {
         return idx * sizeof(u32);
     }
 
-    template<typename T> u32 insert32(std::span<const T> values) requires std::is_convertible_v<T, u32> {
+    template<typename T> size_t insert32(std::span<const T> values) requires std::is_convertible_v<T, u32> {
         if (Config.MultipleKV8Refs) {
             auto it = KeyValue32.begin();
             
             if constexpr (std::is_same_v<u32, T>) {
-                it = std::ranges::search(KeyValue32, values);
+                it = std::ranges::search(KeyValue32, values).begin();
             } else {
                 it = std::ranges::search(KeyValue32, values, [](u32 x, float y) {return x == *reinterpret_cast<u32*>(&y); }).begin();
             }
@@ -174,7 +175,7 @@ struct KeyValueBuffers {
             }
         }
 
-        const u32 idx = static_cast<u32>(KeyValue32.size());
+        const auto idx = KeyValue32.size();
         for (const auto& v : values) {
             if constexpr (std::is_same_v<u32, T>) {
                 KeyValue32.push_back(v);
@@ -186,7 +187,7 @@ struct KeyValueBuffers {
         return idx * sizeof(u32);
     }
 
-    u32 insert64(u64 value) {
+    size_t insert64(u64 value) {
         union {
             u64 v64{};
             u32 v32[2];
@@ -200,14 +201,14 @@ struct KeyValueBuffers {
             }
         }
 
-        const u32 idx = static_cast<u32>(KeyValue32.size());
+        const auto idx = KeyValue32.size();
         KeyValue32.push_back(uvalue.v32[0]);
         KeyValue32.push_back(uvalue.v32[1]);
 
         return idx * sizeof(u32);
     }
 
-    u32 insert64(std::span<u64> values) {
+    size_t insert64(std::span<u64> values) {
         union U6432 {
             u64 v64{};
             u32 v32[2];
@@ -228,13 +229,13 @@ struct KeyValueBuffers {
             }
         }
 
-        const u32 idx = static_cast<u32>(KeyValue32.size());
+        const auto idx = KeyValue32.size();
         KeyValue32.insert_range(KeyValue32.end(), uvalues);
 
         return idx * sizeof(u32);
     }
 
-    u32 insert128(const vector4& value) {
+    size_t insert128(const vector4& value) {
         if (Config.MultipleKV8Refs) {
             const auto it = std::ranges::find(KeyValue128, value);
 
@@ -243,13 +244,13 @@ struct KeyValueBuffers {
             }
         }
 
-        const u32 idx = static_cast<u32>(KeyValue128.size());
+        const auto idx = KeyValue128.size();
         KeyValue128.push_back(value);
 
         return idx * sizeof(vector4);
     }
 
-    u32 insert128(std::span<const vector4> values) {
+    size_t insert128(std::span<const vector4> values) {
         if (Config.MultipleKV8Refs) {
             const auto it = std::ranges::search(KeyValue128, values).begin();
 
@@ -258,7 +259,7 @@ struct KeyValueBuffers {
             }
         }
 
-        const u32 idx = static_cast<u32>(KeyValue128.size());
+        const auto idx = KeyValue128.size();
         KeyValue128.insert_range(KeyValue128.end(), values);
 
         return idx * sizeof(vector4);

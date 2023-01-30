@@ -3,6 +3,6 @@ ChunkDirectory = 'D:\MHWI Mods\chunk'
 Theme = 'Dracula'
 
 [Optimization.AllowMultipleReferences]
-KV128 = false
+KV128 = true
 KV32 = true
 KV8 = true

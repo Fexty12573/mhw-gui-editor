@@ -292,7 +292,7 @@ void GUIEditor::save_file_as() {
     const std::wstring wpath = file_name;
     BinaryWriter writer(wpath);
 
-    m_file.save_to(writer);
+    m_file.save_to(writer, m_settings);
 }
 
 void GUIEditor::render_tree_viewer() {
@@ -831,12 +831,9 @@ void GUIEditor::render_param(GUIParam& param) {
             case ParamType::FLOAT:
                 ImGui::InputFloat("Value", &GET_VEC_V(param.Values, float, i), 0.01f, 0.1f, "%.3f");
                 break;
-            case ParamType::BOOL: {
-                bool v = GET_VEC_V(param.Values, bool, i); // Dumb workaround because std::vector<bool> specialization
-                ImGui::Checkbox("Value", &v);
-                GET_VEC_V(param.Values, bool, i) = v;
+            case ParamType::BOOL:
+                ImGui::Checkbox("Value", reinterpret_cast<bool*>(&GET_VEC_V(param.Values, u8, i)));
                 break;
-            }
             case ParamType::VECTOR:
                 ImGui::ColorEdit4("Value", &GET_VEC_V(param.Values, vector4, i).x, ImGuiColorEditFlags_Float);
                 break;
@@ -909,12 +906,9 @@ void GUIEditor::render_param(GUIParam& param) {
             case ParamType::SEQUENCE:
                 ImGui::InputScalar("Value", ImGuiDataType_U32, &GET_VEC_V(param.Values, u32, i), &u32_step, &u32_fast_step);
                 break;
-            case ParamType::INIT_BOOL: {
-                bool v = GET_VEC_V(param.Values, u8, i);
-                ImGui::Checkbox("Value", &v);
-                GET_VEC_V(param.Values, u8, i) = v;
+            case ParamType::INIT_BOOL:
+                ImGui::Checkbox("Value", reinterpret_cast<bool*>(&GET_VEC_V(param.Values, u8, i)));
                 break;
-            }
             case ParamType::INIT_INT:
                 switch (param.NameCRC) {
                 case "BlendState"_crc:

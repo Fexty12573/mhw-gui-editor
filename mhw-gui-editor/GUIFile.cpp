@@ -251,7 +251,13 @@ void GUIFile::save_to(BinaryWriter& stream, const Settings& settings) {
     stream.write(header);
 
     StringBuffer string_buffer;
-    KeyValueBuffers kv_buffers;
+    KeyValueBuffers kv_buffers{
+        .Config = {
+            .MultipleKV8Refs = settings.AllowMultipleKV8References,
+            .MultipleKV32Refs = settings.AllowMultipleKV32References,
+            .MultipleKV128Refs = settings.AllowMultipleKV128References,
+        }
+    };
 
     header.animationOffset = stream.tell();
     for (const auto& animation : m_animations) {
@@ -268,14 +274,21 @@ void GUIFile::save_to(BinaryWriter& stream, const Settings& settings) {
         object.write(stream, string_buffer, kv_buffers);
     }
 
-    stream.write<u64>(0); // Padding for alignment
+    if (m_objects.size() % 2) {
+        // On odd number of objects, there are 8 bytes of padding
+        // Not technically necessary, just for alignment purposes
+        stream.write<u64>(0); 
+    }
 
     header.objSequenceOffset = stream.tell();
     for (const auto& obj_sequence : m_obj_sequences) {
         obj_sequence.write(stream, string_buffer);
     }
 
-    stream.write<u64>(0); // Padding for alignment
+    if (m_obj_sequences.size() % 2) {
+        // Same thing here
+        stream.write<u64>(0);
+    }
 
     header.initParamOffset = stream.tell();
     for (const auto& init_param : m_init_params) {
@@ -292,7 +305,9 @@ void GUIFile::save_to(BinaryWriter& stream, const Settings& settings) {
         instance.write(stream, string_buffer, kv_buffers);
     }
 
-    stream.write<u64>(0); // Padding for alignment
+    if (m_instances.size() % 2) {
+        stream.write<u64>(0);
+    }
 
     header.flowOffset = stream.tell();
     for (const auto& flow : m_flows) {
@@ -315,7 +330,7 @@ void GUIFile::save_to(BinaryWriter& stream, const Settings& settings) {
     }
 
     // Align to 16 bytes
-    const auto n_align = (16 - stream.tell() % 16) / 4; // All font filters have a multiple of 4 size
+    const auto n_align = ((16 - stream.tell() % 16) / 4) % 4; // All font filters have a multiple of 4 size
     for (auto i = 0u; i < n_align; ++i) {
         stream.write<u32>(0);
     }
@@ -325,14 +340,26 @@ void GUIFile::save_to(BinaryWriter& stream, const Settings& settings) {
         message.write(stream, string_buffer);
     }
 
+    if (m_messages.size() % 2) {
+        stream.write<u64>(0);
+    }
+
     header.guiResourceOffset = stream.tell();
     for (const auto& resource : m_resources) {
         resource.write(stream, string_buffer);
     }
 
+    if (m_resources.size() % 2) {
+        stream.write<u64>(0);
+    }
+
     header.generalResourceOffset = stream.tell();
     for (const auto& general_resource : m_general_resources) {
         general_resource.write(stream, string_buffer);
+    }
+
+    if (m_general_resources.size() % 2) {
+        stream.write<u64>(0);
     }
 
     header.keyOffset = stream.tell();

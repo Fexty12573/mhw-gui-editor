@@ -23,7 +23,6 @@ struct GUIParam {
 	u32 KeyIndex;
 
 	std::variant<
-		std::vector<bool>, 
 		std::vector<u8>, 
 		std::vector<u32>, 
 		std::vector<f32>, 
