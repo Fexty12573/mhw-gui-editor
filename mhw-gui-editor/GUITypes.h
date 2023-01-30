@@ -336,7 +336,8 @@ enum class ParamType : u8 {
     SEQUENCE = 0x10,
     INIT_BOOL = 0x11,
     INIT_INT = 0x12,
-    GENERALRESOURCE = 0x13
+    GENERALRESOURCE = 0x13,
+    INIT_INT32 = 0x14
 };
 
 enum class FontStyle : u32 {
@@ -714,6 +715,7 @@ constexpr const char* enum_to_string(ParamType v) {
     case ParamType::INIT_BOOL: return "INIT_BOOL";
     case ParamType::INIT_INT: return "INIT_INT";
     case ParamType::GENERALRESOURCE: return "GENERALRESOURCE";
+    case ParamType::INIT_INT32: return "INIT_INT32";
     }
 
     return "INVALID";
@@ -991,6 +993,7 @@ inline constexpr std::array ParamTypeNames = {
     "INIT_BOOL",
     "INIT_INT",
     "GENERALRESOURCE",
+    "INIT_INT32",
 };
 
 inline constexpr std::array FontStyleNames = {

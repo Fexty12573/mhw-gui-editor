@@ -97,7 +97,7 @@ Texture::Texture(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceContext* c
 
 Texture::Texture() = default;
 
-void Texture::load_from(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceContext* ctx) noexcept {
+void Texture::load_from(BinaryReader& reader, ID3D11Device* dev, ID3D11DeviceContext* ctx) {
     if (reader.read<u32>() != MAKEFOURCC("TEX\0") || reader.read<u32>() != 0x10) {
         return spdlog::error("Invalid TEX file");
     }

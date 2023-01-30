@@ -16,6 +16,7 @@ HrException::HrException(HRESULT hr, const char* file, int line) : m_hr(hr), m_f
 	);
 
 	spdlog::critical(m_message);
+	Console::get()->get_logger()->flush();
 }
 
 const char* HrException::what() const noexcept {

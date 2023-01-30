@@ -12,7 +12,6 @@
 #include <imgui.h>
 #include <ShObjIdl.h>
 #include <wrl.h>
-#include <DirectXTex.h>
 #include <ranges>
 
 
@@ -780,6 +779,13 @@ void GUIEditor::render_init_param(GUIInitParam& param) {
             }
 
             break;
+            
+        case ParamType::INIT_INT32:
+            switch (param.NameCRC) {
+            case "FontStyleId"_crc:
+                ImGui::RichTextCombo("Value", &param.Value32, FontStyleNames, 0xFFA3D7B8);
+                break;
+            }
         }
 
         ImGui::TreePop();

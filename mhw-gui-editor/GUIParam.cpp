@@ -94,7 +94,8 @@ void GUIParam::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers
 	case ParamType::FONT_FILTER: [[fallthrough]];
 	case ParamType::ANIMEVENT: [[fallthrough]];
 	case ParamType::SEQUENCE: [[fallthrough]];
-	case ParamType::GENERALRESOURCE:
+	case ParamType::GENERALRESOURCE: [[fallthrough]];
+	case ParamType::INIT_INT32:
 		writer.write(kvbuffers.KeyValue32.size());
 		kvbuffers.KeyValue32.push_back(Value32);
 		break;
