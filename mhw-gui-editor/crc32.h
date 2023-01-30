@@ -13,17 +13,17 @@ template <unsigned c> struct f<c, 0> {
     enum { value = c };
 };
 
-#define A(x) B(x) B(x + 128)
-#define B(x) C(x) C(x + 64)
-#define C(x) D(x) D(x + 32)
-#define D(x) E(x) E(x + 16)
-#define E(x) F(x) F(x + 8)
-#define F(x) G(x) G(x + 4)
-#define G(x) H(x) H(x + 2)
-#define H(x) I(x) I(x + 1)
-#define I(x) f<x>::value,
+#define CRC_TABLE_GEN_A(x) CRC_TABLE_GEN_B(x) CRC_TABLE_GEN_B(x + 128)
+#define CRC_TABLE_GEN_B(x) CRC_TABLE_GEN_C(x) CRC_TABLE_GEN_C(x + 64)
+#define CRC_TABLE_GEN_C(x) CRC_TABLE_GEN_D(x) CRC_TABLE_GEN_D(x + 32)
+#define CRC_TABLE_GEN_D(x) CRC_TABLE_GEN_E(x) CRC_TABLE_GEN_E(x + 16)
+#define CRC_TABLE_GEN_E(x) CRC_TABLE_GEN_F(x) CRC_TABLE_GEN_F(x + 8)
+#define CRC_TABLE_GEN_F(x) CRC_TABLE_GEN_G(x) CRC_TABLE_GEN_G(x + 4)
+#define CRC_TABLE_GEN_G(x) CRC_TABLE_GEN_H(x) CRC_TABLE_GEN_H(x + 2)
+#define CRC_TABLE_GEN_H(x) CRC_TABLE_GEN_I(x) CRC_TABLE_GEN_I(x + 1)
+#define CRC_TABLE_GEN_I(x) f<x>::value,
 
-constexpr unsigned crc_table[] = {A(0)};
+constexpr unsigned crc_table[] = {CRC_TABLE_GEN_A(0)};
 
 // Constexpr implementation and helpers
 constexpr uint32_t crc32_impl(const char* p, size_t len, uint32_t crc) {
@@ -53,3 +53,13 @@ constexpr uint32_t operator""_crc(const char* s, size_t len) {
 } // namespace literals
 
 } // namespace crc
+
+#undef CRC_TABLE_GEN_A
+#undef CRC_TABLE_GEN_B
+#undef CRC_TABLE_GEN_C
+#undef CRC_TABLE_GEN_D
+#undef CRC_TABLE_GEN_E
+#undef CRC_TABLE_GEN_F
+#undef CRC_TABLE_GEN_G
+#undef CRC_TABLE_GEN_H
+#undef CRC_TABLE_GEN_I
