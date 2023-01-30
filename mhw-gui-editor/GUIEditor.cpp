@@ -167,6 +167,15 @@ void GUIEditor::render(u32 dockspace_id) {
             select_chunk_dir();
         }
 
+        ImGui::Text("Allow Multiple Referenes to data");
+        ImGui::Indent();
+
+        ImGui::Checkbox("KeyValue8", &m_settings.AllowMultipleKV8References);
+        ImGui::Checkbox("KeyValue32", &m_settings.AllowMultipleKV32References);
+        ImGui::Checkbox("KeyValue128", &m_settings.AllowMultipleKV128References);
+
+        ImGui::Unindent();
+
         ImGui::NewLine();
         if (ImGui::Button("OK")) {
             m_settings.save();

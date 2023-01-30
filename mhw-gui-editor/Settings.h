@@ -13,5 +13,9 @@ struct Settings {
 
     std::string ChunkPath;
     std::string Theme;
+
+    bool AllowMultipleKV8References;
+    bool AllowMultipleKV32References;
+    bool AllowMultipleKV128References;
 };
 

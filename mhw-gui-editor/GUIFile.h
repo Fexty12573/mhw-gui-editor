@@ -3,6 +3,7 @@
 #include "dti_types.h"
 #include "BinaryReader.h"
 #include "BinaryWriter.h"
+#include "Settings.h"
 
 #include "GUIAnimation.h"
 #include "GUISequence.h"
@@ -36,7 +37,7 @@ public:
 
 	void run_data_usage_analysis(bool log_overlapping_offsets = false) const;
 
-    void save_to(BinaryWriter& stream);
+    void save_to(BinaryWriter& stream, const Settings& settings);
 
 	friend class GUIEditor;
 

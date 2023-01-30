@@ -3,6 +3,7 @@
 
 #include <array>
 #include <map>
+#include <type_traits>
 #include <vector>
 
 struct GUIHeader {
@@ -86,6 +87,182 @@ struct KeyValueBuffers {
     std::vector<u32> KeyValue32;
     std::vector<vector4> KeyValue128;
     std::vector<u8> ExtendData;
+
+    struct {
+        bool MultipleKV8Refs = false;
+        bool MultipleKV32Refs = false;
+        bool MultipleKV128Refs = false;
+    } Config;
+
+    template<typename T> u32 insert8(const T& value) requires std::is_convertible_v<T, u8> {
+        if (Config.MultipleKV8Refs) {
+            auto it = KeyValue8.end();
+
+            if constexpr (std::is_same_v<u8, T>) {
+                it = std::ranges::find(KeyValue8, value);
+            } else {
+                it = std::ranges::find_if(KeyValue8, [value](u8 v) { return *reinterpret_cast<T*>(&v) == value; });
+            }
+
+            if (it != KeyValue8.end()) {
+                return std::distance(KeyValue8.begin(), it) * sizeof(u8);
+            }
+        }
+
+        const u32 idx = static_cast<u32>(KeyValue8.size());
+        if constexpr (std::is_same_v<u8, T>) {
+            KeyValue8.push_back(value);
+        } else {
+            KeyValue8.push_back(*reinterpret_cast<const u8*>(&value));
+        }
+
+        return idx * sizeof(u8);
+    }
+
+    template<typename T> u32 insert8_n(std::span<const T> values) {
+        if (Config.MultipleKV8Refs) {
+            const auto it = std::ranges::search(KeyValue8, values).begin();
+
+            if (it != KeyValue8.end()) {
+                return std::distance(KeyValue8.begin(), it) * sizeof(u8);
+            }
+        }
+
+        const u32 idx = static_cast<u32>(KeyValue8.size());
+        KeyValue8.insert_range(KeyValue8.end(), values);
+
+        return idx * sizeof(u8);
+    }
+
+    template<typename T> u32 insert32(const T& value) requires std::is_convertible_v<T, u32> {
+        if (Config.MultipleKV32Refs) {
+            auto it = KeyValue32.end();
+
+            if constexpr (std::is_same_v<u32, T>) {
+                it = std::ranges::find(KeyValue32, value);
+            } else {
+                it = std::ranges::find_if(KeyValue32, [value](u32 v) { return *reinterpret_cast<T*>(&v) == value; });
+            }
+
+            if (it != KeyValue32.end()) {
+                return std::distance(KeyValue32.begin(), it) * sizeof(u32);
+            }
+        }
+
+        const u32 idx = static_cast<u32>(KeyValue32.size());
+        if constexpr (std::is_same_v<u32, T>) {
+            KeyValue32.push_back(value);
+        } else {
+            KeyValue32.push_back(*reinterpret_cast<const u32*>(&value));
+        }
+
+        return idx * sizeof(u32);
+    }
+
+    template<typename T> u32 insert32(std::span<const T> values) requires std::is_convertible_v<T, u32> {
+        if (Config.MultipleKV8Refs) {
+            auto it = KeyValue32.begin();
+            
+            if constexpr (std::is_same_v<u32, T>) {
+                it = std::ranges::search(KeyValue32, values);
+            } else {
+                it = std::ranges::search(KeyValue32, values, [](u32 x, float y) {return x == *reinterpret_cast<u32*>(&y); }).begin();
+            }
+
+            if (it != KeyValue32.end()) {
+                return std::distance(KeyValue32.begin(), it) * sizeof(u32);
+            }
+        }
+
+        const u32 idx = static_cast<u32>(KeyValue32.size());
+        for (const auto& v : values) {
+            if constexpr (std::is_same_v<u32, T>) {
+                KeyValue32.push_back(v);
+            } else {
+                KeyValue32.push_back(*reinterpret_cast<const u32*>(&v));
+            }
+        }
+
+        return idx * sizeof(u32);
+    }
+
+    u32 insert64(u64 value) {
+        union {
+            u64 v64{};
+            u32 v32[2];
+        } uvalue = { .v64 = value };
+
+        if (Config.MultipleKV32Refs) {
+            const auto it = std::ranges::search(KeyValue32, uvalue.v32).begin();
+
+            if (it != KeyValue32.end()) {
+                return std::distance(KeyValue32.begin(), it) * sizeof(u32);
+            }
+        }
+
+        const u32 idx = static_cast<u32>(KeyValue32.size());
+        KeyValue32.push_back(uvalue.v32[0]);
+        KeyValue32.push_back(uvalue.v32[1]);
+
+        return idx * sizeof(u32);
+    }
+
+    u32 insert64(std::span<u64> values) {
+        union U6432 {
+            u64 v64{};
+            u32 v32[2];
+        };
+
+        std::vector<u32> uvalues{};
+        for (u64 v : values) {
+            U6432 u{ .v64 = v };
+            uvalues.push_back(u.v32[0]);
+            uvalues.push_back(u.v32[1]);
+        }
+
+        if (Config.MultipleKV32Refs) {
+            const auto it = std::ranges::search(KeyValue32, uvalues).begin();
+
+            if (it != KeyValue32.end()) {
+                return std::distance(KeyValue32.begin(), it) * sizeof(u32);
+            }
+        }
+
+        const u32 idx = static_cast<u32>(KeyValue32.size());
+        KeyValue32.insert_range(KeyValue32.end(), uvalues);
+
+        return idx * sizeof(u32);
+    }
+
+    u32 insert128(const vector4& value) {
+        if (Config.MultipleKV8Refs) {
+            const auto it = std::ranges::find(KeyValue128, value);
+
+            if (it != KeyValue128.end()) {
+                return std::distance(KeyValue128.begin(), it) * sizeof(vector4);
+            }
+        }
+
+        const u32 idx = static_cast<u32>(KeyValue128.size());
+        KeyValue128.push_back(value);
+
+        return idx * sizeof(vector4);
+    }
+
+    u32 insert128(std::span<const vector4> values) {
+        if (Config.MultipleKV8Refs) {
+            const auto it = std::ranges::search(KeyValue128, values).begin();
+
+            if (it != KeyValue128.end()) {
+                return std::distance(KeyValue128.begin(), it) * sizeof(vector4);
+            }
+        }
+
+        const u32 idx = static_cast<u32>(KeyValue128.size());
+        KeyValue128.insert_range(KeyValue128.end(), values);
+
+        return idx * sizeof(vector4);
+    }
 };
 
 enum class KeyValueType {

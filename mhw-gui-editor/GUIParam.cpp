@@ -146,10 +146,12 @@ void GUIParam::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers
     writer.write<u64>(KeyIndex);
 
 	switch (Type) {
-	case ParamType::BOOL: [[fallthrough]];
+	case ParamType::BOOL:
+		writer.write(kvbuffers.insert8_n(GET_VEC(bool, Values)));
+		break;
 	case ParamType::INIT_BOOL: [[fallthrough]];
 	case ParamType::INIT_INT:
-		writer.write(kvbuffers.KeyValue8.size());
+		writer.write(kvbuffers.insert8_n(GET_VEC(u8, Values)));
 		break;
 	case ParamType::INT: [[fallthrough]];
 	case ParamType::FLOAT: [[fallthrough]];
