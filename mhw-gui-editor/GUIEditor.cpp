@@ -219,8 +219,6 @@ void GUIEditor::render(u32 dockspace_id) {
         }
         ImGui::EndPopup();
     }
-
-    ImGui::ShowDemoWindow();
 }
 
 void GUIEditor::render_object_editor() {
@@ -393,9 +391,16 @@ void GUIEditor::render_overview() const {
     ImGui::RichText("<C FFC6913F>Resource Count:</C> {}", m_file.m_resources.size());
     ImGui::RichText("<C FFC6913F>GeneralResource Count:</C> {}", m_file.m_general_resources.size());
 
-    static ImVec2 points[8] = { { -1, 0 } };
+    static MtHermiteCurve curve = {
+        {0.087f, 0.154f, 0.479f, 0.527f, 0.7f, 0.738f, 0.857f, 0.921f},
+        {0.195f, 0.475f, 0.305f, 0.670f, 0.7f, 0.340f, 0.275f, 0.105f}
+    };
 
-    ImGui::Curve("Hermitecurve", { 300, 200 }, IM_ARRAYSIZE(points), points);
+    ImGui::HermiteCurve("Curve", &curve, { 400, 400 });
+    ImGui::Text("X: { %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f }", 
+        curve.x[0], curve.x[1], curve.x[2], curve.x[3], curve.x[4], curve.x[5], curve.x[6], curve.x[7]);
+    ImGui::Text("Y: { %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f }", 
+        curve.y[0], curve.y[1], curve.y[2], curve.y[3], curve.y[4], curve.y[5], curve.y[6], curve.y[7]);
 
     ImGui::End();
 }

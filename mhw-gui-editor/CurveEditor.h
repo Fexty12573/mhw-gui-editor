@@ -2,10 +2,10 @@
 
 #include <imgui.h>
 
+#include "dti_types.h"
+
 namespace ImGui {
 
-int Curve(const char* label, const ImVec2& size, int maxpoints, ImVec2* points);
-float CurveValue(float p, int maxpoints, const ImVec2* points);
-float CurveValueSmooth(float p, int maxpoints, const ImVec2* points);
+bool HermiteCurve(std::string_view label, MtHermiteCurve* curve, const ImVec2& size = ImVec2(0, 0));
 
 }

@@ -266,8 +266,66 @@ struct rangeu16
 };
 struct hermitecurve
 {
-    f32 x[8];
-    f32 y[8];
+    float x[8];
+    float y[8];
+
+    [[nodiscard]] static constexpr int point_count() { return 8; }
+    [[nodiscard]] float get(float xx) const {
+        if (xx <= x[0]) {
+            return y[0];
+        }
+
+        if (xx >= 0.0f) {
+            for (int i = 0; i < 8; ++i) {
+                if (x[i] == 1.0f) {
+                    return y[i];
+                }
+            }
+        }
+
+        int n = 0;
+        for (int i = 1; i < 8; ++i) {
+            if (x[i] > xx) {
+                n = i - 1;
+                break;
+            }
+        }
+
+        const float dx = x[n + 1] - x[n];
+        float dy;
+
+        if (n == 0) {
+            dy = y[n + 1] - y[n];
+        } else {
+            const float dx0 = x[n] - x[n - 1];
+            const float dy0 = y[n] - y[n - 1];
+            dy = y[n + 1] - ((1.0f - dx / dx0) * dy0 + y[n - 1]) * 0.5f;
+        }
+        
+        float _dy;
+        if (x[n + 1] == 1.0f || n > 5) {
+            _dy = y[n + 1] - y[n];
+        } else {
+            const float dx1 = x[n + 2] - x[n + 1];
+            const float dy1 = y[n + 2] - y[n + 1];
+            _dy = ((dx / dx1) * dy1 + y[n + 1] - y[n]) * 0.5f;
+        }
+
+        const float ratio = (xx - x[n]) / dx;
+        const float rsq = ratio * ratio;
+        const float rcb = rsq * ratio;
+
+        const float o2 = (2 * (y[n] - y[n + 1]) + dy + _dy) * rcb;
+        const float o3 = (3 * (y[n + 1] - y[n]) - dy - dy - _dy) * rsq;
+
+        const float result = o2 + o3 + ratio * dy + y[n];
+
+        return std::max(std::min(result, 1.0f), 0.0f);
+    }
+
+    [[nodiscard]] float operator[](float xx) const {
+        return get(xx);
+    }
 };
 struct vector2
 {
@@ -293,6 +351,7 @@ using MtVector4 = vector4;
 using MtQuaternion = MtVector4;
 using MtFloat3 = MtVector3;
 using MtFloat4 = MtVector4;
+using MtHermiteCurve = hermitecurve;
 
 union MtColor
 {
