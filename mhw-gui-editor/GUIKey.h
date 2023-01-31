@@ -13,6 +13,7 @@ struct GUIKey {
     static GUIKey read(BinaryReader& reader, const GUIHeader& header);
 
 	void write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const;
+	[[nodiscard]] std::string get_preview(u32 index = -1) const;
 
 	union {
 		struct {
@@ -29,5 +30,7 @@ struct GUIKey {
 	} Data;
 	u32 CurveOffset;
     hermitecurve Curve;
+
+	u32 Index;
 };
 

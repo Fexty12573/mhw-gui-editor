@@ -50,6 +50,7 @@ private:
 	void render_init_param(GUIInitParam& param) const;
 	void render_param(GUIParam& param) const;
 	void render_instance(GUIInstance& inst);
+	void render_key(GUIKey& key);
 
 	void update_indices();
 

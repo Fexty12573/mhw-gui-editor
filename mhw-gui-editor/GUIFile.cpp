@@ -380,7 +380,7 @@ void GUIFile::save_to(BinaryWriter& stream, const Settings& settings) {
     stream.write(std::span<const u8>(kv_buffers.ExtendData));
     
     header.stringOffset = stream.tell();
-    stream.write(string_buffer.data(), string_buffer.size() + 1); // +1 for the null terminator
+    stream.write(string_buffer.data(), string_buffer.size());
 
     header.vertexOffset = stream.tell();
     header.vertexBufferSize = static_cast<u32>(m_vertices.size() * GUIVertex::size);

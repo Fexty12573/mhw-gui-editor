@@ -31,6 +31,12 @@
     <Filter Include="Source Files\Utility">
       <UniqueIdentifier>{d3b9a520-f586-47c3-beba-7a558bafe14a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ImGui">
+      <UniqueIdentifier>{d99d1f9f-e002-496f-83ee-4b22052496b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ImGui">
+      <UniqueIdentifier>{95de3f57-4dc5-4e20-bc3f-396308f3f352}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md">
@@ -105,9 +111,6 @@
     <ClCompile Include="GUIMessage.cpp">
       <Filter>Source Files\rGUI</Filter>
     </ClCompile>
-    <ClCompile Include="RichText.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DDSTextureLoader.cpp">
       <Filter>Source Files\rTexture</Filter>
     </ClCompile>
@@ -137,6 +140,15 @@
     </ClCompile>
     <ClCompile Include="Console.cpp">
       <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="GroupPanel.cpp">
+      <Filter>Source Files\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="RichText.cpp">
+      <Filter>Source Files\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="CurveEditor.cpp">
+      <Filter>Source Files\ImGui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -212,9 +224,6 @@
     <ClInclude Include="GUIMessage.h">
       <Filter>Header Files\rGUI</Filter>
     </ClInclude>
-    <ClInclude Include="RichText.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DDSTextureLoader.h">
       <Filter>Header Files\rTexture</Filter>
     </ClInclude>
@@ -250,6 +259,15 @@
     </ClInclude>
     <ClInclude Include="Console.h">
       <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="GroupPanel.h">
+      <Filter>Header Files\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="RichText.h">
+      <Filter>Header Files\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="CurveEditor.h">
+      <Filter>Header Files\ImGui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

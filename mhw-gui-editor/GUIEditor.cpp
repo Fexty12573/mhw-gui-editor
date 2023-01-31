@@ -3,6 +3,7 @@
 #include "HrException.h"
 #include "RichText.h"
 #include "GroupPanel.h"
+#include "CurveEditor.h"
 #include "App.h"
 #include "IconFontAwesome.h"
 #include "crc32.h"
@@ -392,7 +393,9 @@ void GUIEditor::render_overview() const {
     ImGui::RichText("<C FFC6913F>Resource Count:</C> {}", m_file.m_resources.size());
     ImGui::RichText("<C FFC6913F>GeneralResource Count:</C> {}", m_file.m_general_resources.size());
 
-    ImGui::Text("Icon Test: " ICON_FA_FILE);
+    static ImVec2 points[8] = { { -1, 0 } };
+
+    ImGui::Curve("Hermitecurve", { 300, 200 }, IM_ARRAYSIZE(points), points);
 
     ImGui::End();
 }
@@ -651,7 +654,7 @@ void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq) {
         if (objseq.InitParamNum > 0) {
             if (ImGui::TreeNodeEx("InitParams", ImGuiTreeNodeFlags_SpanAvailWidth)) {
                 auto& initparams = m_file.m_init_params;
-                const u64 max = std::min(static_cast<u64>(objseq.InitParamIndex + objseq.InitParamNum), initparams.size());
+                const u64 max = std::min(static_cast<u64>(objseq.InitParamIndex + static_cast<u64>(objseq.InitParamNum)), initparams.size());
 
                 for (auto i = objseq.InitParamIndex; i < max; ++i) {
                     render_init_param(initparams[i]);
@@ -668,7 +671,7 @@ void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq) {
         if (objseq.ParamNum > 0) {
             if (ImGui::TreeNodeEx("Params", ImGuiTreeNodeFlags_SpanAvailWidth)) {
                 auto& params = m_file.m_params;
-                const u64 max = std::min(static_cast<u64>(objseq.ParamIndex + objseq.ParamNum), params.size());
+                const u64 max = std::min(static_cast<u64>(objseq.ParamIndex + static_cast<u64>(objseq.ParamNum)), params.size());
 
                 for (auto i = objseq.ParamIndex; i < max; ++i) {
                     render_param(params[i]);
@@ -975,7 +978,17 @@ void GUIEditor::render_param(GUIParam& param) const {
                 }
 
                 break;
+
+            case ParamType::INIT_INT32:
+                switch (param.NameCRC) {
+                case "FontStyleId"_crc:
+                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u32, i), FontStyleNames, 0xFFA3D7B8);
+                    break;
+                }
+                break;
             }
+
+            
         }
 
         ImGui::TreePop();
@@ -1042,6 +1055,24 @@ void GUIEditor::render_instance(GUIInstance& inst) {
 
     ImGui::PopID();
     ImGui::PopID();
+}
+
+void GUIEditor::render_key(GUIKey& key) {
+    constexpr u32 u32_step = 1;
+    constexpr u32 u32_fast_step = 10;
+
+    ImGui::PushID("Key");
+    ImGui::PushID(key.Index);
+
+    if (ImGui::RichTextTreeNode("Key", key.get_preview(key.Index))) {
+        u32 frame = key.Data.Bitfield.Frame;
+        u8 mode = key.Data.Bitfield.Mode_;
+
+        ImGui::InputScalar("Frame", ImGuiDataType_U32, &frame, &u32_step, &u32_fast_step);
+        ImGui::RichTextCombo("Interpolation Mode", &mode, KeyModeNames, 0xFFA3D7B8);
+
+        ImGui::TreePop();
+    }
 }
 
 #undef GET_VEC_V

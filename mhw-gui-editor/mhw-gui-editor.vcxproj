@@ -159,6 +159,7 @@
     <ClCompile Include="BinaryReader.cpp" />
     <ClCompile Include="BinaryWriter.cpp" />
     <ClCompile Include="Console.cpp" />
+    <ClCompile Include="CurveEditor.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="GroupPanel.cpp" />
     <ClCompile Include="GUIAnimation.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="BinaryWriter.h" />
     <ClInclude Include="Console.h" />
     <ClInclude Include="crc32.h" />
+    <ClInclude Include="CurveEditor.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="dti_types.h" />
     <ClInclude Include="GroupPanel.h" />
