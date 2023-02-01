@@ -27,6 +27,25 @@ bool HermiteCurve(std::string_view label, MtHermiteCurve* curve, const ImVec2& s
     bool changed = false;
     bool hovered = false;
 
+    const auto id = GetID(label.data());
+    ImGui::PushID(id);
+
+    int n_points = curve->effective_point_count();
+    const int prev_count = n_points;
+
+    ImGui::SetNextItemWidth(size.x);
+    if (SliderInt("Point Count", &n_points, 1, 8)) {
+        curve->x[n_points - 1] = 1.0f;
+
+        if (n_points > prev_count) {
+            for (int i = 0; i < (n_points - 1); ++i) {
+                if (curve->x[i] == 1.0f) {
+                    curve->x[i] -= 0.001f * i;
+                }
+            }
+        }
+    }
+
     const ImVec2 avail = GetContentRegionAvail();
     const ImVec2 bb_size = size.x > 0.0f ? size : ImVec2(avail.x, 200.0f); // TODO: make this configurable
     const ImRect bb{ window->DC.CursorPos, window->DC.CursorPos + bb_size };
@@ -36,8 +55,6 @@ bool HermiteCurve(std::string_view label, MtHermiteCurve* curve, const ImVec2& s
         return false;
     }
 
-    const auto id = GetID(label.data());
-    ImGui::PushID(id);
     RenderFrame(bb.Min, bb.Max, GetColorU32(ImGuiCol_FrameBg), true, style.FrameRounding);
 
     // Draw grid
@@ -59,8 +76,8 @@ bool HermiteCurve(std::string_view label, MtHermiteCurve* curve, const ImVec2& s
 
     // Draw curve
     for (int i = 0; i < SMOOTHNESS; ++i) {
-        const float x1 = i / (F_SMOOTHNESS - 1);
-        const float x2 = (i + 1) / (F_SMOOTHNESS - 1);
+        const float x1 = i / (F_SMOOTHNESS - 1.0f);
+        const float x2 = (i + 1) / (F_SMOOTHNESS - 1.0f);
 
         const float y1 = 1.0f - curve->get(x1); // flip y axis
         const float y2 = 1.0f - curve->get(x2); 
@@ -92,7 +109,7 @@ bool HermiteCurve(std::string_view label, MtHermiteCurve* curve, const ImVec2& s
     }
 
     int closest = 0;
-    for (int i = 1; i < point_count; ++i) {
+    for (int i = 1; i < n_points; ++i) {
         if (point_dist[i] < point_dist[closest]) {
             closest = i;
         }
@@ -108,17 +125,18 @@ bool HermiteCurve(std::string_view label, MtHermiteCurve* curve, const ImVec2& s
             float& y = curve->y[closest];
             const auto& io = GetIO();
 
-            x = std::clamp((io.MousePos.x - bb.Min.x) / bb_size.x, 0.0f, 1.0f);
             y = 1.0f - std::clamp((io.MousePos.y - bb.Min.y) / bb_size.y, 0.0f, 1.0f);
-            /*x = std::clamp(x + io.MouseDelta.x / bb_size.x, 0.0f, 1.0f);
-            y = std::clamp(y - io.MouseDelta.y / bb_size.y, 0.0f, 1.0f);*/
 
-            if (closest > 0) {
-                x = std::max(x, curve->x[closest - 1] + 0.001f);
-            }
+            if (x != 1.0f) {
+                x = std::clamp((io.MousePos.x - bb.Min.x) / bb_size.x, 0.0f, 1.0f);
 
-            if (closest < point_count - 1) {
-                x = std::min(x, curve->x[closest + 1] - 0.001f);
+                if (closest > 0) {
+                    x = std::max(x, curve->x[closest - 1] + 0.001f);
+                }
+
+                if (closest < point_count - 1) {
+                    x = std::min(x, curve->x[closest + 1] - 0.001f);
+                }
             }
 
             changed = true;
@@ -126,7 +144,7 @@ bool HermiteCurve(std::string_view label, MtHermiteCurve* curve, const ImVec2& s
     }
 
     // Draw points
-    for (int i = 0; i < point_count; ++i) {
+    for (int i = 0; i < n_points; ++i) {
         const float point_size = (i == closest) && hovered ? POINT_SIZE_SELECTED : POINT_SIZE;
         const float x = curve->x[i];
         const float y = 1.0f - curve->y[i]; // flip y

@@ -270,6 +270,15 @@ struct hermitecurve
     float y[8];
 
     [[nodiscard]] static constexpr int point_count() { return 8; }
+    [[nodiscard]] int effective_point_count() const {
+        for (int i = 0; i < point_count(); ++i) {
+            if (x[i] == 1.0f) {
+                return i + 1;
+            }
+        }
+
+        return point_count();
+    }
     [[nodiscard]] float get(float xx) const {
         if (xx <= x[0]) {
             return y[0];
