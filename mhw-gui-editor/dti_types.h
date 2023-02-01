@@ -308,7 +308,7 @@ struct hermitecurve
         } else {
             const float dx0 = x[n] - x[n - 1];
             const float dy0 = y[n] - y[n - 1];
-            dy = y[n + 1] - ((1.0f - dx / dx0) * dy0 + y[n - 1]) * 0.5f;
+            dy = (y[n + 1] - ((1.0f - dx / dx0) * dy0 + y[n - 1])) * 0.5f;
         }
         
         float _dy;
