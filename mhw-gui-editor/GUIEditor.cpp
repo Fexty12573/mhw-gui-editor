@@ -392,7 +392,7 @@ void GUIEditor::render_overview() const {
     ImGui::RichText("<C FFC6913F>GeneralResource Count:</C> {}", m_file.m_general_resources.size());
 
     static MtHermiteCurve curve = {
-        {0.087f, 0.154f, 0.479f, 0.527f, 0.7f, 0.738f, 0.857f, 0.921f},
+        {0.087f, 0.154f, 0.479f, 0.527f, 0.7f, 0.738f, 0.857f, 1.0f},
         {0.195f, 0.475f, 0.305f, 0.670f, 0.7f, 0.340f, 0.275f, 0.105f}
     };
 
