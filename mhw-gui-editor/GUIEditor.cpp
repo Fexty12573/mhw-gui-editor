@@ -840,7 +840,7 @@ void GUIEditor::render_init_param(GUIInitParam& param) const {
 
 #define GET_VEC_V(V, TYPE, IDX) std::get<std::vector<TYPE>>(V)[IDX]
 
-void GUIEditor::render_param(GUIParam& param) const {
+void GUIEditor::render_param(GUIParam& param) {
     using namespace crc::literals;
     constexpr u32 u32_step = 1;
     constexpr u32 u32_fast_step = 10;
@@ -849,8 +849,26 @@ void GUIEditor::render_param(GUIParam& param) const {
     ImGui::PushID(param.Index);
 
     if (ImGui::RichTextTreeNode("Param", param.get_preview(param.Index))) {
-        ImGui::RichTextCombo("Type", reinterpret_cast<u8*>(&param.Type), ParamTypeNames, 0xFFB0C94E);
-        ImGui::InputScalar("Count", ImGuiDataType_U8, &param.ValueCount, &u32_step, &u32_fast_step);
+        if (ImGui::RichTextCombo("Type", reinterpret_cast<u8*>(&param.Type), ParamTypeNames, 0xFFB0C94E)) {
+            param.perform_value_operation(
+                [](auto, auto& p) { p.Values = std::vector<u8>(p.ValueCount, 0); },
+                [](auto, auto& p) { p.Values = std::vector<u32>(p.ValueCount, 0); },
+                [](auto, auto& p) { p.Values = std::vector<f32>(p.ValueCount, 0.0f); },
+                [](auto, auto& p) { p.Values = std::vector<MtVector4>(p.ValueCount, MtVector4{}); },
+                [](auto, auto& p) { p.Values = std::vector<std::string>(p.ValueCount, ""); },
+                false
+            );
+        }
+
+        if (ImGui::InputScalar("Count", ImGuiDataType_U8, &param.ValueCount, &u32_step, &u32_fast_step)) {
+            param.perform_value_operation(
+                [](auto v, auto& p) { v->resize(p.ValueCount, 0); },
+                [](auto v, auto& p) { v->resize(p.ValueCount, 0); },
+                [](auto v, auto& p) { v->resize(p.ValueCount, 0.0f); },
+                [](auto v, auto& p) { v->resize(p.ValueCount, MtVector4{}); },
+                [](auto v, auto& p) { v->resize(p.ValueCount, ""); }
+            );
+        }
         ImGui::InputText("Name", &param.Name);
 
         for (auto i = 0u; i < param.ValueCount; ++i) {
@@ -996,6 +1014,16 @@ void GUIEditor::render_param(GUIParam& param) const {
             
         }
 
+        if (ImGui::TreeNode("Keyframes")) {
+            const u64 max = std::min(static_cast<u64>(param.KeyIndex + param.ValueCount), m_file.m_keys.size());
+
+            for (auto i = param.KeyIndex; i < max; i++) {
+                render_key(m_file.m_keys[i], param.Type);
+            }
+
+            ImGui::TreePop();
+        }
+
         ImGui::TreePop();
     }
 
@@ -1062,7 +1090,7 @@ void GUIEditor::render_instance(GUIInstance& inst) {
     ImGui::PopID();
 }
 
-void GUIEditor::render_key(GUIKey& key) {
+void GUIEditor::render_key(GUIKey& key, ParamType type) const {
     constexpr u32 u32_step = 1;
     constexpr u32 u32_fast_step = 10;
 
@@ -1075,9 +1103,23 @@ void GUIEditor::render_key(GUIKey& key) {
 
         ImGui::InputScalar("Frame", ImGuiDataType_U32, &frame, &u32_step, &u32_fast_step);
         ImGui::RichTextCombo("Interpolation Mode", &mode, KeyModeNames, 0xFFA3D7B8);
+        if (type != ParamType::FLOAT && type != ParamType::VECTOR && 
+            type != ParamType::INT && type != ParamType::UNKNOWN) {
+            ImGui::TextColored({ 1.0f, 1.0f, 0.2f, 1.0f }, "Note: Interpolation Mode only works for float, vector and int types.");
+        } else {
+            if (key.Data.Named.Mode == KeyMode::HERMITE2) {
+                ImGui::HermiteCurve("Curve", &key.Curve, { 350, 350 });
+            }
+        }
+
+        key.Data.Bitfield.Frame = frame;
+        key.Data.Bitfield.Mode_ = mode;
 
         ImGui::TreePop();
     }
+
+    ImGui::PopID();
+    ImGui::PopID();
 }
 
 #undef GET_VEC_V
@@ -1092,6 +1134,7 @@ void GUIEditor::update_indices() {
     UPDATE_INDEX_LOOP(m_file.m_init_params, Index);
     UPDATE_INDEX_LOOP(m_file.m_params, Index);
     UPDATE_INDEX_LOOP(m_file.m_instances, Index);
+    UPDATE_INDEX_LOOP(m_file.m_keys, Index);
 }
 
 void GUIEditor::select_chunk_dir() {

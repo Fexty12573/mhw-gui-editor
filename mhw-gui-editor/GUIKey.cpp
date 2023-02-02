@@ -11,6 +11,11 @@ GUIKey GUIKey::read(BinaryReader& reader, const GUIHeader& header) {
 
     if (key.CurveOffset != 0) {
         key.Curve = reader.abs_offset_read<hermitecurve>(header.extendDataOffset + key.CurveOffset);
+    } else {
+        key.Curve = {
+            .x = {0.0f, 1.0f, 0, 0, 0, 0, 0, 0},
+            .y = {0.0f, 1.0f, 0, 0, 0, 0, 0, 0}
+        };
     }
 
     return key;
@@ -35,8 +40,8 @@ void GUIKey::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& 
 std::string GUIKey::get_preview(u32 index) const {
     const auto mode = static_cast<KeyMode>(Data.Bitfield.Mode_);
     if (index == -1) {
-        return std::format("KeyFrame<C FFA3D7B8>{}</C>: <C FFB0C94E>{}</C>", Data.Bitfield.Frame, enum_to_string(mode));
+        return std::format("KeyFrame<<C FFA3D7B8>{}</C>>: <C FFB0C94E>{}</C>", Data.Bitfield.Frame, enum_to_string(mode));
     }
 
-    return std::format("[<C FFA3D7B8>{}</C>] KeyFrame<C FFA3D7B8>{}</C>: <C FFB0C94E>{}</C>", index, Data.Bitfield.Frame, enum_to_string(mode));
+    return std::format("[<C FFA3D7B8>{}</C>] KeyFrame<<C FFA3D7B8>{}</C>>: <C FFB0C94E>{}</C>", index, Data.Bitfield.Frame, enum_to_string(mode));
 }

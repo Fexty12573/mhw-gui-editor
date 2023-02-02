@@ -48,9 +48,9 @@ private:
 	void render_sequence(GUISequence& seq) const;
 	void render_obj_sequence(GUIObjectSequence& objseq);
 	void render_init_param(GUIInitParam& param) const;
-	void render_param(GUIParam& param) const;
+	void render_param(GUIParam& param);
 	void render_instance(GUIInstance& inst);
-	void render_key(GUIKey& key);
+	void render_key(GUIKey& key, ParamType type = ParamType::UNKNOWN) const;
 
 	void update_indices();
 

@@ -188,7 +188,6 @@ void GUIParam::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers
 	}
 }
 
-#undef GET_VEC
 
 std::string GUIParam::get_preview(u32 index) const {
 	const std::string fmt = "Param: <C FFB0C94E>{}</C> <C FFFEDC9C>{}</C>";
@@ -207,3 +206,48 @@ std::string GUIParam::get_preview(u32 index) const {
 	
 	return std::vformat("[<C FFA3D7B8>{}</C>] " + fmt, std::make_format_args(index, enum_to_string(Type), Name));
 }
+
+void GUIParam::perform_value_operation(OpFunc<u8>&& u8op, OpFunc<u32>&& u32op, OpFunc<f32>&& f32op,
+    OpFunc<vector4>&& vec4op, OpFunc<std::string>&& strop, bool pass_vector) {
+    switch (Type) {
+	case ParamType::UNKNOWN:
+		break;
+	case ParamType::BOOL: [[fallthrough]];
+	case ParamType::INIT_BOOL: [[fallthrough]];
+	case ParamType::INIT_INT: {
+        u8op(pass_vector ? &GET_VEC(u8, Values) : nullptr, *this);
+		break;
+	}
+    case ParamType::STRING: {
+		strop(pass_vector ? &GET_VEC(std::string, Values) : nullptr, *this);
+		break;
+	}
+	case ParamType::INT: [[fallthrough]];
+	case ParamType::RESOURCE: [[fallthrough]];
+	case ParamType::TEXTURE: [[fallthrough]];
+	case ParamType::FONT: [[fallthrough]];
+	case ParamType::MESSAGE: [[fallthrough]];
+	case ParamType::VARIABLE: [[fallthrough]];
+	case ParamType::ANIMATION: [[fallthrough]];
+	case ParamType::EVENT: [[fallthrough]];
+	case ParamType::GUIRESOURCE: [[fallthrough]];
+	case ParamType::FONT_FILTER: [[fallthrough]];
+	case ParamType::SEQUENCE: [[fallthrough]];
+	case ParamType::GENERALRESOURCE: [[fallthrough]];
+	case ParamType::INIT_INT32: {
+		u32op(pass_vector ? &GET_VEC(u32, Values) : nullptr, *this);
+		break;
+	}
+	case ParamType::VECTOR: {
+        vec4op(pass_vector ? &GET_VEC(vector4, Values) : nullptr, *this);
+		break;
+	}
+	case ParamType::FLOAT:
+	case ParamType::ANIMEVENT: {
+        f32op(pass_vector ? &GET_VEC(f32, Values) : nullptr, *this);
+		break;
+	}
+	}
+}
+
+#undef GET_VEC
