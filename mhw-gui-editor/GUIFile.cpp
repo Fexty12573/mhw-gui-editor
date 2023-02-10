@@ -393,3 +393,198 @@ void GUIFile::save_to(BinaryWriter& stream, const Settings& settings) {
     stream.seek_absolute(0);
     stream.write(header);
 }
+
+void GUIFile::insert_animation(GUIAnimation anim, s32 index, bool) {
+    if (index < 0) {
+        m_animations.emplace_back(std::move(anim));
+        return;
+    }
+
+    m_animations.emplace(m_animations.begin() + index, std::move(anim));
+}
+
+void GUIFile::insert_sequence(GUISequence seq, s32 index, bool update_indices) {
+    if (index < 0) {
+        m_sequences.emplace_back(std::move(seq));
+        return;
+    }
+
+    m_sequences.emplace(m_sequences.begin() + index, std::move(seq));
+
+    if (update_indices) {
+        for (auto& anim : m_animations) {
+            if (anim.SequenceIndex >= index) {
+                ++anim.SequenceIndex;
+            }
+        }
+    }
+}
+
+void GUIFile::insert_object(GUIObject obj, s32 index, bool update_indices) {
+    if (index < 0) {
+        m_objects.emplace_back(std::move(obj));
+        return;
+    }
+
+    m_objects.emplace(m_objects.begin() + index, std::move(obj));
+
+    if (update_indices) {
+        for (auto& anim : m_animations) {
+            if (anim.RootObjectIndex >= index) {
+                ++anim.RootObjectIndex;
+            }
+        }
+    }
+}
+
+void GUIFile::insert_object_sequence(GUIObjectSequence objseq, s32 index, bool update_indices) {
+    if (index < 0) {
+        m_obj_sequences.emplace_back(objseq);
+        return;
+    }
+
+    m_obj_sequences.emplace(m_obj_sequences.begin() + index, objseq);
+
+    if (update_indices) {
+        for (auto& obj : m_objects) {
+            if (obj.ObjectSequenceIndex >= index) {
+                ++obj.ObjectSequenceIndex;
+            }
+        }
+    }
+}
+
+void GUIFile::insert_init_param(GUIInitParam param, s32 index, bool update_indices) {
+    if (index < 0) {
+        m_init_params.emplace_back(std::move(param));
+        return;
+    }
+
+    m_init_params.emplace(m_init_params.begin() + index, std::move(param));
+
+    if (update_indices) {
+        // Objects, Instances, ObjectSequences
+        auto update_init_param_indices = [&](auto& container) {
+            for (auto& obj : container) {
+                if (obj.InitParamIndex >= index) {
+                    ++obj.InitParamIndex;
+                }
+            }
+        };
+
+        update_init_param_indices(m_objects);
+        update_init_param_indices(m_instances);
+        update_init_param_indices(m_obj_sequences);
+    }
+}
+
+void GUIFile::insert_param(GUIParam param, s32 index, bool update_indices) {
+    if (index < 0) {
+        m_params.emplace_back(std::move(param));
+        return;
+    }
+
+    m_params.emplace(m_params.begin() + index, std::move(param));
+
+    if (update_indices) {
+        for (auto& objseq : m_obj_sequences) {
+            if (objseq.ParamIndex >= index) {
+                ++objseq.ParamIndex;
+            }
+        }
+    }
+}
+
+void GUIFile::insert_key(GUIKey key, s32 index, bool update_indices) {
+    if (index < 0) {
+        m_keys.emplace_back(key);
+        return;
+    }
+
+    m_keys.emplace(m_keys.begin() + index, key);
+
+    if (update_indices) {
+        for (auto& param : m_params) {
+            if (param.KeyIndex >= index) {
+                ++param.KeyIndex;
+            }
+        }
+    }
+}
+
+void GUIFile::insert_instance(GUIInstance inst, s32 index, bool update_indices) {
+    if (index < 0) {
+        m_instances.emplace_back(std::move(inst));
+        return;
+    }
+
+    m_instances.emplace(m_instances.begin() + index, std::move(inst));
+
+    if (update_indices) {
+        if (m_start_instance_index >= index) {
+            ++m_start_instance_index;
+        }
+    }
+}
+
+void GUIFile::insert_flow(GUIFlow flow, s32 index, bool update_indices) {
+    if (index < 0) {
+        m_flows.emplace_back(std::move(flow));
+        return;
+    }
+
+    m_flows.emplace(m_flows.begin() + index, std::move(flow));
+
+    if (update_indices) {
+        if (m_header.startFlowIndex >= index) {
+            ++m_header.startFlowIndex;
+        }
+
+        for (auto& _flow : m_flows) {
+            if (_flow.Type == FlowType::START && _flow.FlowProcessIndex >= index) {
+                ++_flow.FlowProcessIndex;
+            }
+        }
+
+        for (auto& fp : m_flow_processes) {
+            if (fp.FlowIndex >= index) {
+                ++fp.FlowIndex;
+            }
+        }
+    }
+}
+
+void GUIFile::insert_flow_process(GUIFlowProcess flow, s32 index, bool update_indices) {
+    if (index < 0) {
+        m_flow_processes.emplace_back(std::move(flow));
+        return;
+    }
+
+    m_flow_processes.emplace(m_flow_processes.begin() + index, std::move(flow));
+
+    if (update_indices) {
+        for (auto& _flow : m_flows) {
+            if (_flow.Type == FlowType::PROCESS && _flow.FlowProcessIndex >= index) {
+                ++_flow.FlowProcessIndex;
+            }
+        }
+    }
+}
+
+void GUIFile::insert_texture(GUITexture tex, s32 index, bool) {
+    if (index < 0) {
+        m_textures.emplace_back(std::move(tex));
+        return;
+    }
+
+    m_textures.emplace(m_textures.begin() + index, std::move(tex));
+}
+
+void GUIFile::insert_font_filter(std::shared_ptr<GUIFontFilter> filter, s32 index, bool) {
+    if (index < 0) {
+        m_font_filters.emplace_back(std::move(filter));
+        return;
+    }
+
+    m_font_filters.emplace(m_font_filters.begin() + index, std::move(filter));
+}

@@ -39,6 +39,23 @@ public:
 
     void save_to(BinaryWriter& stream, const Settings& settings);
 
+    void insert_animation(GUIAnimation anim, s32 index = -1, bool update_indices = true);
+    void insert_sequence(GUISequence seq, s32 index = -1, bool update_indices = true);
+    void insert_object(GUIObject obj, s32 index = -1, bool update_indices = true);
+    void insert_object_sequence(GUIObjectSequence objseq, s32 index = -1, bool update_indices = true);
+    void insert_init_param(GUIInitParam param, s32 index = -1, bool update_indices = true);
+    void insert_param(GUIParam param, s32 index = -1, bool update_indices = true);
+    void insert_key(GUIKey key, s32 index = -1, bool update_indices = true);
+    void insert_instance(GUIInstance inst, s32 index = -1, bool update_indices = true);
+    void insert_flow(GUIFlow flow, s32 index = -1, bool update_indices = true);
+    void insert_flow_process(GUIFlowProcess flow, s32 index = -1, bool update_indices = true);
+    void insert_texture(GUITexture tex, s32 index = -1, bool update_indices = true);
+    void insert_font_filter(std::shared_ptr<GUIFontFilter> filter, s32 index = -1, bool update_indices = true);
+
+    template<class T> [[nodiscard]] u32 get_unused_id(const std::vector<T>& vec) const {
+        
+    }
+
 	friend class GUIEditor;
 
 private:
@@ -69,6 +86,5 @@ private:
 	std::vector<GUIResource> m_resources;
 	std::vector<GUIGeneralResource> m_general_resources;
     std::vector<GUIVertex> m_vertices;
-	std::vector<u8> m_extend_data;
 };
 
