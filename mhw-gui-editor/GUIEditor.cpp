@@ -421,7 +421,7 @@ void GUIEditor::render_resource_manager() {
             node_flags |= ImGuiTreeNodeFlags_Selected;
         }
 
-        const bool open = ImGui::TreeNodeEx(tex.Name.c_str(), node_flags);
+        const bool open = ImGui::TreeNodeEx(std::format("{} | {}", tex.Name, tex.Path).c_str(), node_flags);
         if (ImGui::IsItemClicked()) {
             m_selected_texture = i;
         }

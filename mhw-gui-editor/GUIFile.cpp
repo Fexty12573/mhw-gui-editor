@@ -192,7 +192,7 @@ void GUIFile::run_data_usage_analysis(bool log_overlapping_offsets) const {
             }
 
             spdlog::info("[InitParam] The following {} offsets are used multiple times:", enum_to_string(kvt));
-            for (const auto& [offset, count] : iparam_data) {
+            for (const auto& [offset, count] : iparam_data | std::views::filter([](const auto& p) {return std::get<1>(p) > 1; })) {
                 spdlog::info("{:08X}: {} times", offset, count);
             }
         }
