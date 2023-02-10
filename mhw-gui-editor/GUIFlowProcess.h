@@ -28,7 +28,7 @@ struct GUIFlowProcess {
 	u32 ActionNum;
 	EndConditionType EndCondition;
 	u32 EndConditionParam;
-	u32 NextIndex;
+	u32 FlowIndex;
 	u32 ActionIndex;
 };
 
