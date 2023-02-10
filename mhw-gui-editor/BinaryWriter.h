@@ -19,6 +19,11 @@ public:
         m_file.write(reinterpret_cast<const char*>(&v), sizeof(T));
     }
 
+    template<typename ...Args>
+    void write_tuple(const std::tuple<Args...>& v) {
+        std::apply([this](const auto&... args) { (write(args), ...); }, v);
+    }
+
     void write(const std::string& v, bool nullterminator = true);
     void write(const char* str, size_t size);
 

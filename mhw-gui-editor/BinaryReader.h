@@ -76,6 +76,12 @@ public:
 	[[nodiscard]] std::streampos tell();
 	[[nodiscard]] size_t size() const noexcept;
 
+	[[nodiscard]] std::ios_base::iostate state() const noexcept;
+    [[nodiscard]] bool good() const noexcept;
+    [[nodiscard]] bool eof() const noexcept;
+    [[nodiscard]] bool fail() const noexcept;
+    [[nodiscard]] bool bad() const noexcept;
+
 private:
 	std::ifstream m_file;
 	size_t m_size;

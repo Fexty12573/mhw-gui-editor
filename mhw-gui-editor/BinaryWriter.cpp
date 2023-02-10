@@ -1,9 +1,17 @@
 #include "pch.h"
 #include "BinaryWriter.h"
 
-BinaryWriter::BinaryWriter(const std::string& path) : m_file(path, std::ios::binary | std::ios::trunc) {}
+BinaryWriter::BinaryWriter(const std::string& path) : m_file(path, std::ios::binary | std::ios::trunc) {
+#ifdef _DEBUG
+    m_file.exceptions(m_file.exceptions() | std::ios::failbit | std::ios::badbit);
+#endif
+}
 
-BinaryWriter::BinaryWriter(const std::filesystem::path& path) : m_file(path, std::ios::binary | std::ios::trunc) {}
+BinaryWriter::BinaryWriter(const std::filesystem::path& path) : m_file(path, std::ios::binary | std::ios::trunc) {
+#ifdef _DEBUG
+    m_file.exceptions(m_file.exceptions() | std::ios::failbit | std::ios::badbit);
+#endif
+}
 
 void BinaryWriter::write(const std::string& v, bool nullterminator) {
     m_file.write(v.c_str(), v.size() + (nullterminator ? 1 : 0));

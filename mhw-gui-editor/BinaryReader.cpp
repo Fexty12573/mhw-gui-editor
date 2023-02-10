@@ -9,6 +9,10 @@ BinaryReader::BinaryReader(const std::string& path) : m_file(path, std::ios::bin
 	m_file.seekg(0, std::ios::end);
 	m_size = m_file.tellg();
 	m_file.seekg(0, std::ios::beg);
+
+#ifdef _DEBUG
+	m_file.exceptions(m_file.exceptions() | std::ios::failbit | std::ios::badbit);
+#endif
 }
 
 BinaryReader::BinaryReader(const std::filesystem::path& path) : m_file(path, std::ios::binary) {
@@ -19,6 +23,10 @@ BinaryReader::BinaryReader(const std::filesystem::path& path) : m_file(path, std
 	m_file.seekg(0, std::ios::end);
 	m_size = m_file.tellg();
 	m_file.seekg(0, std::ios::beg);
+
+#ifdef _DEBUG
+	m_file.exceptions(m_file.exceptions() | std::ios::failbit | std::ios::badbit);
+#endif
 }
 
 std::string BinaryReader::read_string(std::streamsize length) {
@@ -105,4 +113,24 @@ std::streampos BinaryReader::tell() {
 
 size_t BinaryReader::size() const noexcept {
 	return m_size;
+}
+
+std::ios_base::iostate BinaryReader::state() const noexcept {
+	return m_file.rdstate();
+}
+
+bool BinaryReader::good() const noexcept {
+    return m_file.good();
+}
+
+bool BinaryReader::eof() const noexcept {
+    return m_file.eof();
+}
+
+bool BinaryReader::fail() const noexcept {
+    return m_file.fail();
+}
+
+bool BinaryReader::bad() const noexcept {
+    return m_file.bad();
 }
