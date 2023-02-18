@@ -152,7 +152,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="..\README.md" />
-    <None Include="imgui_theme_setup_to_toml.py" />
+    <None Include="data\gui_object_param_getter.py" />
+    <None Include="gui_object_param_getter.py" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />

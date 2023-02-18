@@ -53,7 +53,7 @@ public:
     void insert_font_filter(std::shared_ptr<GUIFontFilter> filter, s32 index = -1, bool update_indices = true);
 
     template<class T> [[nodiscard]] u32 get_unused_id(const std::vector<T>& vec) const {
-        
+        return std::ranges::max_element(vec, [](const T& a, const T& b) { return a.ID < b.ID; })->ID + 1;
     }
 
 	friend class GUIEditor;

@@ -7,6 +7,7 @@
 #include "App.h"
 #include "IconFontAwesome.h"
 #include "crc32.h"
+#include "Console.h"
 
 #include <fmt/format.h>
 #include <imgui_internal.h>
@@ -15,7 +16,7 @@
 #include <ShObjIdl.h>
 #include <wrl.h>
 #include <ranges>
-
+#include <nlohmann/json.hpp>
 
 GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
     HR_INIT(S_OK);
@@ -52,6 +53,26 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
 
     fonts->AddFontFromFileTTF("./fonts/Font Awesome 6 Free-Solid-900.otf", 16.0f, &config, icon_ranges);
     fonts->Build();
+
+    nlohmann::json object_info;
+
+    try {
+        std::ifstream("./data/cGUIObject.json") >> object_info;
+    } catch (const std::exception& e) {
+        spdlog::error("Failed to load cGUIObject.json: {}", e.what());
+    }
+
+    for (const auto& [key, value] : object_info.items()) {
+        ObjectInfo info{};
+        info.Name = key;
+        info.Type = ObjectTypeNamesReversed.at(info.Name);
+
+        for (const auto& field : value["Fields"]) {
+            info.Params[field.value("Name", "N/A")] = static_cast<ParamType>(field.value("Type", 0));
+        }
+
+        m_object_info[key] = std::move(info);
+    }
 }
 
 void GUIEditor::add_menu_item(const std::string& menu, const MenuItem& item) {
@@ -102,6 +123,7 @@ void GUIEditor::render(u32 dockspace_id) {
     }
 
     bool open_options_window = false;
+    bool open_extract_window = false;
 
     if (ImGui::BeginMainMenuBar()) {
         for (const auto& [menu, items] : m_menu_items) {
@@ -143,6 +165,14 @@ void GUIEditor::render(u32 dockspace_id) {
 
             if (ImGui::MenuItem(ICON_FA_GEARS " Options")) {
                 open_options_window = true;
+            }
+
+            if (ImGui::MenuItem(ICON_FA_FILE_PEN " Extract GUI Object Data")) {
+                dump_object_data();
+            }
+
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Extracts the InitParams of all GUI objects found in GUI files in the selected directory.");
             }
 
             ImGui::EndMenu();
@@ -310,7 +340,7 @@ void GUIEditor::save_file_as() {
     HR_ASSERT(dialog->SetFileTypes(ARRAYSIZE(filters), filters));
     HR_ASSERT(dialog->SetDefaultExtension(L"gui"));
     HR_ASSERT(dialog->SetOptions(
-        FOS_STRICTFILETYPES | FOS_PATHMUSTEXIST
+        FOS_STRICTFILETYPES | FOS_PATHMUSTEXIST | FOS_OVERWRITEPROMPT
     ));
 
     if (dialog->Show(nullptr) == HRESULT_FROM_WIN32(ERROR_CANCELLED)) {
@@ -426,6 +456,62 @@ void GUIEditor::render_overview() const {
 
 void GUIEditor::render_resource_manager() {
     ImGui::Begin("Resource Manager");
+
+    {
+        static constexpr std::array ResourceTypes = {
+            "Texture",
+            "Message",
+            "Resource",
+            "GeneralResource"
+        };
+
+        static std::string name;
+        static u32 id = 0;
+        static int type = 0;
+        static ObjectType obj_type = ObjectType::None;
+
+        if (ImGui::Button("Add New Resource")) {
+            ImGui::OpenPopup("Add New Resource##popup");
+
+            name = "";
+            id = m_file.get_unused_id(m_file.m_textures);
+            type = 0;
+        }
+
+        if (ImGui::BeginPopupModal("Add New Resource##popup")) {
+            ImGui::Combo("Type", &type, ResourceTypes.data(), ResourceTypes.size());
+            if (type == 0) {
+                ImGui::InputText("Name", &name);
+            } else if (type == 3) {
+                if (ImGui::BeginCombo("Object Type", enum_to_string(obj_type))) {
+                    for (const auto& [key, value] : ObjectTypeNames) {
+                        if (ImGui::Selectable(value, obj_type == key)) {
+                            obj_type = key;
+                        }
+                    }
+
+                    ImGui::EndCombo();
+                }
+            }
+
+            ImGui::InputScalar("ID", ImGuiDataType_U32, &id, nullptr, nullptr, "%u");
+            ImGui::Separator();
+
+            if (ImGui::Button("Add")) {
+                switch (type) {
+                case 0: m_file.insert_texture({ .ID = id, .Name = name }); break;
+                case 1: m_file.m_messages.push_back({ .ID = id }); break;
+                case 2: m_file.m_resources.push_back({ .ID = id }); break;
+                case 3: m_file.m_general_resources.push_back({ .ID = id }); break;
+                default: break;
+                }
+
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+        }
+    }
 
     constexpr ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
     constexpr u32 u32_step = 1;
@@ -621,7 +707,7 @@ void GUIEditor::render_object(GUIObject& obj, u32 seq_count) {
             if (ImGui::TreeNodeEx("InitParams", ImGuiTreeNodeFlags_SpanAvailWidth)) {
                 const u64 max = std::min(static_cast<u64>(obj.InitParamIndex + obj.InitParamNum), m_file.m_init_params.size());
                 for (auto i = obj.InitParamIndex; i < max; ++i) {
-                    render_init_param(m_file.m_init_params[i]);
+                    render_init_param(m_file.m_init_params[i], obj.Type);
                 }
 
                 if (obj.InitParamIndex + static_cast<u64>(obj.InitParamNum) > m_file.m_init_params.size()) {
@@ -726,7 +812,7 @@ void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq) {
     ImGui::PopID();
 }
 
-void GUIEditor::render_init_param(GUIInitParam& param) const {
+void GUIEditor::render_init_param(GUIInitParam& param, ObjectType source_object) const {
     using namespace crc::literals;
     constexpr u32 u32_step = 1;
     constexpr u32 u32_fast_step = 10;
@@ -734,10 +820,44 @@ void GUIEditor::render_init_param(GUIInitParam& param) const {
     ImGui::PushID("InitParam");
     ImGui::PushID(param.Index);
 
-    if (ImGui::RichTextTreeNode("InitParam", param.get_preview(param.Index))) {
+    bool invalid_name = false;
+    bool invalid_type = false;
+    ParamType correct_type = param.Type;
+
+    const std::string source_object_name = enum_to_string(source_object);
+    if (source_object != ObjectType::None) {
+        if (m_object_info.contains(source_object_name)) {
+            const auto& object_info = m_object_info.at(source_object_name);
+            if (object_info.Params.contains(param.Name)) {
+                if (object_info.Params.at(param.Name) != param.Type) {
+                    invalid_type = true;
+                    correct_type = object_info.Params.at(param.Name);
+                }
+            } else {
+                invalid_name = true;
+            }
+        }
+    }
+
+    const bool open = ImGui::RichTextTreeNode("InitParam", param.get_preview(param.Index));
+    const ImVec4 warning_color = { 1.0f, 1.0f, 0.2f, 1.0f };
+
+    if (invalid_name || invalid_type) {
+        ImGui::SameLine();
+        ImGui::TextColored(warning_color, " " ICON_FA_TRIANGLE_EXCLAMATION);
+    }
+
+    if (open) {
+        if (invalid_name) {
+            ImGui::TextColored(warning_color, "Warning: Name does not exist in the original object!");
+        } else if (invalid_type) {
+            ImGui::TextColored(warning_color, "Warning: Type does not match the original type. Should be %s!", enum_to_string(correct_type));
+        }
+
         ImGui::Checkbox("Use", &param.Use);
         ImGui::RichTextCombo("Type", reinterpret_cast<u8*>(&param.Type), ParamTypeNames, 0xFFB0C94E);
         ImGui::InputText("Name", &param.Name);
+
 
         switch (param.Type) {
         case ParamType::UNKNOWN:
@@ -1226,7 +1346,65 @@ std::filesystem::path GUIEditor::open_folder_dialog(std::wstring_view title) con
     return path;
 }
 
-#undef UPDATE_INDEX_LOOP
+void GUIEditor::dump_object_data() const {
+    const auto dir = open_folder_dialog(L"Select a search directory");
+
+    nlohmann::json data = nlohmann::json::object();
+    GUIFile gui{};
+
+    auto object_contains_field = [](const nlohmann::json& object, std::string_view name) {
+        return std::ranges::any_of(object["Fields"], [&](const auto& field) {
+            return field.value("Name", "") == name;
+        });
+    };
+
+    for (const auto& file : std::filesystem::recursive_directory_iterator(dir)) {
+        if (file.path().extension() == ".gui") {
+            BinaryReader reader(file.path().string());
+            gui.load_from(reader);
+
+            for (const auto& obj : gui.m_objects) {
+                if (data.contains(enum_to_string(obj.Type))) {
+                    for (auto i = 0; i < obj.InitParamNum; ++i) {
+                        const auto& param = gui.m_init_params[i + obj.InitParamIndex];
+                        auto& jobj = data[enum_to_string(obj.Type)];
+                        if (!object_contains_field(jobj, param.Name)) {
+                            jobj["Fields"].push_back({
+                                {"Name", param.Name},
+                                {"Type", std::to_underlying(param.Type)}
+                            });
+                        }
+                    }
+
+                    continue;
+                }
+
+                auto type = nlohmann::json::object();
+                auto fields = nlohmann::json::array();
+
+                type["Name"] = enum_to_string(obj.Type);
+
+                for (auto i = 0; i < obj.InitParamNum; ++i) {
+                    const auto& param = gui.m_init_params[i + obj.InitParamIndex];
+
+                    auto field = nlohmann::json::object();
+                    field["Name"] = param.Name;
+                    field["Type"] = std::to_underlying(param.Type);
+
+                    fields.push_back({
+                        {"Name", param.Name},
+                        {"Type", std::to_underlying(param.Type)}
+                    });
+                }
+
+                type["Fields"] = fields;
+                data[enum_to_string(obj.Type)] = type;
+            }
+        }
+    }
+
+    std::ofstream("cGUIObject.json") << data.dump(4);
+}
 
 void GUIEditor::open_animation_editor() {
     if (m_animation_editor_first) {

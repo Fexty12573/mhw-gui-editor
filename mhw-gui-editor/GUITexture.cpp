@@ -2,7 +2,7 @@
 #include "GUITexture.h"
 
 GUITexture GUITexture::read(BinaryReader& reader, const GUIHeader& header) {
-	return {
+	GUITexture tex{
 		.ID = reader.read<u32>(),
 		.Meta = { .Raw = reader.read<u32>() },
 		.Left = reader.read<u16>(),
@@ -10,10 +10,25 @@ GUITexture GUITexture::read(BinaryReader& reader, const GUIHeader& header) {
 		.Width = reader.read<u16>(),
 		.Height = reader.read<u16>(),
 		.Clamp = { reader.read<float>(), reader.read<float>(), reader.read<float>(), reader.read<float>() },
-		.InvSize = reader.read_skip<vector2>(8),
-		.Path = reader.abs_offset_read_string(header.stringOffset + reader.read_skip<u32>(4)),
-		.Name = reader.abs_offset_read_string(header.stringOffset + reader.read_skip<u32>(4))
+		.InvSize = reader.read_skip<vector2>(8)
 	};
+
+	const u32 path_offset = reader.read_skip<u32>(4);
+    const u32 name_offset = reader.read_skip<u32>(4);
+
+	if (path_offset != -1) {
+        tex.Path = reader.abs_offset_read_string(header.stringOffset + path_offset);
+    } else {
+        tex.Path = "";
+    }
+
+    if (name_offset != -1) {
+        tex.Name = reader.abs_offset_read_string(header.stringOffset + name_offset);
+    } else {
+        tex.Name = "";
+    }
+
+    return tex;
 }
 
 void GUITexture::write(BinaryWriter& writer, StringBuffer& buffer) const {

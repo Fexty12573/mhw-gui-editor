@@ -26,6 +26,10 @@ void GUIFile::load_from(BinaryReader& stream) {
     m_general_resources.clear();
     m_vertices.clear();
 
+    if (stream.size() < sizeof(GUIHeader)) {
+        return;
+    }
+
     const auto header = stream.read<GUIHeader>();
 
     std::memcpy(m_magic.data(), header.fileType, m_magic.size());

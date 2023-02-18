@@ -42,7 +42,8 @@
     <None Include="..\README.md">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="imgui_theme_setup_to_toml.py" />
+    <None Include="gui_object_param_getter.py" />
+    <None Include="data\gui_object_param_getter.py" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">

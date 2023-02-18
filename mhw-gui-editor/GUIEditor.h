@@ -22,6 +22,11 @@ struct Menu {
     std::string Name;
     std::vector<MenuItem> Items;
 };
+struct ObjectInfo {
+	std::string Name;
+	ObjectType Type;
+	std::unordered_map<std::string, ParamType> Params;
+};
 
 class GUIEditor {
 public:
@@ -47,7 +52,7 @@ private:
 	void render_object(GUIObject& obj, u32 seq_count = 0);
 	void render_sequence(GUISequence& seq) const;
 	void render_obj_sequence(GUIObjectSequence& objseq);
-	void render_init_param(GUIInitParam& param) const;
+	void render_init_param(GUIInitParam& param, ObjectType source_object = ObjectType::None) const;
 	void render_param(GUIParam& param);
 	void render_instance(GUIInstance& inst);
 	void render_key(GUIKey& key, ParamType type = ParamType::UNKNOWN) const;
@@ -59,6 +64,8 @@ private:
     [[nodiscard]] std::filesystem::path open_file_dialog(std::wstring_view title, const std::vector<COMDLG_FILTERSPEC>& filters, std::wstring_view default_ext = L"") const;
     [[nodiscard]] std::filesystem::path open_folder_dialog(std::wstring_view title) const;
 
+	void dump_object_data() const;
+
 	void open_animation_editor();
 
 private:
@@ -67,6 +74,8 @@ private:
 
 	GUIFile m_file;
 	std::vector<Menu> m_menu_items;
+
+    std::unordered_map<std::string, ObjectInfo> m_object_info;
 
 	bool m_first_render = true;
 	bool m_options_menu_open = false;

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "GUIFontFilter.h"
+#include "Console.h"
 
 std::shared_ptr<GUIFontFilter> GUIFontFilter::read(BinaryReader& reader, const GUIHeader& header) {
 	const auto type = reader.read<ObjectType>();
@@ -61,11 +62,16 @@ std::shared_ptr<GUIFontFilter> GUIFontFilter::read(BinaryReader& reader, const G
 	case ObjectType::None: {
 		return nullptr;
 	}
-	default: break;
+	default: {
+        spdlog::warn("Unknown GUIFontFilter type: {}", std::to_underlying(type));
+		const auto filter = std::make_shared<GUIFontFilter>();
+		filter->ID = id;
+        filter->Type = type;
+
+		return filter;
+	}
 		
 	}
-
-	throw std::runtime_error("Unknown font filter type");
 }
 
 void GUIFontFilter::write(BinaryWriter& writer, StringBuffer& buffer) const {
