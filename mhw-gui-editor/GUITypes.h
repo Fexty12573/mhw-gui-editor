@@ -3,6 +3,7 @@
 
 #include <array>
 #include <map>
+#include <numeric>
 #include <span>
 #include <type_traits>
 #include <vector>
@@ -83,6 +84,12 @@ struct GUIHeader {
     u64 padding;
 };
 
+template<class T0, class T1> concept SameSizeAs = requires(T0 a, T1 b) {
+    { sizeof a } -> std::same_as<size_t>;
+    { sizeof b } -> std::same_as<size_t>;
+    { sizeof a == sizeof b } -> std::same_as<bool>;
+};
+
 struct KeyValueBuffers {
     std::vector<u8> KeyValue8;
     std::vector<u32> KeyValue32;
@@ -126,8 +133,8 @@ struct KeyValueBuffers {
 
             if (it != KeyValue8.end()) {
                 return std::distance(KeyValue8.begin(), it) * sizeof(u8);
+                }
             }
-        }
 
         const auto idx = KeyValue8.size();
         KeyValue8.insert_range(KeyValue8.end(), values);
@@ -135,7 +142,7 @@ struct KeyValueBuffers {
         return idx * sizeof(u8);
     }
 
-    template<typename T> size_t insert32(const T& value) requires std::is_convertible_v<T, u32> {
+    template<typename T> size_t insert32(const T& value) requires SameSizeAs<T, u32> {
         if (Config.MultipleKV32Refs) {
             auto it = KeyValue32.end();
 
@@ -163,17 +170,17 @@ struct KeyValueBuffers {
     template<typename T> size_t insert32(std::span<const T> values) requires std::is_convertible_v<T, u32> {
         if (Config.MultipleKV8Refs) {
             auto it = KeyValue32.begin();
-            
+
             if constexpr (std::is_same_v<u32, T>) {
                 it = std::ranges::search(KeyValue32, values).begin();
             } else {
                 it = std::ranges::search(KeyValue32, values, [](u32 x, float y) {return x == *reinterpret_cast<u32*>(&y); }).begin();
-            }
+                }
 
             if (it != KeyValue32.end()) {
                 return std::distance(KeyValue32.begin(), it) * sizeof(u32);
+                }
             }
-        }
 
         const auto idx = KeyValue32.size();
         for (const auto& v : values) {
@@ -267,6 +274,7 @@ struct KeyValueBuffers {
 };
 
 enum class KeyValueType {
+    None,
     KV8,
     KV32,
     KV128,
@@ -377,6 +385,7 @@ enum class SamplerState : u8
 
 enum class Alignment : u8
 {
+    NONE = 0x0,
     LT = 0x1,
     CT = 0x2,
     RT = 0x3,
@@ -467,6 +476,13 @@ enum class DrawPass : u8
     USER_OFFSET = 0x10,
 };
 
+enum class ScalingType : u32 {
+    NONE = 0x0,
+    POSITION = 0x1,
+    SIZE = 0x2,
+    FULL = 0x3
+};
+
 enum class MaskType : u8
 {
     NONE = 0x0,
@@ -476,6 +492,12 @@ enum class MaskType : u8
     ON_ADD = 0x4,
     REVERSE_ADD = 0x5,
     ALPHA_ADD = 0x6
+};
+
+enum class IconColorType : u32 {
+    NOINFLUENCE = 0x0,
+    ALPHA = 0x1,
+    ALL = 0x2
 };
 
 enum class TilingMode : u8

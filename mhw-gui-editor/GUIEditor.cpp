@@ -783,41 +783,44 @@ void GUIEditor::render_init_param(GUIInitParam& param) const {
             break;
         case ParamType::INIT_INT:
             switch (param.NameCRC) {
+            case "SamplerState"_crc:
+                ImGui::RichTextCombo("Value", &param.Value32, SamplerStateNames, 0xFFA3D7B8);
+                break;
             case "BlendState"_crc:
-                ImGui::RichTextCombo("Value", &param.Value8, BlendStateNames, 0xFFA3D7B8);
+                ImGui::RichTextCombo("Value", &param.Value32, BlendStateNames, 0xFFA3D7B8);
                 break;
             case "Alignment"_crc:
-                ImGui::RichTextCombo("Value", &param.Value8, AlignmentNames, 0xFFA3D7B8);
+                ImGui::RichTextCombo("Value", &param.Value32, AlignmentNames, 0xFFA3D7B8);
                 break;
             case "ResolutionAdjust"_crc:
-                ImGui::RichTextCombo("Value", &param.Value8, ResolutionAdjustNames, 0xFFA3D7B8);
+                ImGui::RichTextCombo("Value", &param.Value32, ResolutionAdjustNames, 0xFFA3D7B8);
                 break;
             case "AutoWrap"_crc:
-                ImGui::RichTextCombo("Value", &param.Value8, AutoWrapNames, 0xFFA3D7B8);
+                ImGui::RichTextCombo("Value", &param.Value32, AutoWrapNames, 0xFFA3D7B8);
                 break;
             case "ColorControl"_crc:
-                ImGui::RichTextCombo("Value", &param.Value8, ColorControlNames, 0xFFA3D7B8);
+                ImGui::RichTextCombo("Value", &param.Value32, ColorControlNames, 0xFFA3D7B8);
                 break;
             case "LetterHAlign"_crc:
-                ImGui::RichTextCombo("Value", &param.Value8, LetterHAlignNames, 0xFFA3D7B8);
+                ImGui::RichTextCombo("Value", &param.Value32, LetterHAlignNames, 0xFFA3D7B8);
                 break;
             case "LetterVAlign"_crc:
-                ImGui::RichTextCombo("Value", &param.Value8, LetterVAlignNames, 0xFFA3D7B8);
+                ImGui::RichTextCombo("Value", &param.Value32, LetterVAlignNames, 0xFFA3D7B8);
                 break;
             case "DepthState"_crc:
-                ImGui::RichTextCombo("Value", &param.Value8, DepthStateNames, 0xFFA3D7B8);
+                ImGui::RichTextCombo("Value", &param.Value32, DepthStateNames, 0xFFA3D7B8);
                 break;
             case "Billboard"_crc:
-                ImGui::RichTextCombo("Value", &param.Value8, BillboardNames, 0xFFA3D7B8);
+                ImGui::RichTextCombo("Value", &param.Value32, BillboardNames, 0xFFA3D7B8);
                 break;
             case "DrawPass"_crc:
-                ImGui::RichTextCombo("Value", &param.Value8, DrawPassNames, 0xFFA3D7B8);
+                ImGui::RichTextCombo("Value", &param.Value32, DrawPassNames, 0xFFA3D7B8);
                 break;
             case "Mask"_crc:
-                ImGui::RichTextCombo("Value", &param.Value8, MaskTypeNames, 0xFFA3D7B8);
+                ImGui::RichTextCombo("Value", &param.Value32, MaskTypeNames, 0xFFA3D7B8);
                 break;
             default:
-                ImGui::InputScalar("Value", ImGuiDataType_U8, &param.Value8, &u32_step, &u32_fast_step);
+                ImGui::InputScalar("Value", ImGuiDataType_S32, &param.Value32, &u32_step, &u32_fast_step);
                 break;
             }
 
@@ -828,6 +831,9 @@ void GUIEditor::render_init_param(GUIInitParam& param) const {
             case "FontStyleId"_crc:
                 ImGui::RichTextCombo("Value", &param.Value32, FontStyleNames, 0xFFA3D7B8);
                 break;
+            default:
+                ImGui::InputScalar("Value", ImGuiDataType_S32, &param.Value32, &u32_step, &u32_fast_step);
+                break;
             }
         }
 
@@ -837,8 +843,6 @@ void GUIEditor::render_init_param(GUIInitParam& param) const {
     ImGui::PopID();
     ImGui::PopID();
 }
-
-#define GET_VEC_V(V, TYPE, IDX) std::get<std::vector<TYPE>>(V)[IDX]
 
 void GUIEditor::render_param(GUIParam& param) {
     using namespace crc::literals;
@@ -877,19 +881,19 @@ void GUIEditor::render_param(GUIParam& param) {
             case ParamType::UNKNOWN:
                 break;
             case ParamType::INT:
-                ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &GET_VEC_V(param.Values, u32, i), &u32_step, &u32_fast_step);
+                ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &param.get_value<u32>(i), &u32_step, &u32_fast_step);
                 break;
             case ParamType::FLOAT:
-                ImGui::InputFloat(name.c_str(), &GET_VEC_V(param.Values, float, i), 0.01f, 0.1f, "%.3f");
+                ImGui::InputFloat(name.c_str(), &param.get_value<float>(i), 0.01f, 0.1f, "%.3f");
                 break;
             case ParamType::BOOL:
-                ImGui::Checkbox(name.c_str(), reinterpret_cast<bool*>(&GET_VEC_V(param.Values, u8, i)));
+                ImGui::Checkbox(name.c_str(), reinterpret_cast<bool*>(&param.get_value<u8>(i)));
                 break;
             case ParamType::VECTOR:
-                ImGui::ColorEdit4(name.c_str(), &GET_VEC_V(param.Values, vector4, i).x, ImGuiColorEditFlags_Float);
+                ImGui::ColorEdit4(name.c_str(), &param.get_value<vector4>(i).x, ImGuiColorEditFlags_Float);
                 break;
             case ParamType::RESOURCE: {
-                auto v = GET_VEC_V(param.Values, u32, i);
+                auto& v = param.get_value<u32>(i);
                 ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &v, &u32_step, &u32_fast_step);
                 for (const auto& res : m_file.m_resources) {
                     if (res.ID == v) {
@@ -899,28 +903,26 @@ void GUIEditor::render_param(GUIParam& param) {
                     }
                 }
 
-                GET_VEC_V(param.Values, u32, i) = v;
                 break;
             }
             case ParamType::STRING:
-                ImGui::InputText(name.c_str(), &GET_VEC_V(param.Values, std::string, i));
+                ImGui::InputText(name.c_str(), &param.get_value<std::string>(i));
                 break;
             case ParamType::TEXTURE: {
-                auto v = GET_VEC_V(param.Values, u32, i);
+                auto& v = param.get_value<u32>(i);
                 ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &v, &u32_step, &u32_fast_step);
                 for (const auto& tex : m_file.m_textures) {
                     if (tex.ID == v) {
                         ImGui::SameLine();
-                        ImGui::Text("Texture: %s", tex.Path.c_str());
+                        ImGui::Text("Texture: %s | %s", tex.Name.c_str(), tex.Path.c_str());
                         break;
                     }
                 }
 
-                GET_VEC_V(param.Values, u32, i) = v;
                 break;
             }
             case ParamType::GUIRESOURCE: {
-                auto v = GET_VEC_V(param.Values, u32, i);
+                auto& v = param.get_value<u32>(i);
                 ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &v, &u32_step, &u32_fast_step);
                 for (const auto& tex : m_file.m_resources) {
                     if (tex.ID == v) {
@@ -930,11 +932,10 @@ void GUIEditor::render_param(GUIParam& param) {
                     }
                 }
 
-                GET_VEC_V(param.Values, u32, i) = v;
                 break;
             }
             case ParamType::GENERALRESOURCE: {
-                auto v = GET_VEC_V(param.Values, u32, i);
+                auto& v = param.get_value<u32>(i);
                 ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &v, &u32_step, &u32_fast_step);
                 for (const auto& tex : m_file.m_general_resources) {
                     if (tex.ID == v) {
@@ -944,7 +945,6 @@ void GUIEditor::render_param(GUIParam& param) {
                     }
                 }
 
-                GET_VEC_V(param.Values, u32, i) = v;
                 break;
             }
             case ParamType::FONT: [[fallthrough]];
@@ -955,48 +955,51 @@ void GUIEditor::render_param(GUIParam& param) {
             case ParamType::FONT_FILTER: [[fallthrough]];
             case ParamType::ANIMEVENT: [[fallthrough]];
             case ParamType::SEQUENCE:
-                ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &GET_VEC_V(param.Values, u32, i), &u32_step, &u32_fast_step);
+                ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &param.get_value<u32>(i), &u32_step, &u32_fast_step);
                 break;
             case ParamType::INIT_BOOL:
-                ImGui::Checkbox(name.c_str(), reinterpret_cast<bool*>(&GET_VEC_V(param.Values, u8, i)));
+                ImGui::Checkbox(name.c_str(), reinterpret_cast<bool*>(&param.get_value<u8>(i)));
                 break;
             case ParamType::INIT_INT:
                 switch (param.NameCRC) {
+                case "SamplerState"_crc:
+                    ImGui::RichTextCombo(name.c_str(), &param.get_value<u8>(i), SamplerStateNames, 0xFFA3D7B8);
+                    break;
                 case "BlendState"_crc:
-                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), BlendStateNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &param.get_value<u8>(i), BlendStateNames, 0xFFA3D7B8);
                     break;
                 case "Alignment"_crc:
-                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), AlignmentNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &param.get_value<u8>(i), AlignmentNames, 0xFFA3D7B8);
                     break;
                 case "ResolutionAdjust"_crc:
-                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), ResolutionAdjustNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &param.get_value<u8>(i), ResolutionAdjustNames, 0xFFA3D7B8);
                     break;
                 case "AutoWrap"_crc:
-                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), AutoWrapNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &param.get_value<u8>(i), AutoWrapNames, 0xFFA3D7B8);
                     break;
                 case "ColorControl"_crc:
-                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), ColorControlNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &param.get_value<u8>(i), ColorControlNames, 0xFFA3D7B8);
                     break;
                 case "LetterHAlign"_crc:
-                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), LetterHAlignNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &param.get_value<u8>(i), LetterHAlignNames, 0xFFA3D7B8);
                     break;
                 case "LetterVAlign"_crc:
-                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), LetterVAlignNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &param.get_value<u8>(i), LetterVAlignNames, 0xFFA3D7B8);
                     break;
                 case "DepthState"_crc:
-                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), DepthStateNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &param.get_value<u8>(i), DepthStateNames, 0xFFA3D7B8);
                     break;
                 case "Billboard"_crc:
-                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), BillboardNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &param.get_value<u8>(i), BillboardNames, 0xFFA3D7B8);
                     break;
                 case "DrawPass"_crc:
-                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), DrawPassNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &param.get_value<u8>(i), DrawPassNames, 0xFFA3D7B8);
                     break;
                 case "Mask"_crc:
-                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u8, i), MaskTypeNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &param.get_value<u8>(i), MaskTypeNames, 0xFFA3D7B8);
                     break;
                 default:
-                    ImGui::InputScalar(name.c_str(), ImGuiDataType_U8, &GET_VEC_V(param.Values, u8, i), &u32_step, &u32_fast_step);
+                    ImGui::InputScalar(name.c_str(), ImGuiDataType_U8, &param.get_value<u8>(i), &u32_step, &u32_fast_step);
                     break;
                 }
 
@@ -1005,7 +1008,10 @@ void GUIEditor::render_param(GUIParam& param) {
             case ParamType::INIT_INT32:
                 switch (param.NameCRC) {
                 case "FontStyleId"_crc:
-                    ImGui::RichTextCombo(name.c_str(), &GET_VEC_V(param.Values, u32, i), FontStyleNames, 0xFFA3D7B8);
+                    ImGui::RichTextCombo(name.c_str(), &param.get_value<u32>(i), FontStyleNames, 0xFFA3D7B8);
+                    break;
+                default:
+                    ImGui::InputScalar(name.c_str(), ImGuiDataType_U32, &param.get_value<u32>(i), &u32_step, &u32_fast_step);
                     break;
                 }
                 break;
@@ -1122,19 +1128,21 @@ void GUIEditor::render_key(GUIKey& key, ParamType type) const {
     ImGui::PopID();
 }
 
-#undef GET_VEC_V
-#define UPDATE_INDEX_LOOP(list, IndexMember) \
-for (auto i = 0u; i < list.size(); ++i) list[i].##IndexMember = i
-
 void GUIEditor::update_indices() {
-    UPDATE_INDEX_LOOP(m_file.m_animations, Index);
-    UPDATE_INDEX_LOOP(m_file.m_objects, Index);
-    UPDATE_INDEX_LOOP(m_file.m_sequences, Index);
-    UPDATE_INDEX_LOOP(m_file.m_obj_sequences, Index);
-    UPDATE_INDEX_LOOP(m_file.m_init_params, Index);
-    UPDATE_INDEX_LOOP(m_file.m_params, Index);
-    UPDATE_INDEX_LOOP(m_file.m_instances, Index);
-    UPDATE_INDEX_LOOP(m_file.m_keys, Index);
+    auto update_indices = [this](auto& list) {
+        for (auto i = 0u; i < list.size(); ++i) {
+            list[i].Index = i;
+        }
+    };
+
+    update_indices(m_file.m_animations);
+    update_indices(m_file.m_objects);
+    update_indices(m_file.m_sequences);
+    update_indices(m_file.m_obj_sequences);
+    update_indices(m_file.m_init_params);
+    update_indices(m_file.m_params);
+    update_indices(m_file.m_instances);
+    update_indices(m_file.m_keys);
 }
 
 void GUIEditor::select_chunk_dir() {

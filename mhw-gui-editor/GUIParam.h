@@ -34,6 +34,10 @@ struct GUIParam {
         bool pass_vector = true
 	);
 
+    template<typename T> T& get_value(u32 index) {
+        return std::get<std::vector<T>>(Values)[index];
+    }
+
 	ParamType Type;
 	u8 ValueCount;
 	u32 ParentID;

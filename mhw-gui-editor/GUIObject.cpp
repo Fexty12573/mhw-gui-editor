@@ -40,7 +40,7 @@ void GUIObject::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffer
         writer.write<s64>(kv_buffers.ExtendData.size());
         ExtendData.write(kv_buffers, Type);
     } else {
-        writer.write<s64>(-1);
+        writer.write_tuple<s32, s32>({ -1, 0 });
     }
 }
 

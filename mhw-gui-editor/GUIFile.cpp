@@ -148,21 +148,23 @@ void GUIFile::run_data_usage_analysis(bool log_overlapping_offsets) const {
     std::unordered_map<KeyValueType, std::unordered_map<u32, u32>> ip_offsets;
 
     for (const auto& param : m_params) {
-        if (param.ValueCount > 0) {
+        if (param.ValueCount > 0 && param.ValueOffsetType != KeyValueType::None) {
             p_offsets[param.ValueOffsetType][param.OrgValueOffset] += 1;
         }
     }
 
     std::unordered_map<u32, u32> ip_val_offsets;
     for (const auto& param : m_init_params) {
-        ip_offsets[param.ValueOffsetType][param.OrgValueOffset] += 1;
+        if (param.ValueOffsetType != KeyValueType::None) {
+            ip_offsets[param.ValueOffsetType][param.OrgValueOffset] += 1;
+        }
     }
 
-    for (auto i = 0u; i < 3; ++i) {
+    for (auto i = std::to_underlying(KeyValueType::KV8); i < std::to_underlying(KeyValueType::String); ++i) {
         const auto kvt = static_cast<KeyValueType>(i);
 
         const std::unordered_map<u32, u32>& param_data = p_offsets[kvt];
-        const std::unordered_map<u32, u32>& iparam_data = p_offsets[kvt];
+        const std::unordered_map<u32, u32>& iparam_data = ip_offsets[kvt];
 
         const auto p_keys = param_data | std::views::keys;
         const auto p_values = param_data | std::views::values;
@@ -186,17 +188,57 @@ void GUIFile::run_data_usage_analysis(bool log_overlapping_offsets) const {
                 spdlog::info("{:08X}", offset);
             }
 
+            const auto more_than_1 = [](const auto& p) { return std::get<1>(p) > 1; };
+
             spdlog::info("[Param] The following {} offsets are used multiple times:", enum_to_string(kvt));
-            for (const auto& [offset, count] : param_data) {
+            for (const auto& [offset, count] : param_data | std::views::filter(more_than_1)) {
                 spdlog::info("{:08X}: {} times", offset, count);
             }
 
             spdlog::info("[InitParam] The following {} offsets are used multiple times:", enum_to_string(kvt));
-            for (const auto& [offset, count] : iparam_data | std::views::filter([](const auto& p) {return std::get<1>(p) > 1; })) {
+            for (const auto& [offset, count] : iparam_data | std::views::filter(more_than_1)) {
                 spdlog::info("{:08X}: {} times", offset, count);
             }
         }
     }
+
+
+    for (auto i = 0u; i < m_init_params.size(); ++i) {
+        u32 obj_use_count = 0;
+        u32 inst_use_count = 0;
+        u32 objseq_use_count = 0;
+
+        for (const auto& obj : m_objects) {
+            const u32 start = obj.InitParamIndex;
+            const u32 end = start + obj.InitParamNum;
+
+            if (i <= start && i < end) {
+                ++obj_use_count;
+            }
+        }
+
+        for (const auto& inst : m_instances) {
+            const u32 start = inst.InitParamIndex;
+            const u32 end = start + inst.InitParamNum;
+
+            if (i <= start && i < end) {
+                ++inst_use_count;
+            }
+        }
+
+        for (const auto& objseq : m_obj_sequences) {
+            const u32 start = objseq.InitParamIndex;
+            const u32 end = start + objseq.InitParamNum;
+
+            if (i <= start && i < end) {
+                ++objseq_use_count;
+            }
+        }
+
+        spdlog::info("InitParam[{}] used by {} Objects, {} Instances, and {} ObjSequences", i, obj_use_count, inst_use_count, objseq_use_count);
+    }
+
+
 #else
     spdlog::info("GUIFile Analysis disabled. Skipping analysis.");
 #endif
@@ -238,7 +280,7 @@ void GUIFile::save_to(BinaryWriter& stream, const Settings& settings) {
         .guiResourceNum = static_cast<u32>(m_resources.size()),
         .generalResourceNum = static_cast<u32>(m_general_resources.size()),
         .cameraSettingNum = 0,
-        .instExeParamNum = 0,
+        .instExeParamNum = static_cast<u32>(m_instances.size()),
         .vertexBufferSize = 0,
         .optionBitFlag = m_header.optionBitFlag,
         .viewSize_Width = m_header.viewSize_Width,
@@ -330,7 +372,7 @@ void GUIFile::save_to(BinaryWriter& stream, const Settings& settings) {
     }
 
     // Align to 16 bytes
-    const auto n_align = ((16 - stream.tell() % 16) / 4) % 4; // All font filters have a multiple of 4 size
+    auto n_align = ((16 - stream.tell() % 16) / 4) % 4; // All font filters have a multiple of 4 size
     for (auto i = 0u; i < n_align; ++i) {
         stream.write<u32>(0);
     }
@@ -370,17 +412,37 @@ void GUIFile::save_to(BinaryWriter& stream, const Settings& settings) {
     header.keyValue8Offset = stream.tell();
     stream.write(std::span<const u8>(kv_buffers.KeyValue8));
 
+    n_align = 16 - stream.tell() % 16;
+    for (auto i = 0u; i < n_align; ++i) {
+        stream.write<u8>(0);
+    }
+
     header.keyValue32Offset = stream.tell();
     stream.write(std::span<const u32>(kv_buffers.KeyValue32));
+
+    n_align = ((16 - stream.tell() % 16) / 4) % 4;
+    for (auto i = 0u; i < n_align; ++i) {
+        stream.write<u32>(0);
+    }
 
     header.keyValue128Offset = stream.tell();
     stream.write(std::span<const vector4>(kv_buffers.KeyValue128));
 
     header.extendDataOffset = stream.tell();
     stream.write(std::span<const u8>(kv_buffers.ExtendData));
+
+    n_align = 16 - stream.tell() % 16;
+    for (auto i = 0u; i < n_align; ++i) {
+        stream.write<u8>(0);
+    }
     
     header.stringOffset = stream.tell();
     stream.write(string_buffer.data(), string_buffer.size());
+
+    n_align = 16 - stream.tell() % 16;
+    for (auto i = 0u; i < n_align; ++i) {
+        stream.write<u8>(0);
+    }
 
     header.vertexOffset = stream.tell();
     header.vertexBufferSize = static_cast<u32>(m_vertices.size() * GUIVertex::size);

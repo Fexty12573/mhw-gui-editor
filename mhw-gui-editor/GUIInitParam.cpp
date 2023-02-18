@@ -28,13 +28,15 @@ GUIInitParam GUIInitParam::read(BinaryReader& reader, const GUIHeader& header) {
     result.ValueVector = {};
 
     switch (static_cast<u8>(result.Type)) {
-    case 3: [[fallthrough]];
-    case 17:
-    case 18:
+    case 3:
         SET_KV_TYPE(result, KeyValueType::KV8);
-        result.Value8 = reader.abs_offset_read<u8>(static_cast<s64>(header.keyValue8Offset) + offset);
+        result.ValueBool = reader.abs_offset_read<bool>(static_cast<s64>(header.keyValue8Offset) + offset) != 0;
         break;
-
+    case 17: [[fallthrough]];
+    case 18:
+        SET_KV_TYPE(result, KeyValueType::None);
+        result.Value32 = offset;
+        break;
     case 1: [[fallthrough]];
     case 7: [[fallthrough]];
     case 8: [[fallthrough]];
@@ -89,10 +91,12 @@ void GUIInitParam::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuf
     writer.write(buffer.append_no_duplicate(Name));
 
     switch (Type) {
-    case ParamType::BOOL: [[fallthrough]];
+    case ParamType::BOOL:
+        writer.write(kvbuffers.insert8(Value8));
+        break;
     case ParamType::INIT_BOOL: [[fallthrough]];
     case ParamType::INIT_INT:
-        writer.write(kvbuffers.insert8(Value8));
+        writer.write<size_t>(Value32);
         break;
     case ParamType::INT: [[fallthrough]];
     case ParamType::FLOAT: [[fallthrough]];

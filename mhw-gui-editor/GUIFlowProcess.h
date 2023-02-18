@@ -31,4 +31,3 @@ struct GUIFlowProcess {
 	u32 FlowIndex;
 	u32 ActionIndex;
 };
-

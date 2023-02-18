@@ -27,6 +27,10 @@ GUIParam GUIParam::read(BinaryReader& reader, const GUIHeader& header) {
 #define SET_KV_TYPE(VAR, TYPE) 
 #endif
 
+    if (offset == -1) {
+        return result;
+    }
+
 	switch (result.Type) {
 	case ParamType::UNKNOWN:
 		spdlog::warn("Unknown ParamType encountered: {}\n", result.Name);
@@ -60,7 +64,7 @@ GUIParam GUIParam::read(BinaryReader& reader, const GUIHeader& header) {
 		SET_KV_TYPE(result, KeyValueType::KV32);
 		result.Values = std::vector<u32>{};
 		break;
-	case ParamType::BOOL: [[fallthrough]];
+    case ParamType::BOOL: [[fallthrough]];
 	case ParamType::INIT_BOOL: [[fallthrough]];
 	case ParamType::INIT_INT: 
 		SET_KV_TYPE(result, KeyValueType::KV8);
@@ -141,7 +145,9 @@ void GUIParam::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers
     writer.write<u64>(KeyIndex);
 
 	switch (Type) {
-	case ParamType::BOOL: [[fallthrough]];
+	case ParamType::BOOL:
+		writer.write(kvbuffers.insert8<u8>(GET_VEC(u8, Values)));
+		break;
 	case ParamType::INIT_BOOL: [[fallthrough]];
 	case ParamType::INIT_INT:
 		writer.write(kvbuffers.insert8<u8>(GET_VEC(u8, Values)));
