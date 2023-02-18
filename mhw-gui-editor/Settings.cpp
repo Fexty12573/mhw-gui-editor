@@ -20,6 +20,7 @@ bool Settings::load() {
     }
 
     ChunkPath = result["General"]["ChunkDirectory"].value_or("");
+    NativePath = result["General"]["NativeDirectory"].value_or("");
     Theme = result["General"]["Theme"].value_or("");
 
     AllowMultipleKV8References = result["Optimization"]["AllowMultipleReferences"]["KV8"].value_or(false);
@@ -34,6 +35,7 @@ bool Settings::save() {
 
     config.insert("General", toml::table{
         {"ChunkDirectory", ChunkPath},
+        {"NativeDirectory", NativePath},
         {"Theme", Theme}
     });
     config.insert("Optimization", toml::table{

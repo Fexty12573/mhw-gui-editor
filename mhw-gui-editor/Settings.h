@@ -12,6 +12,7 @@ struct Settings {
     bool save();
 
     std::string ChunkPath;
+    std::string NativePath;
     std::string Theme;
 
     bool AllowMultipleKV8References;

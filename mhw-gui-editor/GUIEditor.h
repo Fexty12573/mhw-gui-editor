@@ -55,7 +55,9 @@ private:
 	void update_indices();
 
 	void select_chunk_dir();
-    std::filesystem::path open_file_dialog(std::wstring_view title, const std::vector<COMDLG_FILTERSPEC>& filters, std::wstring_view default_ext = L"") const;
+	void select_native_dir();
+    [[nodiscard]] std::filesystem::path open_file_dialog(std::wstring_view title, const std::vector<COMDLG_FILTERSPEC>& filters, std::wstring_view default_ext = L"") const;
+    [[nodiscard]] std::filesystem::path open_folder_dialog(std::wstring_view title) const;
 
 	void open_animation_editor();
 
@@ -72,6 +74,9 @@ private:
 	bool m_animation_editor_first = true;
 	bool m_animation_editor_visible = false;
 	bool m_object_editor_visible = false;
+
+	bool m_error_popup_open = false;
+	std::string m_error_popup_message;
 
 	int m_selected_object = -1;
     int m_selected_texture = -1;

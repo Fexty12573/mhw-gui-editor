@@ -33,7 +33,7 @@ public:
 	GUIFile();
 
 	void load_from(BinaryReader& stream);
-    void load_resources(const std::string& chunk_path, ID3D11Device* device, ID3D11DeviceContext* context);
+    void load_resources(const std::string& chunk_path, const std::string& native_path, ID3D11Device* device, ID3D11DeviceContext* context);
 
 	void run_data_usage_analysis(bool log_overlapping_offsets = false) const;
 

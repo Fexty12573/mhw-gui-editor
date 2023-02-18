@@ -1,5 +1,6 @@
 [General]
 ChunkDirectory = 'D:\MHWI Mods\chunk'
+NativeDirectory = 'C:\Program Files\Steam\steamapps\common\Monster Hunter World\nativePC'
 Theme = 'Dracula'
 
 [Optimization.AllowMultipleReferences]

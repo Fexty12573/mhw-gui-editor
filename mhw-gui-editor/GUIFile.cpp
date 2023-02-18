@@ -125,15 +125,28 @@ void GUIFile::load_from(BinaryReader& stream) {
     m_header = header;
 }
 
-void GUIFile::load_resources(const std::string& chunk_path, ID3D11Device* device, ID3D11DeviceContext* context) {
+void GUIFile::load_resources(const std::string& chunk_path, const std::string& native_path, ID3D11Device* device, ID3D11DeviceContext* context) {
     for (auto& texture : m_textures) {
-        try {
-            BinaryReader stream(std::filesystem::path(chunk_path) / (texture.Path + ".tex"));
-            texture.RenderTexture.load_from(stream, device, context);
-        } catch (const std::runtime_error& e) { 
-            spdlog::error(e.what());
-        } catch (...) {
+        const char* extension = texture.Meta.RenderTargetType == 1 ? ".rtex" : ".tex";
+
+        const std::filesystem::path chunk = std::filesystem::path(chunk_path) / (texture.Path + extension);
+        const std::filesystem::path native = std::filesystem::path(native_path) / (texture.Path + extension);
+        std::filesystem::path path;
+
+        if (exists(native)) {
+            path = native;
+        } else if (exists(chunk)) {
+            path = chunk;
+        } else {
+            spdlog::error("Could not find texture: {}", texture.Path);
             continue;
+        }
+
+        try {
+            BinaryReader stream(path);
+            texture.RenderTexture.load_from(stream, device, context);
+        } catch (...) {
+            spdlog::error("Could not load texture: {}", texture.Path);
         }
     }
 

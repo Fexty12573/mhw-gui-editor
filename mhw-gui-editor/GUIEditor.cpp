@@ -168,8 +168,14 @@ void GUIEditor::render(u32 dockspace_id) {
 
         ImGui::InputText("Chunk Directory", &m_settings.ChunkPath);
         ImGui::SameLine();
-        if (ImGui::Button("Choose Folder")) {
+        if (ImGui::Button("...##ChunkDir")) {
             select_chunk_dir();
+        }
+
+        ImGui::InputText("NativePC Directory", &m_settings.NativePath);
+        ImGui::SameLine();
+        if (ImGui::Button("...##NativeDir")) {
+            select_native_dir();
         }
 
         ImGui::EndGroupPanel();
@@ -214,6 +220,19 @@ void GUIEditor::render(u32 dockspace_id) {
 
     if (ImGui::BeginPopup("Error##SelectFile")) {
         ImGui::Text("Error: File paths have to be relative to the chunk directory.\nSet your chunk directory first in the options menu.");
+        if (ImGui::Button("Ok")) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
+    if (m_error_popup_open) {
+        ImGui::OpenPopup("Error##GenericError");
+        m_error_popup_open = false;
+    }
+
+    if (ImGui::BeginPopup("Error##GenericError")) {
+        ImGui::Text(m_error_popup_message.c_str());
         if (ImGui::Button("Ok")) {
             ImGui::CloseCurrentPopup();
         }
@@ -264,7 +283,7 @@ void GUIEditor::open_file() {
     m_file.load_from(reader);
 
     if (!m_settings.ChunkPath.empty()) {
-        m_file.load_resources(m_settings.ChunkPath, m_owner->get_device().Get(), m_owner->get_context().Get());
+        m_file.load_resources(m_settings.ChunkPath, m_settings.NativePath, m_owner->get_device().Get(), m_owner->get_context().Get());
     }
 
     m_file.run_data_usage_analysis(true);
@@ -453,14 +472,24 @@ void GUIEditor::render_resource_manager() {
             }
 
             if (ImGui::Button(ICON_FA_ARROW_ROTATE_RIGHT " Reload")) {
-                if (m_settings.ChunkPath.empty()) {
+                if (m_settings.ChunkPath.empty() && m_settings.NativePath.empty()) {
                     m_error_popup_select_file_open = true;
                 } else {
-                    auto path = std::filesystem::path(m_settings.ChunkPath) / tex.Path;
+                    auto path = std::filesystem::path(m_settings.NativePath) / tex.Path;
                     path.replace_extension("tex");
 
-                    BinaryReader reader(path);
-                    tex.RenderTexture.load_from(reader, m_owner->get_device().Get(), m_owner->get_context().Get());
+                    if (!exists(path)) {
+                        path = std::filesystem::path(m_settings.ChunkPath) / tex.Path;
+                        path.replace_extension("tex");
+                    }
+
+                    try {
+                        BinaryReader reader(path);
+                        tex.RenderTexture.load_from(reader, m_owner->get_device().Get(), m_owner->get_context().Get());
+                    } catch (...) {
+                        m_error_popup_message = "Failed to load texture";
+                        m_error_popup_open = true;
+                    }
                 }
             }
 
@@ -1146,23 +1175,11 @@ void GUIEditor::update_indices() {
 }
 
 void GUIEditor::select_chunk_dir() {
-    HR_INIT(S_OK);
+    m_settings.ChunkPath = open_folder_dialog(L"Select Chunk Directory").string();
+}
 
-    Microsoft::WRL::ComPtr<IFileOpenDialog> dialog;
-    HR_ASSERT(CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&dialog)));
-    HR_ASSERT(dialog->SetOptions(FOS_PATHMUSTEXIST | FOS_PICKFOLDERS));
-
-    if (dialog->Show(nullptr) == HRESULT_FROM_WIN32(ERROR_CANCELLED)) {
-        return;
-    }
-
-    Microsoft::WRL::ComPtr<IShellItem> item;
-    LPWSTR path;
-    HR_ASSERT(dialog->GetResult(&item));
-    HR_ASSERT(item->GetDisplayName(SIGDN_FILESYSPATH, &path));
-
-    std::wstring wpath = path;
-    m_settings.ChunkPath = { wpath.begin(), wpath.end() };
+void GUIEditor::select_native_dir() {
+    m_settings.NativePath = open_folder_dialog(L"Select NativePC Directory").string();
 }
 
 std::filesystem::path GUIEditor::open_file_dialog(std::wstring_view title, 
@@ -1184,6 +1201,25 @@ std::filesystem::path GUIEditor::open_file_dialog(std::wstring_view title,
     Microsoft::WRL::ComPtr<IShellItem> item;
     LPWSTR path;
 
+    HR_ASSERT(dialog->GetResult(&item));
+    HR_ASSERT(item->GetDisplayName(SIGDN_FILESYSPATH, &path));
+
+    return path;
+}
+
+std::filesystem::path GUIEditor::open_folder_dialog(std::wstring_view title) const {
+    HR_INIT(S_OK);
+
+    Microsoft::WRL::ComPtr<IFileOpenDialog> dialog;
+    HR_ASSERT(CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&dialog)));
+    HR_ASSERT(dialog->SetOptions(FOS_PATHMUSTEXIST | FOS_PICKFOLDERS));
+
+    if (dialog->Show(nullptr) == HRESULT_FROM_WIN32(ERROR_CANCELLED)) {
+        return {};
+    }
+
+    Microsoft::WRL::ComPtr<IShellItem> item;
+    LPWSTR path;
     HR_ASSERT(dialog->GetResult(&item));
     HR_ASSERT(item->GetDisplayName(SIGDN_FILESYSPATH, &path));
 
