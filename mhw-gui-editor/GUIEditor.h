@@ -73,6 +73,8 @@ private:
     ImThemeManager m_theme_manager;
 
 	GUIFile m_file;
+    std::filesystem::path m_file_path;
+
 	std::vector<Menu> m_menu_items;
 
     std::unordered_map<std::string, ObjectInfo> m_object_info;

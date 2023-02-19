@@ -192,7 +192,8 @@ void GUIEditor::render(u32 dockspace_id) {
         m_options_menu_open = true;
     }
 
-    if (ImGui::BeginPopupModal("Options##OptionsWindow", &m_options_menu_open, ImGuiWindowFlags_NoDocking)) {
+    ImGui::SetNextWindowSize(ImVec2(900, 300), ImGuiCond_Once);
+    if (ImGui::BeginPopupModal("Options##OptionsWindow", &m_options_menu_open, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoResize)) {
 
         ImGui::BeginGroupPanel(ICON_FA_BARS " General");
 
@@ -311,8 +312,9 @@ void GUIEditor::open_file() {
     std::wstring wpath = file_name;
     BinaryReader reader{ std::string{ wpath.begin(), wpath.end() } };
     m_file.load_from(reader);
+    m_file_path = wpath;
 
-    if (!m_settings.ChunkPath.empty()) {
+    if (!m_settings.ChunkPath.empty() || !m_settings.NativePath.empty()) {
         m_file.load_resources(m_settings.ChunkPath, m_settings.NativePath, m_owner->get_device().Get(), m_owner->get_context().Get());
     }
 
@@ -324,7 +326,12 @@ void GUIEditor::open_file() {
 }
 
 void GUIEditor::save_file() {
-    
+    if (m_file_path.empty()) {
+        return;
+    }
+
+    BinaryWriter writer(m_file_path);
+    m_file.save_to(writer, m_settings);
 }
 
 void GUIEditor::save_file_as() {
@@ -402,7 +409,18 @@ void GUIEditor::render_tree_viewer() {
         ImGui::TreePop();
     }
 
-    if (ImGui::TreeNodeEx("Params", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+    bool open = ImGui::TreeNodeEx("Params", ImGuiTreeNodeFlags_SpanAvailWidth);
+    bool open_add_param_popup = false;
+
+    if (ImGui::BeginPopupContextItem("Params")) {
+        if (ImGui::MenuItem("Add New (WIP)")) {
+            open_add_param_popup = true;
+        }
+
+        ImGui::EndPopup();
+    }
+
+    if (open) {
         for (auto& param : m_file.m_params) {
             render_param(param);
         }
@@ -548,7 +566,12 @@ void GUIEditor::render_resource_manager() {
                 } else {
                     const auto path = open_file_dialog(L"Select Texture", { {L"TEX Files", L"*.tex"} }, L"tex");
                     if (!path.empty()) {
+                        
                         auto relpath = std::filesystem::relative(path, m_settings.ChunkPath);
+                        if (relpath.empty()) {
+                            relpath = std::filesystem::relative(path, m_settings.NativePath);
+                        }
+
                         tex.Path = relpath.replace_extension().generic_string();
 
                         BinaryReader reader(path);
@@ -603,6 +626,17 @@ void GUIEditor::render_texture_viewer() const {
         const auto& tex = m_file.m_textures[m_selected_texture];
         if (tex.RenderTexture.is_valid()) {
             ImGui::Image(tex.RenderTexture.get_view().Get(), ImVec2{ static_cast<float>(tex.Width), static_cast<float>(tex.Height) });
+            if (ImGui::IsItemHovered()) {
+                const ImVec2 pos = ImGui::GetWindowPos();
+                const ImVec2 padding = ImGui::GetStyle().WindowPadding;
+                const ImVec2 mouse = ImGui::GetMousePos();
+                const ImVec2 relpos = {
+                    mouse.x - (pos.x + padding.x),
+                    mouse.y - (pos.y + padding.y) - 25.0f // TODO: Find out where that extra 25 is coming from
+                };
+
+                ImGui::SetTooltip("(%.2f, %.2f)", relpos.x, relpos.y);
+            }
         } else {
             ImGui::TextColored({ 1.0f, 0.2f, 0.2f, 1.0f }, "Error: Couldn't load texture!");
             ImGui::Text("Make sure the file exists and you have the correct chunk path set under Tools -> Options");
