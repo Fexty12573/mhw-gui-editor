@@ -32,6 +32,7 @@ struct GUIInitParam {
 
 	u32 NameCRC;
 	u32 Index;
+	bool IsColorParam = false;
 
 #ifdef GUI_FILE_ANALYSIS
 	u32 OrgValueOffset;

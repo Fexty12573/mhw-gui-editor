@@ -75,7 +75,11 @@ GUIInitParam GUIInitParam::read(BinaryReader& reader, const GUIHeader& header) {
         break;
     }
 
-    if (result.Name.contains("Color") && result.Name != "ColorScale" && result.Type == ParamType::VECTOR) {
+    result.IsColorParam = result.Name.contains("Color") && result.Name != "ColorScale";
+    result.IsColorParam |= result.Name == "RGB";
+    result.IsColorParam &= result.Type == ParamType::VECTOR;
+
+    if (result.IsColorParam) {
         result.ValueVector /= 255.0f;
     }
 
@@ -120,7 +124,7 @@ void GUIInitParam::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuf
         break;
     }
     case ParamType::VECTOR:
-        if (Name.contains("Color") && Name != "ColorScale") {
+        if (IsColorParam) {
             writer.write(kvbuffers.insert128(ValueVector * 255.0f));
         } else {
             writer.write(kvbuffers.insert128(ValueVector));

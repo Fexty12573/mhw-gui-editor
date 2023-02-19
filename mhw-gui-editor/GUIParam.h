@@ -49,6 +49,7 @@ struct GUIParam {
 	// Meta values
 	u32 NameCRC;
 	u32 Index = 0;
+	bool IsColorParam = false;
 
 #ifdef GUI_FILE_ANALYSIS
 	u32 OrgValueOffset;

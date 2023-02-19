@@ -122,8 +122,11 @@ GUIParam GUIParam::read(BinaryReader& reader, const GUIHeader& header) {
 		}
 	}
 
+	result.IsColorParam = result.Name.contains("Color") && result.Name != "ColorScale";
+	result.IsColorParam |= result.Name == "RGB";
+    result.IsColorParam &= result.Type == ParamType::VECTOR;
 
-    if (result.Name.contains("Color") && result.Name != "ColorScale" && result.Type == ParamType::VECTOR) {
+    if (result.IsColorParam) {
         // Normalize color values
 		auto& vec = GET_VEC(vector4, result.Values);
 		for (auto& val : vec) {
@@ -180,7 +183,7 @@ void GUIParam::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers
 		break;
 	}
 	case ParamType::VECTOR:
-		if (Name.contains("Color") && Name != "ColorScale") {
+		if (IsColorParam) {
 			std::vector<vector4> denormalized;
             std::ranges::transform(GET_VEC(vector4, Values), std::back_inserter(denormalized), [](const auto& v) { return v * 255.0f; });
 			writer.write(kvbuffers.insert128(denormalized));
