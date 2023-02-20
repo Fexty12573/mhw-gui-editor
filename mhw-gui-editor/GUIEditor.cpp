@@ -269,6 +269,75 @@ void GUIEditor::render(u32 dockspace_id) {
         }
         ImGui::EndPopup();
     }
+
+    if (!m_popup_queue.empty()) {
+        if (!ImGui::IsPopupOpen(m_popup_queue.front().Title.c_str())) {
+            ImGui::OpenPopup(m_popup_queue.front().Title.c_str());
+        }
+
+        if (ImGui::BeginPopupModal(m_popup_queue.front().Title.c_str(), nullptr, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize)) {
+            const auto& popup = m_popup_queue.front();
+            ImGui::Text(popup.Message.c_str());
+
+            bool new_line = false;
+
+            if (popup.Type & PopupType::Ok) {
+                new_line = true;
+
+                if (ImGui::Button("Ok")) {
+                    popup.Callback(YesNoCancelPopupResult::Ok, popup.UserData);
+
+                    m_popup_queue.pop();
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+
+            if (popup.Type & PopupType::Yes) {
+                if (new_line) {
+                    ImGui::SameLine();
+                } else {
+                    new_line = true;
+                }
+
+                if (ImGui::Button("Yes")) {
+                    popup.Callback(YesNoCancelPopupResult::Yes, popup.UserData);
+
+                    m_popup_queue.pop();
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+
+            if (popup.Type & PopupType::No) {
+                if (new_line) {
+                    ImGui::SameLine();
+                } else {
+                    new_line = true;
+                }
+
+                if (ImGui::Button("No")) {
+                    popup.Callback(YesNoCancelPopupResult::No, popup.UserData);
+
+                    m_popup_queue.pop();
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+
+            if (popup.Type & PopupType::Cancel) {
+                if (new_line) {
+                    ImGui::SameLine();
+                }
+
+                if (ImGui::Button("Cancel")) {
+                    popup.Callback(YesNoCancelPopupResult::Cancel, popup.UserData);
+
+                    m_popup_queue.pop();
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+
+            ImGui::EndPopup();
+        }
+    } 
 }
 
 void GUIEditor::render_object_editor() {
@@ -540,6 +609,20 @@ void GUIEditor::render_resource_manager() {
         const bool open = ImGui::TreeNodeEx(std::format("{} | {}", tex.Name, tex.Path).c_str(), node_flags);
         if (ImGui::IsItemClicked()) {
             m_selected_texture = i;
+        }
+
+        if (ImGui::BeginPopupContextItem()) {
+            if (ImGui::MenuItem("Delete")) {
+                m_popup_queue.emplace("Are you sure?", "Are you sure you want to delete this texture?", PopupType::YesCancel, 
+                    [this](auto result, auto data) {
+                    if (result == YesNoCancelPopupResult::Yes) {
+                        const int index = std::any_cast<int>(data);
+                        m_file.m_textures.erase(m_file.m_textures.begin() + index);
+                    }
+                }, i);
+            }
+
+            ImGui::EndPopup();
         }
 
         if (open) {

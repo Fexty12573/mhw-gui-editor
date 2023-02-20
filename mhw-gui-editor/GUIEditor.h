@@ -4,9 +4,11 @@
 #include "Settings.h"
 #include "ImThemeManager.h"
 
+#include <any>
 #include <filesystem>
 #include <functional>
 #include <map>
+#include <queue>
 #include <vector>
 
 #include <ShObjIdl.h>
@@ -27,6 +29,35 @@ struct ObjectInfo {
 	ObjectType Type;
 	std::unordered_map<std::string, ParamType> Params;
 };
+
+enum class YesNoCancelPopupResult {
+    Yes,
+    No,
+    Cancel,
+	Ok
+};
+enum class PopupType {
+	Yes = 1,
+    No = 2,
+    Cancel = 4,
+    Ok = 8,
+
+    YesNo = Yes | No,
+    YesNoCancel = Yes | No | Cancel,
+    YesCancel = Yes | Cancel,
+    OkCancel = Ok | Cancel
+};
+struct YesNoCancelPopup {
+    std::string Title;
+    std::string Message;
+	PopupType Type;
+    std::function<void(YesNoCancelPopupResult, std::any user_data)> Callback;
+	std::any UserData;
+};
+
+inline bool operator&(PopupType a, PopupType b) {
+    return static_cast<int>(a) & static_cast<int>(b);
+}
 
 class GUIEditor {
 public:
@@ -85,6 +116,9 @@ private:
 	bool m_animation_editor_first = true;
 	bool m_animation_editor_visible = false;
 	bool m_object_editor_visible = false;
+
+    // Generic yes/no/cancel popup
+    std::queue<YesNoCancelPopup> m_popup_queue;
 
 	bool m_error_popup_open = false;
 	std::string m_error_popup_message;
