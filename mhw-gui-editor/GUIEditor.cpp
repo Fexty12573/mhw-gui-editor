@@ -370,7 +370,7 @@ void GUIEditor::save_file_as() {
 void GUIEditor::render_tree_viewer() {
     ImGui::Begin("Tree Viewer");
 
-    if (ImGui::RichTextTreeNode("Animations", "<C FFC6913F>Animations</C> ({})", m_file.m_animations.size())) {
+    if (ImGui::TreeNodeEx("Animations", ImGuiTreeNodeFlags_SpanAvailWidth)) {
         for (auto& animation : m_file.m_animations) {
             render_animation(animation);
         }
@@ -443,6 +443,9 @@ void GUIEditor::render_tree_viewer() {
 void GUIEditor::render_overview() const {
     ImGui::Begin("Overview");
 
+    ImGui::RichText("<C FFC6913F>File:</C> {}", m_file_path.string());
+    ImGui::NewLine();
+
     ImGui::RichText("<C FFC6913F>Animation Count:</C> {}", m_file.m_animations.size());
     ImGui::RichText("<C FFC6913F>Sequence Count:</C> {}", m_file.m_sequences.size());
     ImGui::RichText("<C FFC6913F>Object Count:</C> {}", m_file.m_objects.size());
@@ -458,17 +461,6 @@ void GUIEditor::render_overview() const {
     ImGui::RichText("<C FFC6913F>Message Count:</C> {}", m_file.m_messages.size());
     ImGui::RichText("<C FFC6913F>Resource Count:</C> {}", m_file.m_resources.size());
     ImGui::RichText("<C FFC6913F>GeneralResource Count:</C> {}", m_file.m_general_resources.size());
-
-    static MtHermiteCurve curve = {
-        {0.087f, 0.154f, 0.479f, 0.527f, 0.7f, 0.738f, 0.857f, 1.0f},
-        {0.195f, 0.475f, 0.305f, 0.670f, 0.7f, 0.340f, 0.275f, 0.105f}
-    };
-
-    ImGui::HermiteCurve("Curve", &curve, { 400, 400 });
-    ImGui::Text("X: { %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f }", 
-        curve.x[0], curve.x[1], curve.x[2], curve.x[3], curve.x[4], curve.x[5], curve.x[6], curve.x[7]);
-    ImGui::Text("Y: { %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f }", 
-        curve.y[0], curve.y[1], curve.y[2], curve.y[3], curve.y[4], curve.y[5], curve.y[6], curve.y[7]);
 
     ImGui::End();
 }
