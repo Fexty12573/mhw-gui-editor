@@ -11,7 +11,6 @@ App::App([[maybe_unused]] const std::string& commandline) : m_window("MHW GUI Ed
 	m_swap_chain = m_window.m_swap_chain;
 	m_device = m_window.m_device;
 	m_context = m_window.m_context;
-	m_main_rtv = m_window.m_main_rtv;
 
 	auto& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -26,6 +25,11 @@ App::App([[maybe_unused]] const std::string& commandline) : m_window("MHW GUI Ed
 
 	ImGui_ImplWin32_Init(m_window.get_window());
 	ImGui_ImplDX11_Init(m_device.Get(), m_context.Get());
+
+	m_window.add_resize_callback([this](u16, u16) {
+        ImGui_ImplDX11_InvalidateDeviceObjects();
+        ImGui_ImplDX11_CreateDeviceObjects();
+	});
 
 	m_editor.add_menu_item("File", { "Exit", "Alt+F4", [](GUIEditor*) { PostQuitMessage(0); } });
 }
@@ -61,8 +65,8 @@ int App::run() {
 
 		ImGui::Render();
 
-		m_context->OMSetRenderTargets(1, m_main_rtv.GetAddressOf(), nullptr);
-		m_context->ClearRenderTargetView(m_main_rtv.Get(), clear_color);
+		m_context->OMSetRenderTargets(1, m_window.m_main_rtv.GetAddressOf(), nullptr);
+		m_context->ClearRenderTargetView(m_window.m_main_rtv.Get(), clear_color);
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {

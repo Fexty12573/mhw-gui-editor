@@ -30,6 +30,5 @@ private:
 	ComPtr<ID3D11Device> m_device;
 	ComPtr<ID3D11DeviceContext> m_context;
 	ComPtr<IDXGISwapChain> m_swap_chain;
-	ComPtr<ID3D11RenderTargetView> m_main_rtv;
 };
 

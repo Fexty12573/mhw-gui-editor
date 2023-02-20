@@ -1,7 +1,9 @@
 #pragma once
 #include "MinWindows.h"
 
+#include <functional>
 #include <string>
+#include <vector>
 
 #include <d3d11.h>
 #include <dxgi.h>
@@ -21,6 +23,8 @@ public:
 
 	[[nodiscard]] HWND get_window() const { return m_window; }
 
+	void add_resize_callback(const std::function<void(u16, u16)>& callback);
+
 private:
 	static LRESULT CALLBACK WndProcInit(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	static LRESULT CALLBACK WndProcThunk(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -37,6 +41,8 @@ private:
 	ComPtr<ID3D11DeviceContext> m_context;
 	ComPtr<IDXGISwapChain> m_swap_chain;
 	ComPtr<ID3D11RenderTargetView> m_main_rtv;
+
+    std::vector<std::function<void(u16, u16)>> m_resize_callbacks;
 
 	friend class App;
 };

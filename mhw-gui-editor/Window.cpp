@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "HrException.h"
 #include "imgui_impl_win32.h"
+#include "imgui_impl_dx11.h"
 
 #include <fmt/format.h>
 
@@ -73,7 +74,7 @@ Window::Window(std::string title, int width, int height)
 	scd.OutputWindow = m_window;
 	scd.Windowed = TRUE;
 	scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-	scd.Flags = 0;
+    scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 #ifdef _DEBUG
 	constexpr UINT flags = 0;
@@ -112,6 +113,10 @@ Window::~Window() {
 	DestroyWindow(m_window);
 }
 
+void Window::add_resize_callback(const std::function<void(u16, u16)>& callback) {
+    m_resize_callbacks.push_back(callback);
+}
+
 LRESULT CALLBACK Window::WndProcInit(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if (msg == WM_NCCREATE) {
 
@@ -139,23 +144,42 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 
 	switch (msg)
 	{
-	case WM_CLOSE:
-		PostQuitMessage(0);
-		break;
+	case WM_CLOSE: [[fallthrough]];
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
-	/*case WM_SIZE:
-		if (m_device && wParam != SIZE_MINIMIZED) {
-			OutputDebugStringA("Resizing\n");
-			m_swap_chain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+    case WM_SIZE:
+	    if (m_device && m_main_rtv && wParam != SIZE_MINIMIZED) {
+		    OutputDebugStringA("Resizing\n");
 
-			ComPtr<ID3D11Texture2D> back_buffer;
-			HR_ASSERT(m_swap_chain->GetBuffer(0, IID_PPV_ARGS(&back_buffer)));
-			HR_ASSERT(m_device->CreateRenderTargetView(back_buffer.Get(), nullptr, &m_main_rtv));
+            m_main_rtv.Reset();
+            HR_ASSERT(m_swap_chain->ResizeBuffers(0, LOWORD(lParam), HIWORD(lParam), DXGI_FORMAT_UNKNOWN, 0));
+
+            ComPtr<ID3D11Texture2D> back_buffer;
+            HR_ASSERT(m_swap_chain->GetBuffer(0, IID_PPV_ARGS(&back_buffer)));
+            HR_ASSERT(m_device->CreateRenderTargetView(back_buffer.Get(), nullptr, &m_main_rtv));
+
+		    for (const auto& callback : m_resize_callbacks) {
+			    callback(LOWORD(lParam), HIWORD(lParam));
+		    }
+	    }
+
+	    break;
+	case WM_DPICHANGED:
+		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DpiEnableScaleViewports) {
+            const RECT* suggested_rect = reinterpret_cast<RECT*>(lParam);
+			SetWindowPos(
+				hwnd, 
+				nullptr,
+				suggested_rect->left,
+				suggested_rect->top,
+				suggested_rect->right - suggested_rect->left,
+				suggested_rect->bottom - suggested_rect->top,
+				SWP_NOZORDER | SWP_NOACTIVATE
+			);
 		}
 
-		break;*/
+		break;
 	default:
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
