@@ -128,3 +128,12 @@ private:
 
 	Settings m_settings;
 };
+
+///	TODO: Add an 'About' window and a 'Help' window
+///		- About: Show version, credits, etc.
+///		- Help: Show hotkeys, object info, etc.
+///	TODO: Add a way to add new params to an objsequence
+///	TODO: Add a way to add all missing InitParams to an object
+///	TODO: Add a way to display GUIResources and GeneralResources
+///	TODO: Add a flow editor (Low priority)
+///
