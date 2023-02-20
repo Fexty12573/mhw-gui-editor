@@ -364,6 +364,7 @@ void GUIEditor::save_file_as() {
     BinaryWriter writer(wpath);
 
     m_file.save_to(writer, m_settings);
+    m_file_path = wpath;
 }
 
 void GUIEditor::render_tree_viewer() {
