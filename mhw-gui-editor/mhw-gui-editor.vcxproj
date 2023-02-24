@@ -165,6 +165,17 @@
     <ClCompile Include="GroupPanel.cpp" />
     <ClCompile Include="GUIAnimation.cpp" />
     <ClCompile Include="GUIEditor.cpp" />
+    <ClCompile Include="GUIEditor_Animation.cpp" />
+    <ClCompile Include="GUIEditor_InitParam.cpp" />
+    <ClCompile Include="GUIEditor_Instance.cpp" />
+    <ClCompile Include="GUIEditor_Key.cpp" />
+    <ClCompile Include="GUIEditor_Object.cpp" />
+    <ClCompile Include="GUIEditor_ObjSequence.cpp" />
+    <ClCompile Include="GUIEditor_Overview.cpp" />
+    <ClCompile Include="GUIEditor_Param.cpp" />
+    <ClCompile Include="GUIEditor_ResourceManager.cpp" />
+    <ClCompile Include="GUIEditor_Sequence.cpp" />
+    <ClCompile Include="GUIEditor_TextureViewer.cpp" />
     <ClCompile Include="GUIExtendData.cpp" />
     <ClCompile Include="GUIFile.cpp" />
     <ClCompile Include="GUIFlow.cpp" />
@@ -190,6 +201,7 @@
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="StringBuffer.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="GUIEditor_TreeViewer.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
