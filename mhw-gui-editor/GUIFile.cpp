@@ -190,8 +190,8 @@ void GUIFile::run_data_usage_analysis(bool log_overlapping_offsets) const {
 
         const ptrdiff_t p_overlaps = std::ranges::count_if(p_values, [](u32 v) { return v > 0; });
         const ptrdiff_t ip_overlaps = std::ranges::count_if(ip_values, [](u32 v) {return v > 0; });
-        const u32 p_max_overlap = *std::ranges::max_element(p_values);
-        const u32 ip_max_overlap = *std::ranges::max_element(ip_values);
+        const u32 p_max_overlap = p_values.size() > 0 ? *std::ranges::max_element(p_values) : 0;
+        const u32 ip_max_overlap = ip_values.size() > 0 ? *std::ranges::max_element(ip_values) : 0;
 
         std::vector<u32> overlapping_offsets{};
         std::ranges::set_intersection(p_keys, ip_keys, std::back_inserter(overlapping_offsets));

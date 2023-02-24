@@ -71,7 +71,9 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
             info.Params[field.value("Name", "N/A")] = static_cast<ParamType>(field.value("Type", 0));
         }
 
-        m_object_info[key] = std::move(info);
+        const auto p_info = std::make_shared<ObjectInfo>(std::move(info));
+        m_object_info[key] = p_info;
+        m_object_info2[p_info->Type] = p_info;
     }
 }
 
@@ -271,12 +273,14 @@ void GUIEditor::render(u32 dockspace_id) {
     }
 
     if (!m_popup_queue.empty()) {
-        if (!ImGui::IsPopupOpen(m_popup_queue.front().Title.c_str())) {
-            ImGui::OpenPopup(m_popup_queue.front().Title.c_str());
+        ImGui::PushID("YesNoCancelPopupQueue");
+
+        auto& popup = m_popup_queue.front();
+        if (!ImGui::IsPopupOpen(popup.Title.c_str())) {
+            ImGui::OpenPopup(popup.Title.c_str());
         }
 
         if (ImGui::BeginPopupModal(m_popup_queue.front().Title.c_str(), nullptr, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize)) {
-            const auto& popup = m_popup_queue.front();
             ImGui::Text(popup.Message.c_str());
 
             bool new_line = false;
@@ -337,7 +341,28 @@ void GUIEditor::render(u32 dockspace_id) {
 
             ImGui::EndPopup();
         }
-    } 
+
+        ImGui::PopID();
+    }
+
+    if (!m_generic_popup_queue.empty()) {
+        ImGui::PushID("GenericPopupQueue");
+
+        auto& popup = m_generic_popup_queue.front();
+        if (!ImGui::IsPopupOpen(popup.Title.c_str())) {
+            ImGui::OpenPopup(popup.Title.c_str());
+        }
+
+        if (ImGui::BeginPopupModal(popup.Title.c_str(), nullptr, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize)) {
+            if (popup.DrawCallback(popup.UserData)) {
+                m_generic_popup_queue.pop();
+            }
+
+            ImGui::EndPopup();
+        }
+
+        ImGui::PopID();
+    }
 }
 
 void GUIEditor::render_object_editor() {
@@ -614,7 +639,7 @@ void GUIEditor::render_resource_manager() {
         if (ImGui::BeginPopupContextItem()) {
             if (ImGui::MenuItem("Delete")) {
                 m_popup_queue.emplace("Are you sure?", "Are you sure you want to delete this texture?", PopupType::YesCancel, 
-                    [this](auto result, auto data) {
+                    [this](auto result, const std::any& data) {
                     if (result == YesNoCancelPopupResult::Yes) {
                         const int index = std::any_cast<int>(data);
                         m_file.m_textures.erase(m_file.m_textures.begin() + index);
@@ -832,7 +857,7 @@ void GUIEditor::render_object(GUIObject& obj, u32 seq_count) {
             if (ImGui::TreeNodeEx("ObjectSequences", ImGuiTreeNodeFlags_SpanAvailWidth)) {
                 const u64 max = std::min(static_cast<u64>(obj.ObjectSequenceIndex + seq_count), m_file.m_obj_sequences.size());
                 for (auto i = obj.ObjectSequenceIndex; i < max; ++i) {
-                    render_obj_sequence(m_file.m_obj_sequences[i]);
+                    render_obj_sequence(m_file.m_obj_sequences[i], obj.Type);
                 }
 
                 ImGui::TreePop();
@@ -865,7 +890,7 @@ void GUIEditor::render_sequence(GUISequence& seq) const {
     ImGui::PopID();
 }
 
-void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq) {
+void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq, ObjectType source_object, u32 object_id) {
     constexpr u32 u32_step = 1;
     constexpr u32 u32_fast_step = 10;
 
@@ -884,10 +909,10 @@ void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq) {
         if (objseq.InitParamNum > 0) {
             if (ImGui::TreeNodeEx("InitParams", ImGuiTreeNodeFlags_SpanAvailWidth)) {
                 auto& initparams = m_file.m_init_params;
-                const u64 max = std::min(static_cast<u64>(objseq.InitParamIndex + static_cast<u64>(objseq.InitParamNum)), initparams.size());
+                const u64 max = std::min(objseq.InitParamIndex + static_cast<u64>(objseq.InitParamNum), initparams.size());
 
                 for (auto i = objseq.InitParamIndex; i < max; ++i) {
-                    render_init_param(initparams[i]);
+                    render_init_param(initparams[i], source_object);
                 }
 
                 if (objseq.InitParamIndex + static_cast<u64>(objseq.InitParamNum) > m_file.m_init_params.size()) {
@@ -899,12 +924,130 @@ void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq) {
         }
 
         if (objseq.ParamNum > 0) {
-            if (ImGui::TreeNodeEx("Params", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+            const bool open = ImGui::TreeNodeEx("Params", ImGuiTreeNodeFlags_SpanAvailWidth);
+
+            if (ImGui::BeginPopupContextItem()) {
+                if (ImGui::MenuItem("Add Param")) {
+                    struct AddParamInfo {
+                        u32 ObjSeqIndex;
+                        ObjectType SourceObjectType;
+                        u32 SourceObjectId;
+                        std::shared_ptr<ObjectInfo> ObjectInfo;
+                        bool AddKeyframes;
+
+                        GUIParam Param;
+                    };
+
+                    m_generic_popup_queue.emplace("Add New Param", [this, u32_step, u32_fast_step](std::any& user_data) {
+                        auto& info = std::any_cast<AddParamInfo&>(user_data);
+
+                        if (info.SourceObjectType != ObjectType::None) {
+                            const auto& params = info.ObjectInfo->Params;
+                            if (ImGui::BeginCombo("Presets", params.contains(info.Param.Name) ? info.Param.Name.c_str() : "----")) {
+                                for (const auto& [name, type] : params) {
+                                    if (ImGui::Selectable(name.c_str(), name == info.Param.Name)) {
+                                        info.Param.Name = name;
+                                        info.Param.Type = type;
+
+                                        info.Param.perform_value_operation(
+                                            [](auto, auto& p) { p.Values = std::vector<u8>(p.ValueCount, 0); },
+                                            [](auto, auto& p) { p.Values = std::vector<u32>(p.ValueCount, 0); },
+                                            [](auto, auto& p) { p.Values = std::vector<f32>(p.ValueCount, 0.0f); },
+                                            [](auto, auto& p) { p.Values = std::vector<MtVector4>(p.ValueCount, MtVector4{}); },
+                                            [](auto, auto& p) { p.Values = std::vector<std::string>(p.ValueCount, ""); },
+                                            false
+                                        );
+                                    }
+                                }
+
+                                ImGui::EndCombo();
+                            }
+                        }
+
+                        if (ImGui::BeginCombo("Type", enum_to_string(info.Param.Type))) {
+                            if (ImGui::RichTextCombo("Type", reinterpret_cast<u8*>(&info.Param.Type), ParamTypeNames, 0xFFB0C94E)) {
+                                info.Param.perform_value_operation(
+                                    [](auto, auto& p) { p.Values = std::vector<u8>(p.ValueCount, 0); },
+                                    [](auto, auto& p) { p.Values = std::vector<u32>(p.ValueCount, 0); },
+                                    [](auto, auto& p) { p.Values = std::vector<f32>(p.ValueCount, 0.0f); },
+                                    [](auto, auto& p) { p.Values = std::vector<MtVector4>(p.ValueCount, MtVector4{}); },
+                                    [](auto, auto& p) { p.Values = std::vector<std::string>(p.ValueCount, ""); },
+                                    false
+                                );
+                            }
+
+                            ImGui::EndCombo();
+                        }
+
+                        if (ImGui::InputScalar("Count", ImGuiDataType_U8, &info.Param.ValueCount, &u32_step, &u32_fast_step)) {
+                            info.Param.perform_value_operation(
+                                [](auto v, auto& p) { v->resize(p.ValueCount, 0); },
+                                [](auto v, auto& p) { v->resize(p.ValueCount, 0); },
+                                [](auto v, auto& p) { v->resize(p.ValueCount, 0.0f); },
+                                [](auto v, auto& p) { v->resize(p.ValueCount, MtVector4{}); },
+                                [](auto v, auto& p) { v->resize(p.ValueCount, ""); }
+                            );
+                        }
+
+                        ImGui::InputText("Name", &info.Param.Name);
+
+                        ImGui::NewLine();
+
+                        if (ImGui::Button("Add")) {
+                            GUIParam& p = info.Param;
+
+                            p.IsColorParam = p.Name.contains("Color") && p.Name != "ColorScale";
+                            p.IsColorParam |= p.Name == "RGB";
+                            p.IsColorParam &= p.Type == ParamType::VECTOR;
+
+                            p.NameCRC = crc::crc32(p.Name.c_str(), p.Name.size());
+                            p.KeyIndex = m_file.m_keys.size();
+                            p.ParentID = info.SourceObjectId != -1 ? info.SourceObjectId : 0;
+
+                            for (auto i = 0u; i < p.ValueCount; ++i) {
+                                m_file.insert_key({ .Data = {.Full = 0 } });
+                            }
+
+                            const auto& seq = m_file.m_obj_sequences[info.ObjSeqIndex];
+
+                            p.Index = seq.ParamIndex + seq.ParamNum;
+                            m_file.insert_param(p, p.Index);
+
+                            update_indices();
+
+                            return true;
+                        }
+
+                        ImGui::SameLine();
+
+                        if (ImGui::Button("Cancel")) {
+                            return true;
+                        }
+
+                        ImGui::SameLine();
+
+                        ImGui::Checkbox("Add Keyframes", &info.AddKeyframes);
+
+                        return false;
+                    }, AddParamInfo{
+                        .ObjSeqIndex = objseq.Index,
+                        .SourceObjectType = source_object,
+                        .SourceObjectId = object_id,
+                        .ObjectInfo = source_object != ObjectType::None ? m_object_info2[source_object] : nullptr,
+                        .AddKeyframes = false,
+                        .Param = { .Type = ParamType::UNKNOWN }
+                    });
+                }
+
+                ImGui::EndPopup();
+            }
+
+            if (open) {
                 auto& params = m_file.m_params;
-                const u64 max = std::min(static_cast<u64>(objseq.ParamIndex + static_cast<u64>(objseq.ParamNum)), params.size());
+                const u64 max = std::min(objseq.ParamIndex + static_cast<u64>(objseq.ParamNum), params.size());
 
                 for (auto i = objseq.ParamIndex; i < max; ++i) {
-                    render_param(params[i]);
+                    render_param(params[i], source_object);
                 }
 
                 if (objseq.ParamIndex + static_cast<u64>(objseq.ParamNum) > m_file.m_init_params.size()) {
@@ -930,38 +1073,21 @@ void GUIEditor::render_init_param(GUIInitParam& param, ObjectType source_object)
     ImGui::PushID("InitParam");
     ImGui::PushID(param.Index);
 
-    bool invalid_name = false;
-    bool invalid_type = false;
-    ParamType correct_type = param.Type;
-
-    const std::string source_object_name = enum_to_string(source_object);
-    if (source_object != ObjectType::None) {
-        if (m_object_info.contains(source_object_name)) {
-            const auto& object_info = m_object_info.at(source_object_name);
-            if (object_info.Params.contains(param.Name)) {
-                if (object_info.Params.at(param.Name) != param.Type) {
-                    invalid_type = true;
-                    correct_type = object_info.Params.at(param.Name);
-                }
-            } else {
-                invalid_name = true;
-            }
-        }
-    }
+    const auto pvr = is_valid_param(param.Type, param.Name, source_object);
 
     const bool open = ImGui::RichTextTreeNode("InitParam", param.get_preview(param.Index));
     const ImVec4 warning_color = { 1.0f, 1.0f, 0.2f, 1.0f };
 
-    if (invalid_name || invalid_type) {
+    if (pvr.InvalidName || pvr.InvalidType) {
         ImGui::SameLine();
         ImGui::TextColored(warning_color, " " ICON_FA_TRIANGLE_EXCLAMATION);
     }
 
     if (open) {
-        if (invalid_name) {
+        if (pvr.InvalidName) {
             ImGui::TextColored(warning_color, "Warning: Name does not exist in the original object!");
-        } else if (invalid_type) {
-            ImGui::TextColored(warning_color, "Warning: Type does not match the original type. Should be %s!", enum_to_string(correct_type));
+        } else if (pvr.InvalidType) {
+            ImGui::TextColored(warning_color, "Warning: Type does not match the original type. Should be %s!", enum_to_string(pvr.CorrectType));
         }
 
         ImGui::Checkbox("Use", &param.Use);
@@ -1103,7 +1229,7 @@ void GUIEditor::render_init_param(GUIInitParam& param, ObjectType source_object)
     ImGui::PopID();
 }
 
-void GUIEditor::render_param(GUIParam& param) {
+void GUIEditor::render_param(GUIParam& param, ObjectType source_object) {
     using namespace crc::literals;
     constexpr u32 u32_step = 1;
     constexpr u32 u32_fast_step = 10;
@@ -1111,7 +1237,23 @@ void GUIEditor::render_param(GUIParam& param) {
     ImGui::PushID("Param");
     ImGui::PushID(param.Index);
 
-    if (ImGui::RichTextTreeNode("Param", param.get_preview(param.Index))) {
+    const auto pvr = is_valid_param(param.Type, param.Name, source_object);
+
+    const bool open = ImGui::RichTextTreeNode("Param", param.get_preview(param.Index));
+    const ImVec4 warning_color = { 1.0f, 1.0f, 0.2f, 1.0f };
+
+    if (pvr.InvalidName || pvr.InvalidType) {
+        ImGui::SameLine();
+        ImGui::TextColored(warning_color, " " ICON_FA_TRIANGLE_EXCLAMATION);
+    }
+
+    if (open) {
+        if (pvr.InvalidName) {
+            ImGui::TextColored(warning_color, "Warning: Name does not exist in the original object!");
+        } else if (pvr.InvalidType) {
+            ImGui::TextColored(warning_color, "Warning: Type does not match the original type. Should be %s!", enum_to_string(pvr.CorrectType));
+        }
+
         if (ImGui::RichTextCombo("Type", reinterpret_cast<u8*>(&param.Type), ParamTypeNames, 0xFFB0C94E)) {
             param.perform_value_operation(
                 [](auto, auto& p) { p.Values = std::vector<u8>(p.ValueCount, 0); },
@@ -1385,6 +1527,33 @@ void GUIEditor::render_key(GUIKey& key, ParamType type) const {
 
     ImGui::PopID();
     ImGui::PopID();
+}
+
+ParamValidationResult GUIEditor::is_valid_param(ParamType type, const std::string& name, ObjectType source_object) const {
+    if (source_object == ObjectType::None) {
+        return { .CorrectType = type };
+    }
+
+    bool invalid_name = false;
+    bool invalid_type = false;
+    ParamType correct_type = type;
+
+    const std::string source_object_name = enum_to_string(source_object);
+    if (source_object != ObjectType::None) {
+        if (m_object_info.contains(source_object_name)) {
+            const auto& object_info = m_object_info.at(source_object_name);
+            if (object_info->Params.contains(name)) {
+                if (object_info->Params.at(name) != type) {
+                    invalid_type = true;
+                    correct_type = object_info->Params.at(name);
+                }
+            } else {
+                invalid_name = true;
+            }
+        }
+    }
+
+    return { invalid_name, invalid_type, correct_type };
 }
 
 void GUIEditor::update_indices() {
