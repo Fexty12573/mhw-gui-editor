@@ -138,3 +138,26 @@ std::vector<TaggedText> ParseRichText(const std::string& text) {
 }
 
 }
+
+bool ImGui::RT::IsItemHovered() {
+	return Internal::g_last_item_hovered;
+}
+
+bool ImGui::RT::BeginPopupContextItem(std::string_view str_id, ImGuiPopupFlags popup_flags) {
+    ImGuiContext& g = *GImGui;
+    ImGuiWindow* window = g.CurrentWindow;
+
+	if (window->SkipItems) {
+		return false;
+	}
+
+    const ImGuiID id = str_id.empty() ? Internal::g_last_item_id : window->GetID(str_id.data());
+	IM_ASSERT(id != 0);
+
+    const int mouse_button = popup_flags & ImGuiPopupFlags_MouseButtonMask_;
+    if (IsMouseReleased(mouse_button) && IsItemHovered()) {
+        OpenPopupEx(id);
+    }
+
+    return BeginPopupEx(id, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoSavedSettings);
+}
