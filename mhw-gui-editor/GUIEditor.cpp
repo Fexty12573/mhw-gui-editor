@@ -24,7 +24,7 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
     
     add_menu_item("File", { ICON_FA_FILE " Open", "Ctrl+O", [](GUIEditor* e) { e->open_file(); } });
     add_menu_item("File", { ICON_FA_FLOPPY_DISK " Save", "Ctrl+S", [](GUIEditor* e) { e->save_file(); } });
-    add_menu_item("File", { "Save As...", "Ctrl+Shift+S", [](GUIEditor* e) {e->save_file_as(); }});
+    add_menu_item("File", { "Save As...", "Ctrl+Shift+S", [](GUIEditor* e) { e->save_file_as(); }});
     add_menu_item("View", { "Animation Editor", "Ctrl+Shift+A", [this](GUIEditor* e) {
         m_animation_editor_visible = true;
         

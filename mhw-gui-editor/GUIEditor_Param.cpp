@@ -19,7 +19,7 @@ void GUIEditor::render_param(GUIParam& param, ObjectType source_object) {
     const auto pvr = is_valid_param(param.Type, param.Name, source_object);
 
     const bool open = ImGui::RichTextTreeNode("Param", param.get_preview(param.Index));
-    const ImVec4 warning_color = { 1.0f, 1.0f, 0.2f, 1.0f };
+    constexpr ImVec4 warning_color = { 1.0f, 1.0f, 0.2f, 1.0f };
 
     if (pvr.InvalidName || pvr.InvalidType) {
         ImGui::SameLine();
