@@ -44,6 +44,7 @@ void GUIEditor::render_param(GUIParam& param, ObjectType source_object) {
             );
         }
 
+        const u8 prev_value_count = param.ValueCount;
         if (ImGui::InputScalar("Count", ImGuiDataType_U8, &param.ValueCount, &u32_step, &u32_fast_step)) {
             param.perform_value_operation(
                 [](auto v, auto& p) { v->resize(p.ValueCount, 0); },
@@ -52,6 +53,16 @@ void GUIEditor::render_param(GUIParam& param, ObjectType source_object) {
                 [](auto v, auto& p) { v->resize(p.ValueCount, MtVector4{}); },
                 [](auto v, auto& p) { v->resize(p.ValueCount, ""); }
             );
+
+            if (m_settings.AutoAdjustKeyFrames) {
+                if (prev_value_count < param.ValueCount) {
+                    for (u32 i = prev_value_count; i < param.ValueCount; ++i) {
+                        m_file.insert_key({}, static_cast<s32>(param.KeyIndex + i));
+                    }
+                } else {
+                    m_file.erase_keys(param.KeyIndex + param.ValueCount, prev_value_count - param.ValueCount);
+                }
+            }
         }
         ImGui::InputText("Name", &param.Name);
 

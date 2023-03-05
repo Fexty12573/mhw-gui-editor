@@ -7,3 +7,6 @@ Theme = 'Deep Dark'
 KV128 = true
 KV32 = true
 KV8 = true
+
+[Utility]
+AutoAdjustKeyFrames = true

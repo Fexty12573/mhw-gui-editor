@@ -18,5 +18,7 @@ struct Settings {
     bool AllowMultipleKV8References;
     bool AllowMultipleKV32References;
     bool AllowMultipleKV128References;
+
+    bool AutoAdjustKeyFrames;
 };
 

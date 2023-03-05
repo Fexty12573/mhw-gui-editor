@@ -27,6 +27,8 @@ bool Settings::load() {
     AllowMultipleKV32References = result["Optimization"]["AllowMultipleReferences"]["KV32"].value_or(false);
     AllowMultipleKV128References = result["Optimization"]["AllowMultipleReferences"]["KV128"].value_or(false);
 
+    AutoAdjustKeyFrames = result["Utility"]["AutoAdjustKeyFrames"].value_or(false);
+
     return true;
 }
 
@@ -44,6 +46,9 @@ bool Settings::save() {
             {"KV32", AllowMultipleKV32References},
             {"KV128", AllowMultipleKV128References}
         }}
+    });
+    config.insert("Utility", toml::table{
+        {"AutoAdjustKeyFrames", AutoAdjustKeyFrames}
     });
 
     try {

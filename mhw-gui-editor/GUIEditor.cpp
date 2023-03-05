@@ -231,6 +231,27 @@ void GUIEditor::render(u32 dockspace_id) {
 
         ImGui::Unindent();
         ImGui::EndGroupPanel();
+        ImGui::BeginGroupPanel(ICON_FA_WRENCH " Utilities");
+
+        if (ImGui::Checkbox("Auto-Adjust Keyframes", &m_settings.AutoAdjustKeyFrames)) {
+            if (m_settings.AutoAdjustKeyFrames) {
+                m_popup_queue.emplace("Are you sure?", 
+                    "Turning on this option and decreasing the ValueCount on a Param will cause Keyframes to be deleted.\nThis cannot be undone.",
+                    PopupType::OkCancel, [this](YesNoCancelPopupResult result, auto) {
+                    if (result == YesNoCancelPopupResult::Cancel) {
+                        m_settings.AutoAdjustKeyFrames = false;
+                    }
+                });
+            }
+        }
+
+        if (ImGui::IsItemHovered()) {
+            ImGui::BeginTooltip();
+            ImGui::Text("Automatically adjusts the number of keyframes to the number of values a Param has.");
+            ImGui::EndTooltip();
+        }
+
+        ImGui::EndGroupPanel();
 
         ImGui::NewLine();
         if (ImGui::Button("OK")) {
@@ -265,7 +286,7 @@ void GUIEditor::render(u32 dockspace_id) {
     }
 
     if (ImGui::BeginPopup("Error##GenericError")) {
-        ImGui::Text(m_error_popup_message.c_str());
+        ImGui::Text("%s", m_error_popup_message.c_str());
         if (ImGui::Button("Ok")) {
             ImGui::CloseCurrentPopup();
         }
@@ -281,7 +302,7 @@ void GUIEditor::render(u32 dockspace_id) {
         }
 
         if (ImGui::BeginPopupModal(m_popup_queue.front().Title.c_str(), nullptr, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::Text(popup.Message.c_str());
+            ImGui::Text("%s", popup.Message.c_str());
 
             bool new_line = false;
 

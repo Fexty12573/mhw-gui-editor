@@ -667,3 +667,21 @@ void GUIFile::insert_font_filter(std::shared_ptr<GUIFontFilter> filter, s32 inde
 
     m_font_filters.emplace(m_font_filters.begin() + index, std::move(filter));
 }
+
+void GUIFile::erase_keys(u32 index, u32 count, bool update_indices) {
+    if (index >= m_keys.size() || count == 0) {
+        return;
+    }
+
+    m_keys.erase(m_keys.begin() + index, m_keys.begin() + index + count);
+
+    if (!update_indices) {
+        return;
+    }
+
+    for (auto& param : m_params) {
+        if (param.KeyIndex >= index) {
+            param.KeyIndex -= count;
+        }
+    }
+}
