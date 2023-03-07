@@ -7,6 +7,9 @@
 
 #include <string>
 
+struct GUIInitParam;
+struct GUIParam;
+
 struct GUIObjectSequence {
 	static constexpr size_t size = 24;
 	static GUIObjectSequence read(BinaryReader& reader);
@@ -21,6 +24,9 @@ struct GUIObjectSequence {
 	s16 FrameCount;
 	u32 InitParamIndex;
 	u32 ParamIndex;
+
+	std::vector<GUIInitParam> InitParams;
+	std::vector<GUIParam> Params;
 
 	u32 Index;
 };

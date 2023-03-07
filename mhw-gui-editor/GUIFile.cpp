@@ -134,6 +134,12 @@ void GUIFile::load_from(BinaryReader& stream) {
     }
 
     m_header = header;
+
+
+    for (auto& anim : m_animations) {
+        anim.resolve(m_objects, m_sequences);
+        anim.RootObject->resolve(m_objects, m_init_params, m_obj_sequences, anim.SequenceNum);
+    }
 }
 
 void GUIFile::load_resources(const std::string& chunk_path, const std::string& native_path, ID3D11Device* device, ID3D11DeviceContext* context) {

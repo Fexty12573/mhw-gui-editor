@@ -51,3 +51,29 @@ std::string GUIObject::get_preview(u32 index) const {
 
     return std::format("[<C FFA3D7B8>{}</C>] Object<<C FFA3D7B8>{}</C>>: <C FFB0C94E>{} </C><C FFFEDC9C>{}</C>", index, ID, enum_to_string(Type), Name);
 }
+
+void GUIObject::resolve(
+    const std::vector<GUIObject> &objects, 
+    const std::vector<GUIInitParam> &init_params, 
+    const std::vector<GUIObjectSequence> &sequences,
+    u32 objseq_count) {
+    if (ChildIndex != -1) {
+        Children.push_back(objects[ChildIndex]);
+
+        GUIObject& child = Children.back();
+        child.resolve(objects, init_params, sequences, objseq_count);
+        while (child.NextIndex != -1) {
+            child = objects[child.NextIndex];
+            Children.push_back(child);
+            Children.back().resolve(objects, init_params, sequences, objseq_count);
+        }
+    }
+
+    if (InitParamIndex != -1 && InitParamNum != 0) {
+        InitParams = std::vector<GUIInitParam>(init_params.begin() + InitParamIndex, init_params.begin() + InitParamIndex + InitParamNum);
+    }
+
+    if (ObjectSequenceIndex != -1 && objseq_count != 0) {
+        ObjectSequences = std::vector<GUIObjectSequence>(sequences.begin() + ObjectSequenceIndex, sequences.begin() + ObjectSequenceIndex + objseq_count);
+    }
+}

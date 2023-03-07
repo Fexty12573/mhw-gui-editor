@@ -7,12 +7,16 @@
 #include "StringBuffer.h"
 #include "dti_types.h"
 
+struct GUISequence;
+struct GUIObject;
+
 struct GUIAnimation {
 	static constexpr size_t size = 0x20;
 	static GUIAnimation read(BinaryReader& stream, std::streamoff text_offset);
 
     void write(BinaryWriter& stream, StringBuffer& buffer) const;
 	[[nodiscard]] std::string get_preview(u32 index = 0xFFFFFFFF) const;
+	void resolve(std::vector<GUIObject>& objects, std::vector<GUISequence>& sequences);
 
 	u32 ID;
 	u16 ObjectNum;
@@ -22,6 +26,9 @@ struct GUIAnimation {
 	u32 RootObjectIndex;
 	std::string Name;
 	u32 SequenceIndex;
+
+	std::vector<GUISequence> Sequences;
+	std::unique_ptr<GUIObject> RootObject;
 
 	u32 Index = 0;
 };

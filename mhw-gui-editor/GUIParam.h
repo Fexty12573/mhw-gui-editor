@@ -10,6 +10,8 @@
 #include <string>
 #include <variant>
 
+struct GUIKey;
+
 struct GUIParam {
 	using ParamVariant = std::variant<
 		std::vector<u8>,
@@ -45,6 +47,8 @@ struct GUIParam {
 	u32 KeyIndex;
 
 	ParamVariant Values;
+
+	std::vector<GUIKey> KeyFrames;
 
 	// Meta values
 	u32 NameCRC;

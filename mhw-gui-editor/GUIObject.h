@@ -9,12 +9,21 @@
 
 #include <string>
 
+struct GUIInitParam;
+struct GUIObjectSequence;
+
 struct GUIObject {
 	static constexpr size_t size = 56;
 	static GUIObject read(BinaryReader& reader, const GUIHeader& header);
 
 	void write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const;
 	[[nodiscard]] std::string get_preview(u32 index = 0xFFFFFFFF) const;
+	void resolve(
+		const std::vector<GUIObject>& objects, 
+		const std::vector<GUIInitParam>& init_params, 
+		const std::vector<GUIObjectSequence>& sequences,
+		u32 objseq_count
+	);
 
 	u32 ID;
 	u8 InitParamNum;
@@ -28,6 +37,10 @@ struct GUIObject {
 	s64 ExtendDataOffset;
 
     GUIExtendData ExtendData;
+
+	std::vector<GUIObject> Children;
+	std::vector<GUIInitParam> InitParams;
+	std::vector<GUIObjectSequence> ObjectSequences;
 
 	u32 Index = 0;
 };

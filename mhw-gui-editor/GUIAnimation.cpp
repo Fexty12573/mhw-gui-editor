@@ -34,3 +34,11 @@ std::string GUIAnimation::get_preview(u32 index) const {
     
 	return std::format("[<C FFA3D7B8>{}</C>] Animation<<C FFA3D7B8>{}</C>> <C FFFEDC9C>{}</C>", index, ID, Name);
 }
+
+void GUIAnimation::resolve(std::vector<GUIObject> &objects, std::vector<GUISequence> &sequences) {
+	for (u32 i = SequenceIndex; i < SequenceIndex + SequenceNum; i++) {
+		Sequences.push_back(sequences[i]);
+	}
+	
+	RootObject = std::make_unique<GUIObject>(objects[RootObjectIndex]);
+}	
