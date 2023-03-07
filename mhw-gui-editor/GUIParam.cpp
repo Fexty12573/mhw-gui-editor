@@ -149,11 +149,11 @@ void GUIParam::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers
 
 	switch (Type) {
 	case ParamType::BOOL:
-		writer.write(kvbuffers.insert8<u8>(GET_VEC(u8, Values)));
+		writer.write(kvbuffers.insert8(GET_VEC(u8, Values)));
 		break;
 	case ParamType::INIT_BOOL: [[fallthrough]];
 	case ParamType::INIT_INT:
-		writer.write(kvbuffers.insert8<u8>(GET_VEC(u8, Values)));
+		writer.write(kvbuffers.insert8(GET_VEC(u8, Values)));
 		break;
 	case ParamType::FLOAT: [[fallthrough]];
 	case ParamType::ANIMEVENT: 

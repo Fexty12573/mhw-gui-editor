@@ -84,12 +84,6 @@ struct GUIHeader {
     u64 padding;
 };
 
-template<class T0, class T1> concept SameSizeAs = requires(T0 a, T1 b) {
-    { sizeof a } -> std::same_as<size_t>;
-    { sizeof b } -> std::same_as<size_t>;
-    { sizeof a == sizeof b } -> std::same_as<bool>;
-};
-
 struct KeyValueBuffers {
     std::vector<u8> KeyValue8;
     std::vector<u32> KeyValue32;
@@ -102,15 +96,9 @@ struct KeyValueBuffers {
         bool MultipleKV128Refs = false;
     } Config;
 
-    template<typename T> size_t insert8(const T& value) requires std::is_convertible_v<T, u8> {
+    size_t insert8(u8 value) {
         if (Config.MultipleKV8Refs) {
-            auto it = KeyValue8.end();
-
-            if constexpr (std::is_same_v<u8, T>) {
-                it = std::ranges::find(KeyValue8, value);
-            } else {
-                it = std::ranges::find_if(KeyValue8, [value](u8 v) { return *reinterpret_cast<T*>(&v) == value; });
-            }
+            const auto it = std::ranges::find(KeyValue8, value);
 
             if (it != KeyValue8.end()) {
                 return std::distance(KeyValue8.begin(), it) * sizeof(u8);
@@ -118,16 +106,12 @@ struct KeyValueBuffers {
         }
 
         const auto idx = KeyValue8.size();
-        if constexpr (std::is_same_v<u8, T>) {
-            KeyValue8.push_back(value);
-        } else {
-            KeyValue8.push_back(*reinterpret_cast<const u8*>(&value));
-        }
+        KeyValue8.push_back(value);
 
         return idx * sizeof(u8);
     }
 
-    template<typename T> size_t insert8(std::span<const T> values) {
+    size_t insert8(std::span<const u8> values) {
         if (Config.MultipleKV8Refs) {
             const auto it = std::ranges::search(KeyValue8, values).begin();
 
@@ -142,15 +126,9 @@ struct KeyValueBuffers {
         return idx * sizeof(u8);
     }
 
-    template<typename T> size_t insert32(const T& value) requires SameSizeAs<T, u32> {
+    size_t insert32(u32 value) {
         if (Config.MultipleKV32Refs) {
-            auto it = KeyValue32.end();
-
-            if constexpr (std::is_same_v<u32, T>) {
-                it = std::ranges::find(KeyValue32, value);
-            } else {
-                it = std::ranges::find_if(KeyValue32, [value](u32 v) { return *reinterpret_cast<T*>(&v) == value; });
-            }
+            const auto it = std::ranges::find(KeyValue32, value);
 
             if (it != KeyValue32.end()) {
                 return std::distance(KeyValue32.begin(), it) * sizeof(u32);
@@ -158,13 +136,13 @@ struct KeyValueBuffers {
         }
 
         const auto idx = KeyValue32.size();
-        if constexpr (std::is_same_v<u32, T>) {
-            KeyValue32.push_back(value);
-        } else {
-            KeyValue32.push_back(*reinterpret_cast<const u32*>(&value));
-        }
+        KeyValue32.push_back(value);
 
         return idx * sizeof(u32);
+    }
+
+    size_t insert32(float value) {
+        return insert32(*reinterpret_cast<u32*>(&value));
     }
 
     template<typename T> size_t insert32(std::span<const T> values) requires std::is_convertible_v<T, u32> {
