@@ -5,6 +5,7 @@
 
 #include <filesystem>
 #include <ranges>
+#include <unordered_set>
 
 GUIFile::GUIFile() = default;
 
@@ -55,6 +56,12 @@ void GUIFile::load_from(BinaryReader& stream) {
     for (auto i = 0u; i < header.objectNum; ++i) {
         m_objects.emplace_back(GUIObject::read(stream, header));
     }
+
+    #ifdef GUI_FILE_ANALYSIS
+        for (u32 i = 0; i < m_objects.size(); ++i) {
+            m_objects[i].Index = i;
+        }
+    #endif
 
     stream.seek_absolute(static_cast<s64>(header.objSequenceOffset));
     for (auto i = 0u; i < header.objSequenceNum; ++i) {
@@ -255,7 +262,52 @@ void GUIFile::run_data_usage_analysis(bool log_overlapping_offsets) const {
         spdlog::info("InitParam[{}] used by {} Objects, {} Instances, and {} ObjSequences", i, obj_use_count, inst_use_count, objseq_use_count);
     }
 
+    // Object ownership analysis
+    spdlog::info("Analyzing Object ownership...");
 
+    u32 current_index = 0;
+    u32 anim_index = 0;
+    for (const auto& anim : m_animations) {
+        if (anim.SequenceIndex < current_index) {
+            spdlog::info("Animation[{}]: Found animation with overlapping sequences", anim_index, current_index);
+        }
+
+        anim_index++;
+        current_index += anim.SequenceNum;
+    }
+
+    current_index = 0;
+    std::unordered_set<u32> used_objects{};
+    const std::function<void(const GUIObject&, const GUIAnimation&)> check_object = [&](const GUIObject& obj, const GUIAnimation& anim) {
+        if (used_objects.contains(obj.Index)) {
+            spdlog::info("Object[{}]: Found object with overlapping sequences in Anim<{}>", obj.Index, anim.ID);
+        }
+
+        used_objects.insert(obj.Index);
+
+        if (obj.ChildIndex != -1) check_object(m_objects[obj.ChildIndex], anim);
+        if (obj.NextIndex != -1) check_object(m_objects[obj.NextIndex], anim);
+    };
+
+    for (const auto& anim : m_animations) {
+        check_object(m_objects[anim.RootObjectIndex], anim);
+    }
+
+    std::unordered_set<u32> used_params{};
+
+    for (const auto& objseq : m_obj_sequences) {
+        for (auto i = objseq.ParamIndex; i < objseq.ParamIndex + objseq.ParamNum; ++i) {
+            if (used_params.contains(i)) {
+                spdlog::info("ObjSequence[{}]: Found ObjSequence with overlapping parameters", current_index);
+            }
+
+            used_params.insert(i);
+        }
+
+        current_index++;
+    }
+
+    spdlog::info("Analysis complete.");
 #else
     spdlog::info("GUIFile Analysis disabled. Skipping analysis.");
 #endif
