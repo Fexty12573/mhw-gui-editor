@@ -18,6 +18,17 @@ that texture will be displayed instead of the one in the chunk directory.
 ### To start editing
 File > Open > Select a .gui file
 
+# Features
+- Editing of these GUI properties
+  - Animations
+  - Objects
+  - Sequences
+  - ObjectSequences
+  - InitParams
+  - Params
+  - Instances
+  - FontFilters
+- A texture viewer and parameter editor
 
 # Building
 Install the following packages using [vcpkg](https://github.com/microsoft/vcpkg/):
