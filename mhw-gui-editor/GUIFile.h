@@ -61,6 +61,9 @@ public:
 	friend class GUIEditor;
 
 private:
+    u32 get_animation_object_count(u32 anim_index) const;
+
+private:
 	GUIHeader m_header{};
 
 	std::array<char, 4> m_magic{};

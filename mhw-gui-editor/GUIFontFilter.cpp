@@ -79,13 +79,17 @@ void GUIFontFilter::write(BinaryWriter& writer, StringBuffer& buffer) const {
     writer.write(ID);
 }
 
+std::string GUIFontFilter::get_preview() const {
+    return fmt::format("FontFilter<<C FFA3D7B8>{}</C>>: <C FFB0C94E>{}</C>", ID, enum_to_string(Type));
+}
+
 void GUIFontFilterDistanceField::write(BinaryWriter& writer, StringBuffer& buffer) const {
     GUIFontFilter::write(writer, buffer);
 
 	writer.write(ParamNum);
 
-    for (u32 i = 0; i < 2; ++i) {
-        writer.write(Params[i]);
+    for (const auto& Param : Params) {
+        writer.write(Param);
     }
 
     writer.write(Offset);

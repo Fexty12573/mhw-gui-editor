@@ -166,6 +166,7 @@
     <ClCompile Include="GUIAnimation.cpp" />
     <ClCompile Include="GUIEditor.cpp" />
     <ClCompile Include="GUIEditor_Animation.cpp" />
+    <ClCompile Include="GUIEditor_FontFilter.cpp" />
     <ClCompile Include="GUIEditor_InitParam.cpp" />
     <ClCompile Include="GUIEditor_Instance.cpp" />
     <ClCompile Include="GUIEditor_Key.cpp" />

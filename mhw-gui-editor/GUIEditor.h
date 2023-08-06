@@ -98,6 +98,11 @@ private:
 	void render_param(GUIParam& param, ObjectType source_object = ObjectType::None);
 	void render_instance(GUIInstance& inst);
 	void render_key(GUIKey& key, ParamType type = ParamType::UNKNOWN) const;
+    void render_font_filter(const std::shared_ptr<GUIFontFilter>& filter) const;
+    void render_font_filter_shadow(const std::shared_ptr<GUIFontFilterShadow>& filter) const;
+    void render_font_filter_border(const std::shared_ptr<GUIFontFilterBorder>& filter) const;
+    void render_font_filter_gradation_overlay(const std::shared_ptr<GUIFontFilterGradationOverlay>& filter) const;
+    void render_font_filter_distance_field(const std::shared_ptr<GUIFontFilterDistanceField>& filter) const;
 
     [[nodiscard]] ParamValidationResult is_valid_param(ParamType type, const std::string& name, ObjectType source_object) const;
 	void update_indices();

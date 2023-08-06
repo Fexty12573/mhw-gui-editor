@@ -685,3 +685,7 @@ void GUIFile::erase_keys(u32 index, u32 count, bool update_indices) {
         }
     }
 }
+
+u32 GUIFile::get_animation_object_count(u32 anim_index) const {
+    
+}

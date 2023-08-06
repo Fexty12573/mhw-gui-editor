@@ -72,5 +72,13 @@ void GUIEditor::render_tree_viewer() {
         ImGui::TreePop();
     }
 
+    if (ImGui::TreeNodeEx("FontFilters", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+        for (auto& font_filter : m_file.m_font_filters) {
+            render_font_filter(font_filter);
+        }
+
+        ImGui::TreePop();
+    }
+
     ImGui::End();
 }

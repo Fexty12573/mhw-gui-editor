@@ -193,6 +193,9 @@
     <ClCompile Include="GUIEditor_TextureViewer.cpp">
       <Filter>Source Files\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="GUIEditor_FontFilter.cpp">
+      <Filter>Source Files\Editor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
