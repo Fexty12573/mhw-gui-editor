@@ -90,6 +90,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\im-neo-sequencer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -104,6 +105,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\im-neo-sequencer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -123,6 +125,7 @@
       <DisableSpecificWarnings>28251</DisableSpecificWarnings>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\im-neo-sequencer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -142,6 +145,7 @@
       <DisableSpecificWarnings>28251</DisableSpecificWarnings>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\im-neo-sequencer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -195,6 +199,8 @@
     <ClCompile Include="GUITexture.cpp" />
     <ClCompile Include="GUIVertex.cpp" />
     <ClCompile Include="HrException.cpp" />
+    <ClCompile Include="imgui_neo_internal.cpp" />
+    <ClCompile Include="imgui_neo_sequencer.cpp" />
     <ClCompile Include="ImThemeManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="pch.cpp" />
@@ -237,6 +243,7 @@
     <ClInclude Include="GUIVertex.h" />
     <ClInclude Include="HrException.h" />
     <ClInclude Include="IconFontAwesome.h" />
+    <ClInclude Include="imgui_neo_sequencer.h" />
     <ClInclude Include="ImThemeManager.h" />
     <ClInclude Include="MinWindows.h" />
     <ClInclude Include="pch.h" />

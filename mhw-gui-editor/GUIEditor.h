@@ -64,6 +64,10 @@ struct ParamValidationResult {
 	bool InvalidName = false;
     bool InvalidType = false;
     ParamType CorrectType = ParamType::UNKNOWN;
+
+    operator bool() const {
+        return !(InvalidName || InvalidType);
+    }
 };
 
 inline bool operator&(PopupType a, PopupType b) {
