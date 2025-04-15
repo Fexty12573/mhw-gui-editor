@@ -4,6 +4,8 @@
 #include "Settings.h"
 #include "ImThemeManager.h"
 
+#include "imgui-notify/imgui_notify.h"
+
 #include <any>
 #include <filesystem>
 #include <functional>
@@ -95,7 +97,7 @@ private:
 	void render_object_editor();
 
 	void render_animation(GUIAnimation& anim);
-	void render_object(GUIObject& obj, u32 seq_count = 0);
+	void render_object(GUIObject& obj, u32 seq_count = 0, GUIAnimation* parent_anim = nullptr);
 	void render_sequence(GUISequence& seq) const;
 	void render_obj_sequence(GUIObjectSequence& objseq, ObjectType source_object = ObjectType::None, u32 object_id = -1);
 	void render_init_param(GUIInitParam& param, ObjectType source_object = ObjectType::None) const;

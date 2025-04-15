@@ -200,20 +200,21 @@ void GUIParam::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers
 
 std::string GUIParam::get_preview(u32 index) const {
 	const std::string fmt = "Param: <C FFB0C94E>{}</C> <C FFFEDC9C>{}</C>";
+    const auto type_name = enum_to_string(Type);
 
 	if (index == -1) {
 		if (ValueCount > 1) {
-			return std::vformat(fmt + "[<C FFA3D7B8>{}</C>]", std::make_format_args(enum_to_string(Type), Name, ValueCount));
+			return std::vformat(fmt + "[<C FFA3D7B8>{}</C>]", std::make_format_args(type_name, Name, ValueCount));
 		}
 
-		return std::vformat(fmt, std::make_format_args(enum_to_string(Type), Name));
+		return std::vformat(fmt, std::make_format_args(type_name, Name));
 	}
 
 	if (ValueCount > 1) {
-		return std::vformat("[<C FFA3D7B8>{}</C>] " + fmt + "[<C FFA3D7B8>{}</C>]", std::make_format_args(index, enum_to_string(Type), Name, ValueCount));
+		return std::vformat("[<C FFA3D7B8>{}</C>] " + fmt + "[<C FFA3D7B8>{}</C>]", std::make_format_args(index, type_name, Name, ValueCount));
 	}
 	
-	return std::vformat("[<C FFA3D7B8>{}</C>] " + fmt, std::make_format_args(index, enum_to_string(Type), Name));
+	return std::vformat("[<C FFA3D7B8>{}</C>] " + fmt, std::make_format_args(index, type_name, Name));
 }
 
 void GUIParam::perform_value_operation(OpFunc<u8>&& u8op, OpFunc<u32>&& u32op, OpFunc<f32>&& f32op,

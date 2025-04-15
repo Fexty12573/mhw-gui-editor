@@ -9,6 +9,8 @@
 #include "crc32.h"
 #include "Console.h"
 
+#include "imgui-notify/tahoma.h"
+
 #include <fmt/format.h>
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>
@@ -31,19 +33,34 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
         
     } });
 
+    add_menu_item("Edit", { ICON_FA_ARROW_RIGHT " Go To...", "Ctrl+G", [](GUIEditor* e) {
+        e->m_generic_popup_queue.emplace("Go To...", [e](const std::any& data) {
+            auto& path = std::any_cast<std::string&>(data);
+            ImGui::InputText("Path", &path);
+            ImGui::NewLine();
+
+            if (ImGui::Button("Go")) {
+                ImGui::CloseCurrentPopup();
+                //e->m_selected_object = e->m_file.find_object(path);
+                return true;
+            }
+
+            if (ImGui::Button("Cancel")) {
+                ImGui::CloseCurrentPopup();
+                return true;
+            }
+
+            return false;
+        }, std::string{});
+    }});
+
     m_settings.load();
     m_theme_manager.set_theme_directory("./themes");
     m_theme_manager.refresh();
 
-    if (m_settings.Theme.empty()) {
-        m_theme_manager.apply_style("Default");
-    } else {
-        m_theme_manager.apply_style(m_settings.Theme);
-    }
+    m_theme_manager.apply_style(m_settings.Theme.empty() ? "Default" : m_settings.Theme);
 
     const auto fonts = ImGui::GetIO().Fonts;
-
-    fonts->AddFontFromFileTTF("./fonts/CascadiaMono.ttf", 16.0f);
 
     ImFontConfig config;
     config.MergeMode = true;
@@ -51,8 +68,14 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
     config.GlyphMaxAdvanceX = 16.0f;
     static constexpr ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
 
+    fonts->AddFontFromFileTTF("./fonts/CascadiaMono.ttf", 16.0f);
     fonts->AddFontFromFileTTF("./fonts/Font Awesome 6 Free-Solid-900.otf", 16.0f, &config, icon_ranges);
     fonts->Build();
+
+    config.FontDataOwnedByAtlas = false;
+    fonts->AddFontFromMemoryTTF((void*)tahoma, sizeof tahoma, 17.0f, &config);
+    fonts->Build();
+    ImGui::MergeIconsWithLatestFont(16.0f);
 
     nlohmann::json object_info;
 
@@ -384,6 +407,12 @@ void GUIEditor::render(u32 dockspace_id) {
 
         ImGui::PopID();
     }
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 5.f);
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(43.f / 255.f, 43.f / 255.f, 43.f / 255.f, 100.f / 255.f));
+    ImGui::RenderNotifications();
+    ImGui::PopStyleVar(1);
+    ImGui::PopStyleColor(1);
 }
 
 void GUIEditor::render_object_editor() {
@@ -413,7 +442,7 @@ void GUIEditor::open_file() {
     HR_ASSERT(dialog->SetOptions(
         FOS_STRICTFILETYPES | FOS_PATHMUSTEXIST | FOS_FILEMUSTEXIST
     ));
-
+    
     if (dialog->Show(nullptr) == HRESULT_FROM_WIN32(ERROR_CANCELLED)) {
         return;
     }
@@ -446,7 +475,14 @@ void GUIEditor::save_file() {
     }
 
     BinaryWriter writer(m_file_path);
+
     m_file.save_to(writer, m_settings);
+
+    ImGuiToast toast(ImGuiToastType_Success);
+    toast.set_title("Saved");
+    toast.set_type(ImGuiToastType_Success);
+    toast.set_content("Successfully saved file to %s", m_file_path.string().c_str());
+    ImGui::InsertNotification(toast);
 }
 
 void GUIEditor::save_file_as() {
@@ -480,6 +516,12 @@ void GUIEditor::save_file_as() {
 
     m_file.save_to(writer, m_settings);
     m_file_path = wpath;
+
+    ImGuiToast toast(ImGuiToastType_Success);
+    toast.set_title("Saved");
+    toast.set_type(ImGuiToastType_Success);
+    toast.set_content("Successfully saved file to %s", m_file_path.string().c_str());
+    ImGui::InsertNotification(toast);
 }
 
 ParamValidationResult GUIEditor::is_valid_param(ParamType type, const std::string& name, ObjectType source_object) const {

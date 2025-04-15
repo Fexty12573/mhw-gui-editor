@@ -324,5 +324,8 @@
     <ClInclude Include="imgui_neo_sequencer.h">
       <Filter>Header Files\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="EditorPath.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

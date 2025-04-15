@@ -261,7 +261,7 @@ void GUIFile::run_data_usage_analysis(bool log_overlapping_offsets) const {
 #endif
 }
 
-void GUIFile::save_to(BinaryWriter& stream, const Settings& settings) {
+void GUIFile::save_to(BinaryWriter& stream, const Settings& settings) const {
     GUIHeader header = {
         .fileType = {'G', 'U', 'I', '\0'},
         .guiVersion = m_version,

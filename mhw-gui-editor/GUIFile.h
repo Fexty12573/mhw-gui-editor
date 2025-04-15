@@ -37,7 +37,7 @@ public:
 
 	void run_data_usage_analysis(bool log_overlapping_offsets = false) const;
 
-    void save_to(BinaryWriter& stream, const Settings& settings);
+    void save_to(BinaryWriter& stream, const Settings& settings) const;
 
     void insert_animation(GUIAnimation anim, s32 index = -1, bool update_indices = true);
     void insert_sequence(GUISequence seq, s32 index = -1, bool update_indices = true);

@@ -22,11 +22,11 @@ void GUIEditor::render_animation(GUIAnimation& anim) {
 
         if (ImGui::TreeNodeEx("Objects", ImGuiTreeNodeFlags_SpanAvailWidth)) {
             auto object = &m_file.m_objects[anim.RootObjectIndex];
-            render_object(*object, anim.SequenceNum);
+            render_object(*object, anim.SequenceNum, &anim);
 
             while (object->NextIndex != -1) {
                 object = &m_file.m_objects[object->NextIndex];
-                render_object(*object, anim.SequenceNum);
+                render_object(*object, anim.SequenceNum, &anim);
             }
 
             ImGui::TreePop();

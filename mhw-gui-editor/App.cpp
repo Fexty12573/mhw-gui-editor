@@ -56,6 +56,7 @@ int App::run() {
 			DispatchMessage(&msg);
 		}
 
+        handle_input();
 
 		ImGui_ImplDX11_NewFrame();
 		ImGui_ImplWin32_NewFrame();
@@ -87,5 +88,27 @@ void App::render_frame() {
 }
 
 void App::handle_input() {
-	
+#define CLEAR_KEY(key) ImGui::GetIO().KeysData[ImGuiKey_##key].Down = false
+
+	if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
+	    if (ImGui::IsKeyPressed(ImGuiKey_S)) {
+            if (ImGui::IsKeyDown(ImGuiKey_LeftShift)) {
+                CLEAR_KEY(S);
+                m_editor.save_file_as();
+            } else {
+                m_editor.save_file();
+            }
+        }
+
+        if (ImGui::IsKeyPressed(ImGuiKey_O)) {
+            CLEAR_KEY(O);
+            m_editor.open_file();
+        }
+    }
+
+    if (ImGui::IsKeyDown(ImGuiKey_LeftAlt)) {
+        if (ImGui::IsKeyPressed(ImGuiKey_F4)) {
+            PostQuitMessage(0);
+        }
+    }
 }

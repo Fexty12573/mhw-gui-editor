@@ -220,6 +220,7 @@
     <ClInclude Include="CurveEditor.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="dti_types.h" />
+    <ClInclude Include="EditorPath.h" />
     <ClInclude Include="GroupPanel.h" />
     <ClInclude Include="GUIAnimation.h" />
     <ClInclude Include="GUIEditor.h" />
