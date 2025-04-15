@@ -73,6 +73,7 @@ public:
     }
 
 	friend class GUIEditor;
+	friend class Editor;
 
 private:
     u32 get_animation_object_count(u32 anim_index) const;

@@ -7,8 +7,6 @@
 
 
 void GUIEditor::render_resource_manager() {
-    ImGui::Begin("Resource Manager");
-
     {
         static constexpr std::array ResourceTypes = {
             "Texture",
@@ -85,13 +83,12 @@ void GUIEditor::render_resource_manager() {
 
         if (ImGui::BeginPopupContextItem()) {
             if (ImGui::MenuItem("Delete")) {
-                m_popup_queue.emplace("Are you sure?", "Are you sure you want to delete this texture?", PopupType::YesCancel,
-                    [this](auto result, const std::any& data) {
+                m_owner->add_popup("Are you sure?", "Are you sure you want to delete this texture?", PopupType::YesCancel,
+                    [this, i](auto result, const auto&) {
                     if (result == YesNoCancelPopupResult::Yes) {
-                        const int index = std::any_cast<int>(data);
-                        m_file.m_textures.erase(m_file.m_textures.begin() + index);
+                        m_file.m_textures.erase(m_file.m_textures.begin() + i);
                     }
-                }, i);
+                });
             }
 
             ImGui::EndPopup();
@@ -108,55 +105,57 @@ void GUIEditor::render_resource_manager() {
             ImGui::InputText("Name", &tex.Name);
             ImGui::InputText("Path", &tex.Path);
             ImGui::SameLine();
+
+            const auto& settings = m_owner->get_settings();
+
             if (ImGui::Button("...")) {
-                if (m_settings.ChunkPath.empty()) {
-                    m_error_popup_select_file_open = true;
+                if (settings.ChunkPath.empty()) {
+                    m_owner->error_file_open();
                 } else {
-                    const auto path = open_file_dialog(L"Select Texture", { {L"TEX Files", L"*.tex"} }, L"tex");
+                    const auto path = m_owner->open_file_dialog(L"Select Texture", { {L"TEX Files", L"*.tex"} }, L"tex");
                     if (!path.empty()) {
                         std::filesystem::path relpath;
                         if (m_file.is_mhgu()) {
-                            relpath = std::filesystem::relative(path, m_settings.ArcfsPath);
+                            relpath = std::filesystem::relative(path, settings.ArcfsPath);
                         } else {
-                            relpath = std::filesystem::relative(path, m_settings.ChunkPath);
+                            relpath = std::filesystem::relative(path, settings.ChunkPath);
                             if (relpath.empty()) {
-                                relpath = std::filesystem::relative(path, m_settings.NativePath);
+                                relpath = std::filesystem::relative(path, settings.NativePath);
                             }
                         }
 
                         tex.Path = relpath.replace_extension().generic_string();
 
                         BinaryReader reader(path);
-                        tex.RenderTexture.load_from(reader, m_file.is_mhgu(), m_owner->get_device().Get(), m_owner->get_context().Get());
+                        tex.RenderTexture.load_from(reader, m_file.is_mhgu(), m_app->get_device().Get(), m_app->get_context().Get());
                     }
                 }
             }
 
             if (ImGui::Button(ICON_FA_ARROW_ROTATE_RIGHT " Reload")) {
-                if (m_settings.ChunkPath.empty() && m_settings.NativePath.empty()) {
-                    m_error_popup_select_file_open = true;
+                if (settings.ChunkPath.empty() && settings.NativePath.empty()) {
+                    m_owner->error_file_open();
                 } else {
                     std::filesystem::path path;
 
                     if (m_file.is_mhgu()) {
-                        path = std::filesystem::path(m_settings.ArcfsPath) / tex.Path;
+                        path = std::filesystem::path(settings.ArcfsPath) / tex.Path;
                         path.replace_extension("tex");
                     } else {
-                        path = std::filesystem::path(m_settings.NativePath) / tex.Path;
+                        path = std::filesystem::path(settings.NativePath) / tex.Path;
                         path.replace_extension("tex");
 
                         if (!exists(path)) {
-                            path = std::filesystem::path(m_settings.ChunkPath) / tex.Path;
+                            path = std::filesystem::path(settings.ChunkPath) / tex.Path;
                             path.replace_extension("tex");
                         }
                     }
 
                     try {
                         BinaryReader reader(path);
-                        tex.RenderTexture.load_from(reader, m_file.is_mhgu(), m_owner->get_device().Get(), m_owner->get_context().Get());
+                        tex.RenderTexture.load_from(reader, m_file.is_mhgu(), m_app->get_device().Get(), m_app->get_context().Get());
                     } catch (...) {
-                        m_error_popup_message = "Failed to load texture";
-                        m_error_popup_open = true;
+                        m_owner->error_popup("Failed to load texture");
                     }
                 }
             }
@@ -174,6 +173,4 @@ void GUIEditor::render_resource_manager() {
             ImGui::TreePop();
         }
     }
-
-    ImGui::End();
 }

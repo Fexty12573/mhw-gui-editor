@@ -139,7 +139,7 @@ void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq, ObjectType source
                 .ObjSeqIndex = objseq.Index,
                 .SourceObjectType = source_object,
                 .SourceObjectId = object_id,
-                .ObjectInfo = source_object != ObjectType::None ? m_object_info2[source_object] : nullptr,
+                .ObjectInfo = source_object != ObjectType::None ? m_owner->get_object_info2().at(source_object) : nullptr,
                 .AddKeyframes = false,
                 .Param = { .Type = ParamType::UNKNOWN }
             });
@@ -183,7 +183,7 @@ void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq, ObjectType source
                         .ObjSeqIndex = objseq.Index,
                         .SourceObjectType = source_object,
                         .SourceObjectId = object_id,
-                        .ObjectInfo = source_object != ObjectType::None ? m_object_info2[source_object] : nullptr,
+                        .ObjectInfo = source_object != ObjectType::None ? m_owner->get_object_info2().at(source_object) : nullptr,
                         .AddKeyframes = false,
                         .Param = { .Type = ParamType::UNKNOWN }
                     });

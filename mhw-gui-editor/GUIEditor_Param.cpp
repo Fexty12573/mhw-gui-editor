@@ -54,7 +54,7 @@ void GUIEditor::render_param(GUIParam& param, ObjectType source_object) {
                 [](auto v, auto& p) { v->resize(p.ValueCount, ""); }
             );
 
-            if (m_settings.AutoAdjustKeyFrames) {
+            if (m_owner->get_settings().AutoAdjustKeyFrames) {
                 if (prev_value_count < param.ValueCount) {
                     for (u32 i = prev_value_count; i < param.ValueCount; ++i) {
                         m_file.insert_key({}, static_cast<s32>(param.KeyIndex + i));

@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "GroupPanel.h"
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_internal.h"
 
 // Source: https://github.com/ocornut/imgui/issues/1496#issuecomment-655048353

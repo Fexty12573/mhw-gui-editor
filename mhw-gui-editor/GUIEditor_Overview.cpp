@@ -4,8 +4,6 @@
 
 
 void GUIEditor::render_overview() const {
-    ImGui::Begin("Overview");
-
     ImGui::RichText("<C FFC6913F>File:</C> {}", m_file_path.string());
     ImGui::NewLine();
 
@@ -24,6 +22,4 @@ void GUIEditor::render_overview() const {
     ImGui::RichText("<C FFC6913F>Message Count:</C> {}", m_file.m_messages.size());
     ImGui::RichText("<C FFC6913F>Resource Count:</C> {}", m_file.m_resources.size());
     ImGui::RichText("<C FFC6913F>GeneralResource Count:</C> {}", m_file.m_general_resources.size());
-
-    ImGui::End();
 }

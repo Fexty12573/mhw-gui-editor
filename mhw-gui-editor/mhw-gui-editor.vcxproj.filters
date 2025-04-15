@@ -196,14 +196,11 @@
     <ClCompile Include="GUIEditor_FontFilter.cpp">
       <Filter>Source Files\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="imgui_neo_internal.cpp">
-      <Filter>Source Files\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui_neo_sequencer.cpp">
-      <Filter>Source Files\ImGui</Filter>
-    </ClCompile>
     <ClCompile Include="Sampler.cpp">
       <Filter>Source Files\rTexture</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor.cpp">
+      <Filter>Source Files\Editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -324,9 +321,6 @@
     <ClInclude Include="HrException.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="imgui_neo_sequencer.h">
-      <Filter>Header Files\ImGui</Filter>
-    </ClInclude>
     <ClInclude Include="EditorPath.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
@@ -335,6 +329,9 @@
     </ClInclude>
     <ClInclude Include="Sampler.h">
       <Filter>Header Files\rTexture</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor.h">
+      <Filter>Header Files\Editor</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

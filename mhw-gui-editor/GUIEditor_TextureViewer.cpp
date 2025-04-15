@@ -3,8 +3,6 @@
 
 
 void GUIEditor::render_texture_viewer() const {
-    ImGui::Begin("Texture Viewer");
-
     if (m_selected_texture != -1 && m_selected_texture < m_file.m_textures.size()) {
         const auto& tex = m_file.m_textures[m_selected_texture];
         if (tex.RenderTexture.is_valid()) {
@@ -25,6 +23,4 @@ void GUIEditor::render_texture_viewer() const {
             ImGui::Text("Make sure the file exists and you have the correct chunk path set under Tools -> Options");
         }
     }
-
-    ImGui::End();
 }

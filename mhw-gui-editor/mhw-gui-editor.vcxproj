@@ -125,7 +125,7 @@
       <DisableSpecificWarnings>28251</DisableSpecificWarnings>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\im-neo-sequencer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\im-neo-sequencer;%(AdditionalIncludeDirectories);IMGUI_DEFINE_MATH_OPERATORS</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -147,7 +147,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DisableSpecificWarnings>28251</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\im-neo-sequencer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)dependencies\im-neo-sequencer;%(AdditionalIncludeDirectories);IMGUI_DEFINE_MATH_OPERATORS</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -174,6 +174,7 @@
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="CurveEditor.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
+    <ClCompile Include="Editor.cpp" />
     <ClCompile Include="GroupPanel.cpp" />
     <ClCompile Include="GUIAnimation.cpp" />
     <ClCompile Include="GUIEditor.cpp" />
@@ -207,8 +208,6 @@
     <ClCompile Include="GUITexture.cpp" />
     <ClCompile Include="GUIVertex.cpp" />
     <ClCompile Include="HrException.cpp" />
-    <ClCompile Include="imgui_neo_internal.cpp" />
-    <ClCompile Include="imgui_neo_sequencer.cpp" />
     <ClCompile Include="ImThemeManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="pch.cpp">
@@ -231,6 +230,7 @@
     <ClInclude Include="CurveEditor.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="dti_types.h" />
+    <ClInclude Include="Editor.h" />
     <ClInclude Include="EditorPath.h" />
     <ClInclude Include="GroupPanel.h" />
     <ClInclude Include="GUIAnimation.h" />
@@ -255,7 +255,6 @@
     <ClInclude Include="GUIVertex.h" />
     <ClInclude Include="HrException.h" />
     <ClInclude Include="IconFontAwesome.h" />
-    <ClInclude Include="imgui_neo_sequencer.h" />
     <ClInclude Include="ImThemeManager.h" />
     <ClInclude Include="MinWindows.h" />
     <ClInclude Include="pch.h" />

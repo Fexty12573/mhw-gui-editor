@@ -2,7 +2,6 @@
 #include "GUIEditor.h"
 #include "RichText.h"
 #include "App.h"
-#include "imgui_neo_sequencer.h"
 
 #include <imgui_stdlib.h>
 #include <imgui_internal.h>
@@ -106,8 +105,8 @@ void GUIEditor::render_object(GUIObject& obj, u32 seq_count, GUIAnimation* paren
                             const auto draw_list = ImGui::GetWindowDrawList();
                             const auto& callback_data = m_draw_callback_data.emplace_back(
                                 std::make_unique<DrawCallbackData>(
-                                    m_owner->get_context().Get(),
-                                    m_samplers[(SamplerMode)sampler->Value32].get(),
+                                    m_app->get_context().Get(),
+                                    m_owner->get_samplers().at((SamplerMode)sampler->Value32).get(),
                                     nullptr
                                 )
                             );

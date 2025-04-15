@@ -31,7 +31,7 @@ App::App([[maybe_unused]] const std::string& commandline) : m_window("MHW GUI Ed
         ImGui_ImplDX11_CreateDeviceObjects();
 	});
 
-	m_editor.add_menu_item("File", { "Exit", "Alt+F4", [](GUIEditor*) { PostQuitMessage(0); } });
+	m_editor.add_menu_item("File", { "Exit", "Alt+F4", [](Editor*) { PostQuitMessage(0); } });
 }
 
 App::~App() {
@@ -82,7 +82,7 @@ int App::run() {
 }
 
 void App::render_frame() {
-	const ImGuiID dockspace_id = ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+	const ImGuiID dockspace_id = ImGui::DockSpaceOverViewport();
 
 	m_editor.render(dockspace_id);
 }

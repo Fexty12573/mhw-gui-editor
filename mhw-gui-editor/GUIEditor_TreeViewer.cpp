@@ -3,8 +3,6 @@
 
 
 void GUIEditor::render_tree_viewer() {
-    ImGui::Begin("Tree Viewer");
-
     if (ImGui::TreeNodeEx("Animations", ImGuiTreeNodeFlags_SpanAvailWidth)) {
         for (auto& animation : m_file.m_animations) {
             render_animation(animation);
@@ -79,6 +77,4 @@ void GUIEditor::render_tree_viewer() {
 
         ImGui::TreePop();
     }
-
-    ImGui::End();
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Window.h"
-#include "GUIEditor.h"
+#include "Editor.h"
 
 #include <wrl.h>
 #include <string>
@@ -25,7 +25,7 @@ private:
 
 private:
 	Window m_window;
-	GUIEditor m_editor;
+	Editor m_editor;
 
 	ComPtr<ID3D11Device> m_device;
 	ComPtr<ID3D11DeviceContext> m_context;
