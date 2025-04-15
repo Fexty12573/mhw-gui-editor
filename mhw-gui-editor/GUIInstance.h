@@ -12,8 +12,10 @@
 struct GUIInstance {
 	static constexpr size_t size = 56;
 	static GUIInstance read(BinaryReader& reader, const GUIHeader& header);
+	static GUIInstance read_mhgu(BinaryReader& reader, const GUIHeaderMHGU& header);
 
     void write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const;
+    void write_mhgu(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const;
     [[nodiscard]] std::string get_preview(u32 index = 0xFFFFFFFF) const;
 
 	u32 ID;

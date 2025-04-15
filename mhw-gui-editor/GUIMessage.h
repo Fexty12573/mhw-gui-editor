@@ -11,8 +11,10 @@
 struct GUIMessage {
 	static constexpr size_t size = 24;
 	static GUIMessage read(BinaryReader& reader, const GUIHeader& header);
+	static GUIMessage read_mhgu(BinaryReader& reader, const GUIHeaderMHGU& header);
 
 	void write(BinaryWriter& writer, StringBuffer& buffer) const;
+    void write_mhgu(BinaryWriter& writer, StringBuffer& buffer) const;
 
 	u32 ID;
 	std::string Path;

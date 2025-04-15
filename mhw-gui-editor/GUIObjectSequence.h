@@ -10,9 +10,11 @@
 struct GUIObjectSequence {
 	static constexpr size_t size = 24;
 	static GUIObjectSequence read(BinaryReader& reader);
+	static GUIObjectSequence read_mhgu(BinaryReader& reader);
 
     void write(BinaryWriter& writer, StringBuffer& buffer) const;
-	[[nodiscard]] std::string get_preview(u32 index = 0xFFFFFFFF) const;
+    void write_mhgu(BinaryWriter& writer, StringBuffer& buffer) const;
+	[[nodiscard]] std::string get_preview(u32 index = 0xFFFFFFFF, std::string_view name = {}) const;
 
 	u16 Attr;
 	u8 InitParamNum;

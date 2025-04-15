@@ -21,6 +21,24 @@ GUIInstance GUIInstance::read(BinaryReader& reader, const GUIHeader& header) {
     return inst;
 }
 
+GUIInstance GUIInstance::read_mhgu(BinaryReader& reader, const GUIHeaderMHGU& header) {
+	GUIInstance inst = {
+		.ID = reader.read<u32>(),
+		.Attr = reader.read<u32>(),
+		.NextIndex = reader.read<s32>(),
+		.ChildIndex = reader.read<s32>(),
+		.InitParamNum = reader.read<u32>(),
+		.Name = reader.abs_offset_read_string(header.stringOffset + reader.read<u32>()),
+		.Type = reader.read<ObjectType>(),
+		.InitParamIndex = reader.read<u32>(),
+		.ExtendDataOffset = reader.read<s32>(),
+	};
+
+	inst.ExtendData = GUIExtendData::read_mhgu(reader, inst.Type, inst.ExtendDataOffset, header);
+
+	return inst;
+}
+
 void GUIInstance::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const {
 	writer.write(ID);
     writer.write(Attr);
@@ -39,6 +57,25 @@ void GUIInstance::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuff
         writer.write_tuple<s32, s32>({ -1, 0 });
     }
 
+}
+
+void GUIInstance::write_mhgu(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const {
+    writer.write(ID);
+    writer.write(Attr);
+    writer.write(NextIndex);
+    writer.write(ChildIndex);
+    writer.write(InitParamNum);
+    writer.write<u32>(0);
+    writer.write((u32)buffer.append_no_duplicate(Name));
+    writer.write(Type);
+    writer.write(InitParamIndex);
+
+    if (ExtendDataOffset != -1) {
+        writer.write((u32)kv_buffers.ExtendData.size());
+        ExtendData.write_mhgu(kv_buffers, Type);
+    } else {
+        writer.write<s32>(-1);
+    }
 }
 
 std::string GUIInstance::get_preview(u32 index) const {

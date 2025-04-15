@@ -84,6 +84,81 @@ struct GUIHeader {
     u64 padding;
 };
 
+struct GUIHeaderMHGU {
+    char fileType[4];
+    u32 guiVersion;
+    u32 fileSize;
+    u32 attr;
+    time_t revisionDate;
+    u32 instanceID;
+    u32 flowID;
+    u32 variableID;
+    u32 startInstanceIndex;
+    u32 animationNum;
+    u32 sequenceNum;
+    u32 objectNum;
+    u32 objSequenceNum;
+    u32 initParamNum;
+    u32 paramNum;
+    u32 keyNum;
+    u32 instanceNum;
+    u32 flowNum;
+    u32 flowProcessNum;
+    u32 flowInputNum; // Always 0
+    u32 flowSwitchNum; // Always 0
+    u32 flowFunctionNum; // Always 0
+    u32 actionNum; // Always 0
+    u32 inputConditionNum; // Always 0
+    u32 switchConditionNum; // Always 0
+    u32 switchOperatorNum; // Always 0
+    u32 variableNum; // Always 0
+    u32 textureNum;
+    u32 fontNum; // Always 0
+    u32 fontFilterNum;
+    u32 messageNum; // Always 0
+    u32 guiResourceNum;
+    u32 generalResourceNum;
+    u32 cameraSettingNum; // Always 0
+    u32 instExeParamNum;
+    u32 vertexBufferSize;
+    u32 optionBitFlag; // baseZ :2,framerateMode:1,languageSettingNo:2,padding:27
+    u32 viewSize_Width;
+    u32 viewSize_Height;
+    u32 startFlowIndex;
+    u32 animationOffset;
+    u32 sequenceOffset;
+    u32 objectOffset;
+    u32 objSequenceOffset;
+    u32 initParamOffset;
+    u32 paramOffset;
+    u32 instanceOffset;
+    u32 flowOffset;
+    u32 flowProcessOffset;
+    u32 flowInputOffset;
+    u32 flowSwitchOffset;
+    u32 flowFunctionOffset;
+    u32 actionOffset;
+    u32 inputConditionOffset;
+    u32 switchOperatorOffset;
+    u32 switchConditionOffset;
+    u32 variableOffset;
+    u32 textureOffset;
+    u32 fontOffset;
+    u32 fontFilterOffset;
+    u32 messageOffset;
+    u32 guiResourceOffset;
+    u32 generalResourceOffset;
+    u32 cameraSettingOffset;
+    u32 stringOffset;
+    u32 keyOffset;
+    u32 keyValue8Offset;
+    u32 keyValue32Offset;
+    u32 keyValue128Offset;
+    u32 extendDataOffset;
+    u32 instExeParamOffset;
+    u32 vertexOffset;
+};
+
 struct KeyValueBuffers {
     std::vector<u8> KeyValue8;
     std::vector<u32> KeyValue32;
@@ -117,8 +192,8 @@ struct KeyValueBuffers {
 
             if (it != KeyValue8.end()) {
                 return std::distance(KeyValue8.begin(), it) * sizeof(u8);
-                }
             }
+        }
 
         const auto idx = KeyValue8.size();
         KeyValue8.insert_range(KeyValue8.end(), values);
@@ -153,12 +228,12 @@ struct KeyValueBuffers {
                 it = std::ranges::search(KeyValue32, values).begin();
             } else {
                 it = std::ranges::search(KeyValue32, values, [](u32 x, float y) {return x == *reinterpret_cast<u32*>(&y); }).begin();
-                }
+            }
 
             if (it != KeyValue32.end()) {
                 return std::distance(KeyValue32.begin(), it) * sizeof(u32);
-                }
             }
+        }
 
         const auto idx = KeyValue32.size();
         for (const auto& v : values) {
@@ -316,6 +391,13 @@ enum class ObjectType : u32
 
     //misc hashes
     rEffectAsset = 795748986,
+
+    // MHGU only
+    cGUIObjTexWithParam = 0x413023E9,
+    cGUIObjBlendTextureSample = 0x27A477BF,
+    cGUIObjFreePolygon = 0x0AD8C6E9,
+    cFestaGUIObjPolygon = 0x35929810,
+    cFestaGUIObjTexture = 0x7050B470
 };
 
 enum class FlowType : u32
@@ -353,7 +435,7 @@ enum class BlendState : u8
     AddInvColor = 0x14
 };
 
-enum class SamplerState : u8
+enum class SamplerMode : u8
 {
     WrapLinear = 0x0,
     ClampLinear = 0x1,
@@ -620,60 +702,6 @@ constexpr const char* enum_to_string(KeyValueType v) {
     return "INVALID";
 }
 
-constexpr const char* enum_to_string(ObjectType v) {
-    switch (v) {
-    case ObjectType::cGUIObjRoot: return "cGUIObjRoot";
-    case ObjectType::cGUIObjColorAdjust: return "cGUIObjColorAdjust";
-    case ObjectType::cGUIObj2D: return "cGUIObj2D";
-    case ObjectType::cGUIObjScissorMask: return "cGUIObjScissorMask";
-    case ObjectType::cGUIObjNull: return "cGUIObjNull";
-    case ObjectType::cGUIObjChildAnimationRoot: return "cGUIObjChildAnimationRoot";
-    case ObjectType::cGUIObjPolygon: return "cGUIObjPolygon";
-    case ObjectType::cGUIObjTexture: return "cGUIObjTexture";
-    case ObjectType::cGUIObjTextureSet: return "cGUIObjTextureSet";
-    case ObjectType::cGUIObjMaterial: return "cGUIObjMaterial";
-    case ObjectType::cGUIObjMessage: return "cGUIObjMessage";
-    case ObjectType::cGUIObjText: return "cGUIObjText";
-    case ObjectType::cGUIObjEffect: return "cGUIObjEffect";
-    case ObjectType::cGUIObjBaseModel: return "cGUIObjBaseModel";
-    case ObjectType::cGUIObjHitRect: return "cGUIObjHitRect";
-    case ObjectType::cGUIObjModel: return "cGUIObjModel";
-    case ObjectType::cGUIObjSizeAdjustMessage: return "cGUIObjSizeAdjustMessage";
-    case ObjectType::cGUIInstAnimVariable: return "cGUIInstAnimVariable";
-    case ObjectType::cGUIInstAnimControl: return "cGUIInstAnimControl";
-    case ObjectType::cGUIInstRoot: return "cGUIInstRoot";
-    case ObjectType::cGUIInstNull: return "cGUIInstNull";
-    case ObjectType::cGUIInstScissorMask: return "cGUIInstScissorMask";
-    case ObjectType::cGUIInstAnimation: return "cGUIInstAnimation";
-    case ObjectType::cGUIInstGauge: return "cGUIInstGauge";
-    case ObjectType::cGUIInstAutoAnimation: return "cGUIInstAutoAnimation";
-    case ObjectType::cGUIInstInput: return "cGUIInstInput";
-    case ObjectType::cGUIInstButtonList: return "cGUIInstButtonList";
-    case ObjectType::cGUIInstScrollBar: return "cGUIInstScrollBar";
-    case ObjectType::cGUIInstSlider: return "cGUIInstSlider";
-    case ObjectType::cGUIInstText: return "cGUIInstText";
-    case ObjectType::cGUIInstButtonGrid: return "cGUIInstButtonGrid";
-    case ObjectType::cGUIInstButtonGridLink: return "cGUIInstButtonGridLink";
-    case ObjectType::cGUIInstButtonTree: return "cGUIInstButtonTree";
-    case ObjectType::cGUIInstChangeNumInput: return "cGUIInstChangeNumInput";
-    case ObjectType::cGUIInstColorPallet: return "cGUIInstColorPallet";
-    case ObjectType::cGUIInstCursor: return "cGUIInstCursor";
-    case ObjectType::cGUIInstFreeCursor: return "cGUIInstFreeCursor";
-    case ObjectType::cGUIInstItemGrid: return "cGUIInstItemGrid";
-    case ObjectType::cGUIInstMessage: return "cGUIInstMessage";
-    case ObjectType::cGUIInstMouseOverFilter: return "cGUIInstMouseOverFilter";
-    case ObjectType::cGUIFontFilterShadow: return "cGUIFontFilterShadow";
-    case ObjectType::cGUIFontFilterBorder: return "cGUIFontFilterBorder";
-    case ObjectType::cGUIFontFilterShading: return "cGUIFontFilterShading";
-    case ObjectType::cGUIFontFilterGradationOverlay: return "cGUIFontFilterGradationOverlay";
-    case ObjectType::cGUIFontFilterTextureBlend: return "cGUIFontFilterTextureBlend";
-    case ObjectType::cGUIFontFilterDistanceField: return "cGUIFontFilterDistanceField";
-    case ObjectType::rEffectAsset: return "rEffectAsset";
-    }
-
-    return "INVALID";
-}
-
 constexpr const char* enum_to_string(FlowType v) {
     switch (v) {
     case FlowType::START: return "START";
@@ -715,12 +743,12 @@ constexpr const char* enum_to_string(BlendState v) {
     return "INVALID";
 }
 
-constexpr const char* enum_to_string(SamplerState v) {
+constexpr const char* enum_to_string(SamplerMode v) {
     switch (v) {
-    case SamplerState::WrapLinear: return "WrapLinear";
-    case SamplerState::ClampLinear: return "ClampLinear";
-    case SamplerState::WrapPoint: return "WrapPoint";
-    case SamplerState::ClampPoint: return "ClampPoint";
+    case SamplerMode::WrapLinear: return "WrapLinear";
+    case SamplerMode::ClampLinear: return "ClampLinear";
+    case SamplerMode::WrapPoint: return "WrapPoint";
+    case SamplerMode::ClampPoint: return "ClampPoint";
     }
 
     return "INVALID";
@@ -1329,7 +1357,14 @@ inline const std::map<ObjectType, const char*> ObjectTypeNames = {
     { ObjectType::cGUIFontFilterGradationOverlay, "cGUIFontFilterGradationOverlay" },
     { ObjectType::cGUIFontFilterTextureBlend, "cGUIFontFilterTextureBlend" },
     { ObjectType::cGUIFontFilterDistanceField, "cGUIFontFilterDistanceField" },
-    { ObjectType::rEffectAsset, "rEffectAsset" }
+    { ObjectType::rEffectAsset, "rEffectAsset" },
+
+    // MHGU Only
+    { ObjectType::cGUIObjTexWithParam, "cGUIObjTexWithParam" },
+    { ObjectType::cGUIObjBlendTextureSample, "cGUIObjBlendTextureSample" },
+    { ObjectType::cGUIObjFreePolygon, "cGUIObjFreePolygon" },
+    { ObjectType::cFestaGUIObjPolygon, "cFestaGUIObjPolygon" },
+    { ObjectType::cFestaGUIObjTexture, "cFestaGUIObjTexture" },
 };
 
 inline const std::map<std::string, ObjectType> ObjectTypeNamesReversed = {
@@ -1380,5 +1415,72 @@ inline const std::map<std::string, ObjectType> ObjectTypeNamesReversed = {
     { "cGUIFontFilterGradationOverlay", ObjectType::cGUIFontFilterGradationOverlay },
     { "cGUIFontFilterTextureBlend", ObjectType::cGUIFontFilterTextureBlend },
     { "cGUIFontFilterDistanceField", ObjectType::cGUIFontFilterDistanceField },
-    { "rEffectAsset", ObjectType::rEffectAsset }
+    { "rEffectAsset", ObjectType::rEffectAsset },
+
+    // MHGU Only
+    { "cGUIObjTexWithParam", ObjectType::cGUIObjTexWithParam },
+    { "cGUIObjBlendTextureSample", ObjectType::cGUIObjBlendTextureSample },
+    { "cGUIObjFreePolygon", ObjectType::cGUIObjFreePolygon },
+    { "cFestaGUIObjPolygon", ObjectType::cFestaGUIObjPolygon },
+    { "cFestaGUIObjTexture", ObjectType::cFestaGUIObjTexture },
 };
+
+constexpr const char* enum_to_string(ObjectType v) {  
+   switch (v) {  
+   case ObjectType::None: return "None";  
+   case ObjectType::cGUIObjRoot: return "cGUIObjRoot";  
+   case ObjectType::cGUIObjColorAdjust: return "cGUIObjColorAdjust";  
+   case ObjectType::cGUIObj2D: return "cGUIObj2D";  
+   case ObjectType::cGUIObjScissorMask: return "cGUIObjScissorMask";  
+   case ObjectType::cGUIObjNull: return "cGUIObjNull";  
+   case ObjectType::cGUIObjChildAnimationRoot: return "cGUIObjChildAnimationRoot";  
+   case ObjectType::cGUIObjPolygon: return "cGUIObjPolygon";  
+   case ObjectType::cGUIObjTexture: return "cGUIObjTexture";  
+   case ObjectType::cGUIObjTextureSet: return "cGUIObjTextureSet";  
+   case ObjectType::cGUIObjMaterial: return "cGUIObjMaterial";  
+   case ObjectType::cGUIObjMessage: return "cGUIObjMessage";  
+   case ObjectType::cGUIObjText: return "cGUIObjText";  
+   case ObjectType::cGUIObjEffect: return "cGUIObjEffect";  
+   case ObjectType::cGUIObjBaseModel: return "cGUIObjBaseModel";  
+   case ObjectType::cGUIObjHitRect: return "cGUIObjHitRect";  
+   case ObjectType::cGUIObjModel: return "cGUIObjModel";  
+   case ObjectType::cGUIObjSizeAdjustMessage: return "cGUIObjSizeAdjustMessage";  
+   case ObjectType::cGUIInstAnimVariable: return "cGUIInstAnimVariable";  
+   case ObjectType::cGUIInstAnimControl: return "cGUIInstAnimControl";  
+   case ObjectType::cGUIInstRoot: return "cGUIInstRoot";  
+   case ObjectType::cGUIInstNull: return "cGUIInstNull";  
+   case ObjectType::cGUIInstScissorMask: return "cGUIInstScissorMask";  
+   case ObjectType::cGUIInstAnimation: return "cGUIInstAnimation";  
+   case ObjectType::cGUIInstGauge: return "cGUIInstGauge";  
+   case ObjectType::cGUIInstAutoAnimation: return "cGUIInstAutoAnimation";  
+   case ObjectType::cGUIInstInput: return "cGUIInstInput";  
+   case ObjectType::cGUIInstButtonList: return "cGUIInstButtonList";  
+   case ObjectType::cGUIInstScrollBar: return "cGUIInstScrollBar";  
+   case ObjectType::cGUIInstSlider: return "cGUIInstSlider";  
+   case ObjectType::cGUIInstText: return "cGUIInstText";  
+   case ObjectType::cGUIInstButtonGrid: return "cGUIInstButtonGrid";  
+   case ObjectType::cGUIInstButtonGridLink: return "cGUIInstButtonGridLink";  
+   case ObjectType::cGUIInstButtonTree: return "cGUIInstButtonTree";  
+   case ObjectType::cGUIInstChangeNumInput: return "cGUIInstChangeNumInput";  
+   case ObjectType::cGUIInstColorPallet: return "cGUIInstColorPallet";  
+   case ObjectType::cGUIInstCursor: return "cGUIInstCursor";  
+   case ObjectType::cGUIInstFreeCursor: return "cGUIInstFreeCursor";  
+   case ObjectType::cGUIInstItemGrid: return "cGUIInstItemGrid";  
+   case ObjectType::cGUIInstMessage: return "cGUIInstMessage";  
+   case ObjectType::cGUIInstMouseOverFilter: return "cGUIInstMouseOverFilter";  
+   case ObjectType::cGUIFontFilterShadow: return "cGUIFontFilterShadow";  
+   case ObjectType::cGUIFontFilterBorder: return "cGUIFontFilterBorder";  
+   case ObjectType::cGUIFontFilterShading: return "cGUIFontFilterShading";  
+   case ObjectType::cGUIFontFilterGradationOverlay: return "cGUIFontFilterGradationOverlay";  
+   case ObjectType::cGUIFontFilterTextureBlend: return "cGUIFontFilterTextureBlend";  
+   case ObjectType::cGUIFontFilterDistanceField: return "cGUIFontFilterDistanceField";  
+   case ObjectType::rEffectAsset: return "rEffectAsset";  
+   case ObjectType::cGUIObjTexWithParam: return "cGUIObjTexWithParam";  
+   case ObjectType::cGUIObjBlendTextureSample: return "cGUIObjBlendTextureSample";  
+   case ObjectType::cGUIObjFreePolygon: return "cGUIObjFreePolygon";  
+   case ObjectType::cFestaGUIObjPolygon: return "cFestaGUIObjPolygon";  
+   case ObjectType::cFestaGUIObjTexture: return "cFestaGUIObjTexture";
+   }
+
+   return "INVALID";  
+}

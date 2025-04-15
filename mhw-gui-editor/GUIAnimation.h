@@ -10,8 +10,10 @@
 struct GUIAnimation {
 	static constexpr size_t size = 0x20;
 	static GUIAnimation read(BinaryReader& stream, std::streamoff text_offset);
+	static GUIAnimation read_mhgu(BinaryReader& stream, std::streamoff text_offset);
 
     void write(BinaryWriter& stream, StringBuffer& buffer) const;
+    void write_mhgu(BinaryWriter& stream, StringBuffer& buffer) const;
 	[[nodiscard]] std::string get_preview(u32 index = 0xFFFFFFFF) const;
 
 	u32 ID;

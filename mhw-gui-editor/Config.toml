@@ -1,4 +1,5 @@
 [General]
+ArcfsDirectory = 'F:\MHGU\mhmodtools-by-dasding\arcfs'
 ChunkDirectory = 'D:\MHWI Mods\chunk'
 NativeDirectory = 'F:\SteamLibrary\steamapps\common\Monster Hunter World\nativePC'
 Theme = 'Deep Dark'

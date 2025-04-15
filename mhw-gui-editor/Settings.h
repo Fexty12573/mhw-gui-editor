@@ -13,6 +13,7 @@ struct Settings {
 
     std::string ChunkPath;
     std::string NativePath;
+    std::string ArcfsPath;
     std::string Theme;
 
     bool AllowMultipleKV8References;

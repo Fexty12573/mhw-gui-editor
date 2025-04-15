@@ -114,16 +114,20 @@ void GUIEditor::render_resource_manager() {
                 } else {
                     const auto path = open_file_dialog(L"Select Texture", { {L"TEX Files", L"*.tex"} }, L"tex");
                     if (!path.empty()) {
-
-                        auto relpath = std::filesystem::relative(path, m_settings.ChunkPath);
-                        if (relpath.empty()) {
-                            relpath = std::filesystem::relative(path, m_settings.NativePath);
+                        std::filesystem::path relpath;
+                        if (m_file.is_mhgu()) {
+                            relpath = std::filesystem::relative(path, m_settings.ArcfsPath);
+                        } else {
+                            relpath = std::filesystem::relative(path, m_settings.ChunkPath);
+                            if (relpath.empty()) {
+                                relpath = std::filesystem::relative(path, m_settings.NativePath);
+                            }
                         }
 
                         tex.Path = relpath.replace_extension().generic_string();
 
                         BinaryReader reader(path);
-                        tex.RenderTexture.load_from(reader, m_owner->get_device().Get(), m_owner->get_context().Get());
+                        tex.RenderTexture.load_from(reader, m_file.is_mhgu(), m_owner->get_device().Get(), m_owner->get_context().Get());
                     }
                 }
             }
@@ -132,17 +136,24 @@ void GUIEditor::render_resource_manager() {
                 if (m_settings.ChunkPath.empty() && m_settings.NativePath.empty()) {
                     m_error_popup_select_file_open = true;
                 } else {
-                    auto path = std::filesystem::path(m_settings.NativePath) / tex.Path;
-                    path.replace_extension("tex");
+                    std::filesystem::path path;
 
-                    if (!exists(path)) {
-                        path = std::filesystem::path(m_settings.ChunkPath) / tex.Path;
+                    if (m_file.is_mhgu()) {
+                        path = std::filesystem::path(m_settings.ArcfsPath) / tex.Path;
                         path.replace_extension("tex");
+                    } else {
+                        path = std::filesystem::path(m_settings.NativePath) / tex.Path;
+                        path.replace_extension("tex");
+
+                        if (!exists(path)) {
+                            path = std::filesystem::path(m_settings.ChunkPath) / tex.Path;
+                            path.replace_extension("tex");
+                        }
                     }
 
                     try {
                         BinaryReader reader(path);
-                        tex.RenderTexture.load_from(reader, m_owner->get_device().Get(), m_owner->get_context().Get());
+                        tex.RenderTexture.load_from(reader, m_file.is_mhgu(), m_owner->get_device().Get(), m_owner->get_context().Get());
                     } catch (...) {
                         m_error_popup_message = "Failed to load texture";
                         m_error_popup_open = true;

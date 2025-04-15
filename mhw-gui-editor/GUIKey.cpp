@@ -21,6 +21,24 @@ GUIKey GUIKey::read(BinaryReader& reader, const GUIHeader& header) {
     return key;
 }
 
+GUIKey GUIKey::read_mhgu(BinaryReader& reader, const GUIHeaderMHGU& header) {
+    GUIKey key{};
+
+    key.Data = { .Full = reader.read<u32>() };
+    key.CurveOffset = reader.read<u32>();
+
+    if (key.CurveOffset != 0) {
+        key.Curve = reader.abs_offset_read<hermitecurve>(header.extendDataOffset + key.CurveOffset);
+    } else {
+        key.Curve = {
+            .x = {0.0f, 1.0f, 0, 0, 0, 0, 0, 0},
+            .y = {0.0f, 1.0f, 0, 0, 0, 0, 0, 0}
+        };
+    }
+
+    return key;
+}
+
 void GUIKey::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const {
 	writer.write(Data.Full);
 
@@ -35,6 +53,20 @@ void GUIKey::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& 
     }
     
 	writer.write<u32>(0);
+}
+
+void GUIKey::write_mhgu(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const {
+    writer.write(Data.Full);
+
+    if (CurveOffset != 0) {
+        writer.write((u32)kv_buffers.ExtendData.size());
+        kv_buffers.ExtendData.insert(kv_buffers.ExtendData.end(),
+            reinterpret_cast<const u8*>(&Curve),
+            reinterpret_cast<const u8*>(&Curve) + sizeof(hermitecurve)
+        );
+    } else {
+        writer.write<u32>(0);
+    }
 }
 
 std::string GUIKey::get_preview(u32 index) const {

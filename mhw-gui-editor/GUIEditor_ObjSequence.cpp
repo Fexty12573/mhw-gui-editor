@@ -6,7 +6,7 @@
 #include <imgui_stdlib.h>
 
 
-void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq, ObjectType source_object, u32 object_id) {
+void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq, ObjectType source_object, u32 object_id, const GUISequence* seq) {
     struct AddParamInfo {
         u32 ObjSeqIndex;
         ObjectType SourceObjectType;
@@ -20,7 +20,7 @@ void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq, ObjectType source
 
     constexpr u32 u32_step = 1;
     constexpr u32 u32_fast_step = 10;
-    const std::function add_param_func = [this, u32_step, u32_fast_step](std::any& user_data)  {
+    const auto add_param_func = [this, u32_step, u32_fast_step](std::any& user_data)  {
         auto& info = std::any_cast<AddParamInfo&>(user_data);
 
         if (info.SourceObjectType != ObjectType::None) {
@@ -118,7 +118,7 @@ void GUIEditor::render_obj_sequence(GUIObjectSequence& objseq, ObjectType source
     ImGui::PushID("ObjectSequence");
     ImGui::PushID(objseq.Index);
 
-    bool open = ImGui::RichTextTreeNode("ObjSeq", objseq.get_preview(objseq.Index));
+    bool open = ImGui::RichTextTreeNode("ObjSeq", objseq.get_preview(objseq.Index, seq ? seq->Name : ""));
 
     if (ImGui::RT::BeginPopupContextItem("ObjSeq")) {
         if (ImGui::MenuItem("Add Param")) {

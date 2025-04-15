@@ -7,8 +7,10 @@
 
 struct GUIExtendData {
     static GUIExtendData read(BinaryReader& reader, ObjectType type, s64 offset, const GUIHeader& header);
+    static GUIExtendData read_mhgu(BinaryReader& reader, ObjectType type, s64 offset, const GUIHeaderMHGU& header);
 
     void write(KeyValueBuffers& kv_buffers, ObjectType type) const;
+    void write_mhgu(KeyValueBuffers& kv_buffers, ObjectType type) const;
 
     union {
         struct {
@@ -39,4 +41,3 @@ struct GUIExtendData {
 
     std::vector<rectf> UVs;
 };
-

@@ -5,8 +5,7 @@
 
 GUIVertex GUIVertex::read(BinaryReader& reader) {
     return {
-        .A = reader.read<vector4>(),
-        .B = reader.read<vector4>()
+        .V = reader.read<vector4>()
     };
 
     /*GUIVertex vertex{};
@@ -26,7 +25,16 @@ GUIVertex GUIVertex::read(BinaryReader& reader) {
     return vertex;*/
 }
 
+GUIVertex GUIVertex::read_mhgu(BinaryReader& reader) {
+    return  {
+        .V = reader.read<vector4>()
+    };
+}
+
 void GUIVertex::write(BinaryWriter& writer, StringBuffer& buffer) const {
-    writer.write(A);
-    writer.write(B);
+    writer.write(V);
+}
+
+void GUIVertex::write_mhgu(BinaryWriter& writer, StringBuffer& buffer) const {
+    writer.write(V);
 }

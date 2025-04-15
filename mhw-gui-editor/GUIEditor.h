@@ -99,7 +99,7 @@ private:
 	void render_animation(GUIAnimation& anim);
 	void render_object(GUIObject& obj, u32 seq_count = 0, GUIAnimation* parent_anim = nullptr);
 	void render_sequence(GUISequence& seq) const;
-	void render_obj_sequence(GUIObjectSequence& objseq, ObjectType source_object = ObjectType::None, u32 object_id = -1);
+	void render_obj_sequence(GUIObjectSequence& objseq, ObjectType source_object = ObjectType::None, u32 object_id = -1, const GUISequence* seq = nullptr);
 	void render_init_param(GUIInitParam& param, ObjectType source_object = ObjectType::None) const;
 	void render_param(GUIParam& param, ObjectType source_object = ObjectType::None);
 	void render_instance(GUIInstance& inst);
@@ -115,12 +115,19 @@ private:
 
 	void select_chunk_dir();
 	void select_native_dir();
+	void select_arcfs_dir();
     [[nodiscard]] std::filesystem::path open_file_dialog(std::wstring_view title, const std::vector<COMDLG_FILTERSPEC>& filters, std::wstring_view default_ext = L"") const;
     [[nodiscard]] std::filesystem::path open_folder_dialog(std::wstring_view title) const;
 
 	void dump_object_data() const;
 
 	void open_animation_editor();
+
+	struct DrawCallbackData {
+		ID3D11DeviceContext* Context;
+		Sampler* Sampler = nullptr;
+		ID3D11SamplerState* OriginalState;
+	};
 
 private:
     App* m_owner;
@@ -133,6 +140,9 @@ private:
 
     std::unordered_map<std::string, std::shared_ptr<ObjectInfo>> m_object_info;
     std::unordered_map<ObjectType, std::shared_ptr<ObjectInfo>> m_object_info2;
+
+    std::map<SamplerMode, std::unique_ptr<Sampler>> m_samplers;
+    std::vector<std::unique_ptr<DrawCallbackData>> m_draw_callback_data;
 
 	bool m_first_render = true;
 	bool m_options_menu_open = false;

@@ -11,8 +11,10 @@
 struct GUIFlowProcess {
 	static constexpr size_t size = 48;
 	static GUIFlowProcess read(BinaryReader& reader, const GUIHeader& header);
+	static GUIFlowProcess read_mhgu(BinaryReader& reader, const GUIHeaderMHGU& header);
 
 	void write(BinaryWriter& writer, StringBuffer& buffer) const;
+    void write_mhgu(BinaryWriter& writer, StringBuffer& buffer) const;
 
 	union {
 		struct {

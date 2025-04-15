@@ -24,6 +24,25 @@ GUIObject GUIObject::read(BinaryReader& reader, const GUIHeader& header) {
     return obj;
 }
 
+GUIObject GUIObject::read_mhgu(BinaryReader& reader, const GUIHeaderMHGU& header) {
+    GUIObject obj = {
+        .ID = reader.read<u32>(),
+        .InitParamNum = reader.read<u8>(),
+        .AnimateParamNum = reader.read_skip<u8>(2),
+        .NextIndex = reader.read<s32>(),
+        .ChildIndex = reader.read<s32>(),
+        .Name = reader.abs_offset_read_string(header.stringOffset + reader.read<u32>()),
+        .Type = reader.read<ObjectType>(),
+        .InitParamIndex = reader.read<u32>(),
+        .ObjectSequenceIndex = reader.read<u32>(),
+        .ExtendDataOffset = reader.read<s32>(),
+    };
+
+    obj.ExtendData = GUIExtendData::read_mhgu(reader, obj.Type, obj.ExtendDataOffset, header);
+
+    return obj;
+}
+
 void GUIObject::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const {
 	writer.write(ID);
     writer.write(InitParamNum);
@@ -41,6 +60,26 @@ void GUIObject::write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffer
         ExtendData.write(kv_buffers, Type);
     } else {
         writer.write_tuple<s32, s32>({ -1, 0 });
+    }
+}
+
+void GUIObject::write_mhgu(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kv_buffers) const {
+    writer.write(ID);
+    writer.write(InitParamNum);
+    writer.write(AnimateParamNum);
+    writer.write<u16>(0);
+    writer.write(NextIndex);
+    writer.write(ChildIndex);
+    writer.write((u32)buffer.append_no_duplicate(Name));
+    writer.write(Type);
+    writer.write(InitParamIndex);
+    writer.write(ObjectSequenceIndex);
+
+    if (ExtendDataOffset != -1) {
+        writer.write((u32)kv_buffers.ExtendData.size());
+        ExtendData.write(kv_buffers, Type);
+    } else {
+        writer.write<s32>(-1);
     }
 }
 

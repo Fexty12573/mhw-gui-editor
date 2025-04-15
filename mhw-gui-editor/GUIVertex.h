@@ -9,12 +9,13 @@
 #include <string>
 
 struct GUIVertex {
-	static constexpr size_t size = 32;
+	static constexpr size_t size = sizeof(vector4);
 	static GUIVertex read(BinaryReader& reader);
+	static GUIVertex read_mhgu(BinaryReader& reader);
 
 	void write(BinaryWriter& writer, StringBuffer& buffer) const;
+    void write_mhgu(BinaryWriter& writer, StringBuffer& buffer) const;
 
-	vector4 A;
-    vector4 B;
+	vector4 V;
 };
 

@@ -11,10 +11,24 @@ GUISequence GUISequence::read(BinaryReader& reader, std::streamoff text_offset) 
 	};
 }
 
+GUISequence GUISequence::read_mhgu(BinaryReader& reader, std::streamoff text_offset) {
+	return {
+		.ID = reader.read<u32>(),
+		.FrameCount = reader.read<u32>(),
+		.Name = reader.abs_offset_read_string(text_offset + reader.read<u32>())
+	};
+}
+
 void GUISequence::write(BinaryWriter& writer, StringBuffer& buffer) const {
 	writer.write(ID);
 	writer.write(FrameCount);
     writer.write(buffer.append_no_duplicate(Name));
+}
+
+void GUISequence::write_mhgu(BinaryWriter& writer, StringBuffer& buffer) const {
+    writer.write(ID);
+    writer.write(FrameCount);
+    writer.write((u32)buffer.append_no_duplicate(Name));
 }
 
 std::string GUISequence::get_preview(u32 index) const {

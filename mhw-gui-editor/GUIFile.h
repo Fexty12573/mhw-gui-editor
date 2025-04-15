@@ -33,11 +33,25 @@ public:
 	GUIFile();
 
 	void load_from(BinaryReader& stream);
-    void load_resources(const std::string& chunk_path, const std::string& native_path, ID3D11Device* device, ID3D11DeviceContext* context);
+    void load_resources(
+		const std::string& chunk_path, 
+		const std::string& native_path,
+        const std::string& arcfs_path,
+		ID3D11Device* device, 
+		ID3D11DeviceContext* context
+	);
 
 	void run_data_usage_analysis(bool log_overlapping_offsets = false) const;
 
     void save_to(BinaryWriter& stream, const Settings& settings) const;
+
+	enum class Version {
+		MHW = 144150,
+		MHGU = 141077,
+	};
+
+	Version get_version() const { return static_cast<Version>(m_header.guiVersion); }
+    bool is_mhgu() const { return get_version() == Version::MHGU; }
 
     void insert_animation(GUIAnimation anim, s32 index = -1, bool update_indices = true);
     void insert_sequence(GUISequence seq, s32 index = -1, bool update_indices = true);
@@ -64,7 +78,10 @@ private:
     u32 get_animation_object_count(u32 anim_index) const;
 
 private:
-	GUIHeader m_header{};
+	union {
+		GUIHeader m_header{};
+		GUIHeaderMHGU m_header_mhgu;
+	};
 
 	std::array<char, 4> m_magic{};
 	u32 m_version = 0;

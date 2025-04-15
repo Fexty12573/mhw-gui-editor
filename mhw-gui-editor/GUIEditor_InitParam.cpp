@@ -50,7 +50,11 @@ void GUIEditor::render_init_param(GUIInitParam& param, ObjectType source_object)
             ImGui::Checkbox("Value", &param.ValueBool);
             break;
         case ParamType::VECTOR:
-            ImGui::ColorEdit4("Value", &param.ValueVector.x, ImGuiColorEditFlags_Float);
+            if (param.IsColorParam) {
+                ImGui::ColorEdit4("Value", &param.ValueVector.x, ImGuiColorEditFlags_Float);
+            } else {
+                ImGui::DragFloat4("Value", &param.ValueVector.x);
+            }
             break;
         case ParamType::RESOURCE:
             ImGui::InputScalar("Value", ImGuiDataType_U32, &param.Value32, &u32_step, &u32_fast_step);

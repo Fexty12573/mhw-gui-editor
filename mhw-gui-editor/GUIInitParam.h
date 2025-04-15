@@ -11,8 +11,10 @@
 struct GUIInitParam {
 	static constexpr size_t size = 32;
 	static GUIInitParam read(BinaryReader& reader, const GUIHeader& header);
+    static GUIInitParam read_mhgu(BinaryReader& reader, const GUIHeaderMHGU& header);
 
     void write(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kvbuffers) const;
+    void write_mhgu(BinaryWriter& writer, StringBuffer& buffer, KeyValueBuffers& kvbuffers) const;
     [[nodiscard]] std::string get_preview(u32 index = 0xFFFFFFFF) const;
 
 	ParamType Type;

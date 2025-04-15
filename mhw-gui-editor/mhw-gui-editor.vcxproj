@@ -130,7 +130,11 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)tegra_swizzle\tegra_swizzle.dll.lib</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(ProjectDir)tegra_swizzle\tegra_swizzle.dll $(TargetDir)tegra_swizzle.dll</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -143,16 +147,20 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DisableSpecificWarnings>28251</DisableSpecificWarnings>
-      <PrecompiledHeader>Create</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(ProjectDir)dependencies\im-neo-sequencer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);$(ProjectDir)tegra_swizzle\tegra_swizzle.dll.lib</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(ProjectDir)tegra_swizzle\tegra_swizzle.dll $(TargetDir)tegra_swizzle.dll</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="..\README.md" />
@@ -203,8 +211,11 @@
     <ClCompile Include="imgui_neo_sequencer.cpp" />
     <ClCompile Include="ImThemeManager.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="RichText.cpp" />
+    <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="StringBuffer.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -249,8 +260,10 @@
     <ClInclude Include="MinWindows.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="RichText.h" />
+    <ClInclude Include="Sampler.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="StringBuffer.h" />
+    <ClInclude Include="tegra_swizzle.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>

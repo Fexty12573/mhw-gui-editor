@@ -202,6 +202,9 @@
     <ClCompile Include="imgui_neo_sequencer.cpp">
       <Filter>Source Files\ImGui</Filter>
     </ClCompile>
+    <ClCompile Include="Sampler.cpp">
+      <Filter>Source Files\rTexture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -326,6 +329,12 @@
     </ClInclude>
     <ClInclude Include="EditorPath.h">
       <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="tegra_swizzle.h">
+      <Filter>Header Files\rTexture</Filter>
+    </ClInclude>
+    <ClInclude Include="Sampler.h">
+      <Filter>Header Files\rTexture</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

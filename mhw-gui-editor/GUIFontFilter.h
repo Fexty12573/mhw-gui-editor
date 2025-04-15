@@ -12,6 +12,7 @@
 struct GUIFontFilter {
 	static constexpr size_t size = 8;
 	static std::shared_ptr<GUIFontFilter> read(BinaryReader& reader, const GUIHeader& header);
+	static std::shared_ptr<GUIFontFilter> read_mhgu(BinaryReader& reader, const GUIHeaderMHGU& header);
 
     static vector4 color_to_vector4(color c) {
         return {
@@ -30,6 +31,7 @@ struct GUIFontFilter {
     }
 
 	virtual void write(BinaryWriter& writer, StringBuffer& buffer) const;
+	virtual void write_mhgu(BinaryWriter& writer, StringBuffer& buffer) const;
 
     virtual std::string get_preview() const;
 
@@ -41,6 +43,7 @@ struct GUIFontFilterDistanceField : GUIFontFilter {
 	static constexpr size_t size = 64;
 
     void write(BinaryWriter& writer, StringBuffer& buffer) const override;
+    void write_mhgu(BinaryWriter& writer, StringBuffer& buffer) const override;
 
 	u32 ParamNum;
 	struct {
@@ -61,6 +64,7 @@ struct GUIFontFilterGradationOverlay : GUIFontFilter {
 	static constexpr size_t size = 16;
 
 	void write(BinaryWriter& writer, StringBuffer& buffer) const override;
+    void write_mhgu(BinaryWriter& writer, StringBuffer& buffer) const override;
 
 	u32 TextureIndex;
 	std::string Name;
@@ -70,6 +74,7 @@ struct GUIFontFilterBorder : GUIFontFilter {
 	static constexpr size_t size = 20;
 
 	void write(BinaryWriter& writer, StringBuffer& buffer) const override;
+    void write_mhgu(BinaryWriter& writer, StringBuffer& buffer) const override;
 
 	u32 BorderType;
 	s32 Distance;
@@ -80,6 +85,7 @@ struct GUIFontFilterShadow : GUIFontFilter {
 	static constexpr size_t size = 20;
 
 	void write(BinaryWriter& writer, StringBuffer& buffer) const override;
+    void write_mhgu(BinaryWriter& writer, StringBuffer& buffer) const override;
 
 	s32 Distance;
 	s32 Rotation;

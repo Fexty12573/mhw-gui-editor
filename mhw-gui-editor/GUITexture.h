@@ -9,11 +9,14 @@
 
 #include <string>
 
+
 struct GUITexture {
 	static constexpr size_t size = 64;
 	static GUITexture read(BinaryReader& reader, const GUIHeader& header);
+	static GUITexture read_mhgu(BinaryReader& reader, const GUIHeaderMHGU& header);
 
 	void write(BinaryWriter& writer, StringBuffer& buffer) const;
+    void write_mhgu(BinaryWriter& writer, StringBuffer& buffer) const;
 
 	u32 ID;
 	union {

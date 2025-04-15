@@ -34,9 +34,12 @@ GUIEditor::GUIEditor(App* owner) : m_owner(owner) {
     } });
 
     add_menu_item("Edit", { ICON_FA_ARROW_RIGHT " Go To...", "Ctrl+G", [](GUIEditor* e) {
-        e->m_generic_popup_queue.emplace("Go To...", [e](const std::any& data) {
+        e->m_generic_popup_queue.emplace("Go To...", [e](std::any& data) {
             auto& path = std::any_cast<std::string&>(data);
-            ImGui::InputText("Path", &path);
+            if (ImGui::InputText("Path", &path)) {
+                //data = path;
+            }
+
             ImGui::NewLine();
 
             if (ImGui::Button("Go")) {
@@ -145,10 +148,19 @@ void GUIEditor::render(u32 dockspace_id) {
         ImGui::DockBuilderDockWindow("Tree Viewer", dockspace_id);
         ImGui::DockBuilderDockWindow("Resource Manager", dock_id_bottom_left);
         ImGui::DockBuilderDockWindow("Texture Viewer", dock_id_bottom_right);
+
+        // Create samplers
+        const auto device = m_owner->get_device().Get();
+        m_samplers[SamplerMode::WrapLinear] = std::make_unique<Sampler>(device, SamplerMode::WrapLinear);
+        m_samplers[SamplerMode::ClampLinear] = std::make_unique<Sampler>(device, SamplerMode::ClampLinear);
+        m_samplers[SamplerMode::WrapPoint] = std::make_unique<Sampler>(device, SamplerMode::WrapPoint);
+        m_samplers[SamplerMode::ClampPoint] = std::make_unique<Sampler>(device, SamplerMode::ClampPoint);
     }
 
     bool open_options_window = false;
     bool open_extract_window = false;
+
+    m_draw_callback_data.clear();
 
     if (ImGui::BeginMainMenuBar()) {
         for (const auto& [menu, items] : m_menu_items) {
@@ -232,6 +244,12 @@ void GUIEditor::render(u32 dockspace_id) {
         ImGui::SameLine();
         if (ImGui::Button("...##NativeDir")) {
             select_native_dir();
+        }
+
+        ImGui::InputText("ArcFS Directory", &m_settings.ArcfsPath);
+        ImGui::SameLine();
+        if (ImGui::Button("...##ArcfsDir")) {
+            select_arcfs_dir();
         }
 
         ImGui::EndGroupPanel();
@@ -459,7 +477,13 @@ void GUIEditor::open_file() {
     m_file_path = wpath;
 
     if (!m_settings.ChunkPath.empty() || !m_settings.NativePath.empty()) {
-        m_file.load_resources(m_settings.ChunkPath, m_settings.NativePath, m_owner->get_device().Get(), m_owner->get_context().Get());
+        m_file.load_resources(
+            m_settings.ChunkPath, 
+            m_settings.NativePath, 
+            m_settings.ArcfsPath, 
+            m_owner->get_device().Get(), 
+            m_owner->get_context().Get()
+        );
     }
 
     m_file.run_data_usage_analysis(true);
@@ -574,6 +598,10 @@ void GUIEditor::select_chunk_dir() {
 
 void GUIEditor::select_native_dir() {
     m_settings.NativePath = open_folder_dialog(L"Select NativePC Directory").string();
+}
+
+void GUIEditor::select_arcfs_dir() {
+    m_settings.ArcfsPath = open_folder_dialog(L"Select ArcFS Directory").string();
 }
 
 std::filesystem::path GUIEditor::open_file_dialog(std::wstring_view title, 

@@ -37,6 +37,10 @@ std::streampos BinaryWriter::tell() {
     return m_file.tellp();
 }
 
+u32 BinaryWriter::tell32() {
+    return m_file.tellp();
+}
+
 size_t BinaryWriter::size() noexcept {
     const auto pos = tell();
     seek_absolute(End);

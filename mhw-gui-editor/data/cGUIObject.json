@@ -1751,5 +1751,814 @@
             }
         ],
         "Name": "cGUIObjTextureSet"
+    },
+    "cGUIObjTexWithParam": {
+        "Fields": [
+            {
+                "Name": "BlendState",
+                "Type": 18
+            },
+            {
+                "Name": "ControlPoint",
+                "Type": 18
+            },
+            {
+                "Name": "FixFrame",
+                "Type": 17
+            },
+            {
+                "Name": "ForceVisibleOff",
+                "Type": 3
+            },
+            {
+                "Name": "IgnoreMouseReaction",
+                "Type": 3
+            },
+            {
+                "Name": "Mask",
+                "Type": 18
+            },
+            {
+                "Name": "PosX",
+                "Type": 2
+            },
+            {
+                "Name": "PosY",
+                "Type": 2
+            },
+            {
+                "Name": "PosZ",
+                "Type": 2
+            },
+            {
+                "Name": "Priority",
+                "Type": 1
+            },
+            {
+                "Name": "ReferencePosition",
+                "Type": 17
+            },
+            {
+                "Name": "ReferenceRotation",
+                "Type": 17
+            },
+            {
+                "Name": "ReferenceScaleX",
+                "Type": 18
+            },
+            {
+                "Name": "ReferenceScaleY",
+                "Type": 18
+            },
+            {
+                "Name": "ReferenceScaleZ",
+                "Type": 18
+            },
+            {
+                "Name": "Reverse",
+                "Type": 17
+            },
+            {
+                "Name": "Rotation",
+                "Type": 2
+            },
+            {
+                "Name": "SamplerState",
+                "Type": 18
+            },
+            {
+                "Name": "Size",
+                "Type": 4
+            },
+            {
+                "Name": "Texture",
+                "Type": 7
+            },
+            {
+                "Name": "Tiling",
+                "Type": 1
+            },
+            {
+                "Name": "VertexColorDown",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorUp",
+                "Type": 4
+            },
+            {
+                "Name": "Visible",
+                "Type": 3
+            },
+            {
+                "Name": "mTextureRect",
+                "Type": 4
+            },
+            {
+                "Name": "ScissorSize",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColor",
+                "Type": 4
+            },
+            {
+                "Name": "VertexAlpha",
+                "Type": 1
+            },
+            {
+                "Name": "VertexRGB",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorLeft",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorRight",
+                "Type": 4
+            },
+            {
+                "Name": "RotationZ",
+                "Type": 2
+            },
+            {
+                "Name": "RotationX",
+                "Type": 2
+            },
+            {
+                "Name": "RotationY",
+                "Type": 2
+            },
+            {
+                "Name": "VertexColorLB",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorLT",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorRB",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorRT",
+                "Type": 4
+            },
+            {
+                "Name": "ReverseHLayoutWhenRTLLanguage",
+                "Type": 17
+            },
+            {
+                "Name": "VisibleOff",
+                "Type": 3
+            },
+            {
+                "Name": "ParamType",
+                "Type": 1
+            },
+            {
+                "Name": "ParamValue",
+                "Type": 1
+            }
+        ],
+        "Name": "cGUIObjTexWithParam"
+    },
+    "cGUIObjBlendTextureSample": {
+        "Fields": [
+            {
+                "Name": "BlendState",
+                "Type": 18
+            },
+            {
+                "Name": "ControlPoint",
+                "Type": 18
+            },
+            {
+                "Name": "FixFrame",
+                "Type": 17
+            },
+            {
+                "Name": "ForceVisibleOff",
+                "Type": 3
+            },
+            {
+                "Name": "IgnoreMouseReaction",
+                "Type": 3
+            },
+            {
+                "Name": "Mask",
+                "Type": 18
+            },
+            {
+                "Name": "PosX",
+                "Type": 2
+            },
+            {
+                "Name": "PosY",
+                "Type": 2
+            },
+            {
+                "Name": "PosZ",
+                "Type": 2
+            },
+            {
+                "Name": "Priority",
+                "Type": 1
+            },
+            {
+                "Name": "ReferencePosition",
+                "Type": 17
+            },
+            {
+                "Name": "ReferenceRotation",
+                "Type": 17
+            },
+            {
+                "Name": "ReferenceScaleX",
+                "Type": 18
+            },
+            {
+                "Name": "ReferenceScaleY",
+                "Type": 18
+            },
+            {
+                "Name": "ReferenceScaleZ",
+                "Type": 18
+            },
+            {
+                "Name": "Reverse",
+                "Type": 17
+            },
+            {
+                "Name": "Rotation",
+                "Type": 2
+            },
+            {
+                "Name": "SamplerState",
+                "Type": 18
+            },
+            {
+                "Name": "Size",
+                "Type": 4
+            },
+            {
+                "Name": "Texture",
+                "Type": 7
+            },
+            {
+                "Name": "Tiling",
+                "Type": 1
+            },
+            {
+                "Name": "VertexColorDown",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorUp",
+                "Type": 4
+            },
+            {
+                "Name": "Visible",
+                "Type": 3
+            },
+            {
+                "Name": "mTextureRect",
+                "Type": 4
+            },
+            {
+                "Name": "ScissorSize",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColor",
+                "Type": 4
+            },
+            {
+                "Name": "VertexAlpha",
+                "Type": 1
+            },
+            {
+                "Name": "VertexRGB",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorLeft",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorRight",
+                "Type": 4
+            },
+            {
+                "Name": "RotationZ",
+                "Type": 2
+            },
+            {
+                "Name": "RotationX",
+                "Type": 2
+            },
+            {
+                "Name": "RotationY",
+                "Type": 2
+            },
+            {
+                "Name": "VertexColorLB",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorLT",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorRB",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorRT",
+                "Type": 4
+            },
+            {
+                "Name": "ReverseHLayoutWhenRTLLanguage",
+                "Type": 17
+            },
+            {
+                "Name": "VisibleOff",
+                "Type": 3
+            },
+            {
+                "Name": "BlendTexture",
+                "Type": 7
+            }
+        ],
+        "Name": "cGUIObjBlendTextureSample"
+    },
+    "cGUIObjFreePolygon": {
+        "Fields": [
+            {
+                "Name": "Alpha",
+                "Type": 1
+            },
+            {
+                "Name": "AutoScale",
+                "Type": 17
+            },
+            {
+                "Name": "AutoWrap",
+                "Type": 18
+            },
+            {
+                "Name": "BlendState",
+                "Type": 18
+            },
+            {
+                "Name": "ControlPoint",
+                "Type": 18
+            },
+            {
+                "Name": "FixFrame",
+                "Type": 17
+            },
+            {
+                "Name": "Font",
+                "Type": 8
+            },
+            {
+                "Name": "FontFilter0",
+                "Type": 14
+            },
+            {
+                "Name": "FontFilter1",
+                "Type": 14
+            },
+            {
+                "Name": "FontSize",
+                "Type": 4
+            },
+            {
+                "Name": "ForceVisibleOff",
+                "Type": 3
+            },
+            {
+                "Name": "IconColorType",
+                "Type": 18
+            },
+            {
+                "Name": "IgnoreMouseReaction",
+                "Type": 3
+            },
+            {
+                "Name": "Layout",
+                "Type": 18
+            },
+            {
+                "Name": "LetterHAlign",
+                "Type": 18
+            },
+            {
+                "Name": "LetterSpace",
+                "Type": 18
+            },
+            {
+                "Name": "LetterVAlign",
+                "Type": 18
+            },
+            {
+                "Name": "LineSpace",
+                "Type": 18
+            },
+            {
+                "Name": "Monospace",
+                "Type": 17
+            },
+            {
+                "Name": "PosX",
+                "Type": 2
+            },
+            {
+                "Name": "PosY",
+                "Type": 2
+            },
+            {
+                "Name": "PosZ",
+                "Type": 2
+            },
+            {
+                "Name": "Priority",
+                "Type": 1
+            },
+            {
+                "Name": "RGB",
+                "Type": 4
+            },
+            {
+                "Name": "ReferencePosition",
+                "Type": 17
+            },
+            {
+                "Name": "ReferenceRotation",
+                "Type": 17
+            },
+            {
+                "Name": "ReferenceScaleX",
+                "Type": 18
+            },
+            {
+                "Name": "ReferenceScaleY",
+                "Type": 18
+            },
+            {
+                "Name": "ReferenceScaleZ",
+                "Type": 18
+            },
+            {
+                "Name": "ResolutionAdjust",
+                "Type": 1
+            },
+            {
+                "Name": "ReverseHLayoutWhenRTLLanguage",
+                "Type": 17
+            },
+            {
+                "Name": "Rotation",
+                "Type": 2
+            },
+            {
+                "Name": "Texture",
+                "Type": 7
+            },
+            {
+                "Name": "Color",
+                "Type": 4
+            },
+            {
+                "Name": "Alpha",
+                "Type": 1
+            },
+            {
+                "Name": "RGB",
+                "Type": 4
+            },
+            {
+                "Name": "CreatePointNum",
+                "Type": 1
+            }
+        ],
+        "Name": "cGUIObjFreePolygon"
+    },
+    "cFestaGUIObjPolygon": {
+        "Fields": [
+            {
+                "Name": "BlendState",
+                "Type": 18
+            },
+            {
+                "Name": "ControlPoint",
+                "Type": 18
+            },
+            {
+                "Name": "FixFrame",
+                "Type": 17
+            },
+            {
+                "Name": "ForceVisibleOff",
+                "Type": 3
+            },
+            {
+                "Name": "IgnoreMouseReaction",
+                "Type": 3
+            },
+            {
+                "Name": "Mask",
+                "Type": 18
+            },
+            {
+                "Name": "PosX",
+                "Type": 2
+            },
+            {
+                "Name": "PosY",
+                "Type": 2
+            },
+            {
+                "Name": "PosZ",
+                "Type": 2
+            },
+            {
+                "Name": "Priority",
+                "Type": 1
+            },
+            {
+                "Name": "ReferencePosition",
+                "Type": 17
+            },
+            {
+                "Name": "ReferenceRotation",
+                "Type": 17
+            },
+            {
+                "Name": "ReferenceScaleX",
+                "Type": 18
+            },
+            {
+                "Name": "ReferenceScaleY",
+                "Type": 18
+            },
+            {
+                "Name": "ReferenceScaleZ",
+                "Type": 18
+            },
+            {
+                "Name": "Reverse",
+                "Type": 17
+            },
+            {
+                "Name": "Rotation",
+                "Type": 2
+            },
+            {
+                "Name": "Size",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColor",
+                "Type": 4
+            },
+            {
+                "Name": "Visible",
+                "Type": 3
+            },
+            {
+                "Name": "ScissorSize",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorLeft",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorRight",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorDown",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorUp",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorLB",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorLT",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorRB",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorRT",
+                "Type": 4
+            },
+            {
+                "Name": "VertexAlpha",
+                "Type": 1
+            },
+            {
+                "Name": "VertexRGB",
+                "Type": 4
+            },
+            {
+                "Name": "RotationX",
+                "Type": 2
+            },
+            {
+                "Name": "RotationY",
+                "Type": 2
+            },
+            {
+                "Name": "RotationZ",
+                "Type": 2
+            },
+            {
+                "Name": "ReverseHLayoutWhenRTLLanguage",
+                "Type": 17
+            },
+            {
+                "Name": "VisibleOff",
+                "Type": 3
+            }
+        ],
+        "Name": "cFestaGUIObjPolygon"
+    },
+    "cFestaGUIObjTexture": {
+        "Fields": [
+            {
+                "Name": "BlendState",
+                "Type": 18
+            },
+            {
+                "Name": "ControlPoint",
+                "Type": 18
+            },
+            {
+                "Name": "FixFrame",
+                "Type": 17
+            },
+            {
+                "Name": "ForceVisibleOff",
+                "Type": 3
+            },
+            {
+                "Name": "IgnoreMouseReaction",
+                "Type": 3
+            },
+            {
+                "Name": "Mask",
+                "Type": 18
+            },
+            {
+                "Name": "PosX",
+                "Type": 2
+            },
+            {
+                "Name": "PosY",
+                "Type": 2
+            },
+            {
+                "Name": "PosZ",
+                "Type": 2
+            },
+            {
+                "Name": "Priority",
+                "Type": 1
+            },
+            {
+                "Name": "ReferencePosition",
+                "Type": 17
+            },
+            {
+                "Name": "ReferenceRotation",
+                "Type": 17
+            },
+            {
+                "Name": "ReferenceScaleX",
+                "Type": 18
+            },
+            {
+                "Name": "ReferenceScaleY",
+                "Type": 18
+            },
+            {
+                "Name": "ReferenceScaleZ",
+                "Type": 18
+            },
+            {
+                "Name": "Reverse",
+                "Type": 17
+            },
+            {
+                "Name": "Rotation",
+                "Type": 2
+            },
+            {
+                "Name": "SamplerState",
+                "Type": 18
+            },
+            {
+                "Name": "Size",
+                "Type": 4
+            },
+            {
+                "Name": "Texture",
+                "Type": 7
+            },
+            {
+                "Name": "Tiling",
+                "Type": 1
+            },
+            {
+                "Name": "VertexColorDown",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorUp",
+                "Type": 4
+            },
+            {
+                "Name": "Visible",
+                "Type": 3
+            },
+            {
+                "Name": "mTextureRect",
+                "Type": 4
+            },
+            {
+                "Name": "ScissorSize",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColor",
+                "Type": 4
+            },
+            {
+                "Name": "VertexAlpha",
+                "Type": 1
+            },
+            {
+                "Name": "VertexRGB",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorLeft",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorRight",
+                "Type": 4
+            },
+            {
+                "Name": "RotationZ",
+                "Type": 2
+            },
+            {
+                "Name": "RotationX",
+                "Type": 2
+            },
+            {
+                "Name": "RotationY",
+                "Type": 2
+            },
+            {
+                "Name": "VertexColorLB",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorLT",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorRB",
+                "Type": 4
+            },
+            {
+                "Name": "VertexColorRT",
+                "Type": 4
+            },
+            {
+                "Name": "ReverseHLayoutWhenRTLLanguage",
+                "Type": 17
+            },
+            {
+                "Name": "VisibleOff",
+                "Type": 3
+            }
+        ],
+        "Name": "cFestaGUIObjTexture"
     }
 }
