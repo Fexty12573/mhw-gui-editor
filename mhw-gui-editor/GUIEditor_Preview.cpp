@@ -210,7 +210,7 @@ void GUIEditor::render_object_preview(const GUIObject& obj, AnimationPreviewCont
         const auto p_scly = m_file.find_init_param(obj, "SclY");
         const auto p_ctrl_point = m_file.find_init_param(obj, "ControlPoint");
 
-        if (!p_texture || !p_size || p_texture->Value32 == 0xFFFFFFFF) {
+        if (!p_texture || p_texture->Value32 == 0xFFFFFFFF) {
             break;
         }
 
@@ -247,9 +247,15 @@ void GUIEditor::render_object_preview(const GUIObject& obj, AnimationPreviewCont
         }
 
         const auto raw_pos = ImGui::GetCursorScreenPos() + ctx.Offset * ctx.Scale;
-        const auto scaled_size = ImVec2{
+        const auto scaled_size = p_size ? ImVec2{
             p_size->ValueVector.x * ctx.Scale.x,
             p_size->ValueVector.y * ctx.Scale.y
+        } : p_rect ? ImVec2{
+            (p_rect->ValueVector.z - p_rect->ValueVector.x) * ctx.Scale.x,
+            (p_rect->ValueVector.z - p_rect->ValueVector.y)* ctx.Scale.y
+        } : ImVec2{
+            texture->Width * ctx.Scale.x,
+            texture->Height * ctx.Scale.y
         };
 
         const auto pos = utility::apply_control_point(raw_pos, scaled_size, control_point);
@@ -312,8 +318,9 @@ void GUIEditor::render_object_preview(const GUIObject& obj, AnimationPreviewCont
         const auto p_posy = m_file.find_init_param(obj, "PosY");
         const auto p_sclx = m_file.find_init_param(obj, "SclX");
         const auto p_scly = m_file.find_init_param(obj, "SclY");
+        const auto p_ctrl_point = m_file.find_init_param(obj, "ControlPoint");
 
-        if (!p_texture || !p_size || p_texture->Value32 == 0xFFFFFFFF) {
+        if (!p_texture || p_texture->Value32 == 0xFFFFFFFF) {
             break;
         }
 
@@ -337,11 +344,24 @@ void GUIEditor::render_object_preview(const GUIObject& obj, AnimationPreviewCont
             break;
         }
 
+        const auto control_point = p_ctrl_point ? (ControlPoint)p_ctrl_point->Value32 : ControlPoint::TL;
+
         for (const auto& uv : obj.ExtendData.UVs) {
             const ImVec2 uv0 = { uv.x, uv.y };
             const ImVec2 uv1 = { uv.w, uv.h };
 
-            const auto pos = ImGui::GetCursorScreenPos() + ctx.Offset * ctx.Scale;
+            const auto raw_pos = ImGui::GetCursorScreenPos() + ctx.Offset * ctx.Scale;
+            const auto scaled_size = p_size ? ImVec2{
+                p_size->ValueVector.x * ctx.Scale.x,
+                p_size->ValueVector.y * ctx.Scale.y
+            } : ImVec2{
+                (uv.w - uv.x) * ctx.Scale.x,
+                (uv.h - uv.y) * ctx.Scale.y
+            };
+
+            const auto pos = utility::apply_control_point(raw_pos, scaled_size, control_point);
+            const auto min = pos;
+            const auto max = pos + scaled_size;
 
             if (p_sampler) {
                 const auto& sampler = m_owner->get_samplers().at((SamplerMode)p_sampler->Value32);
@@ -363,8 +383,7 @@ void GUIEditor::render_object_preview(const GUIObject& obj, AnimationPreviewCont
 
                 draw_list->AddImage(
                     texture->RenderTexture.get_view().Get(),
-                    pos,
-                    { pos.x + p_size->ValueVector.x * ctx.Scale.x, pos.y + p_size->ValueVector.y * ctx.Scale.y },
+                    min, max,
                     uv0, uv1,
                     ImGui::ColorConvertFloat4ToU32(ctx.Tint)
                 );
@@ -378,8 +397,7 @@ void GUIEditor::render_object_preview(const GUIObject& obj, AnimationPreviewCont
             } else {
                 draw_list->AddImage(
                     texture->RenderTexture.get_view().Get(),
-                    pos,
-                    { pos.x + p_size->ValueVector.x, pos.y + p_size->ValueVector.y },
+                    min, max,
                     uv0, uv1,
                     ImGui::ColorConvertFloat4ToU32(ctx.Tint)
                 );

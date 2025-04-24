@@ -105,6 +105,11 @@ void App::handle_input() {
             CLEAR_KEY(O);
             m_editor.open_file();
         }
+
+		if (ImGui::IsKeyDown(ImGuiKey_LeftShift) && ImGui::IsKeyPressed(ImGuiKey_P)) {
+            CLEAR_KEY(P);
+            m_editor.open_preview();
+		}
     }
 
     if (ImGui::IsKeyDown(ImGuiKey_LeftAlt)) {

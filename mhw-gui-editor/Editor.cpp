@@ -33,9 +33,12 @@ Editor::Editor(App* owner) : m_owner(owner) {
     add_menu_item("File", { ICON_FA_FILE " Open", "Ctrl+O", [](Editor* e) { e->open_file(); } });
     add_menu_item("File", { ICON_FA_FLOPPY_DISK " Save", "Ctrl+S", [](Editor* e) { e->save_file(); } });
     add_menu_item("File", { "Save As...", "Ctrl+Shift+S", [](Editor* e) { e->save_file_as(); } });
-    add_menu_item("View", { "Animation Editor", "Ctrl+Shift+A", [this](Editor* e) {
+    add_menu_item("View", { ICON_FA_FILM " Animation Editor", "Ctrl+Shift+A", [this](Editor* e) {
 
     } });
+    add_menu_item("View", { ICON_FA_EXPAND " Preview", "Ctrl+Shift+P", [this](Editor* e) {
+        m_preview_open = true;
+    }});
 
     add_menu_item("Edit", { ICON_FA_ARROW_RIGHT " Go To...", "Ctrl+G", [](Editor* e) {
         //e->m_generic_popup_queue.emplace("Go To...", [e](std::any& data) {
@@ -269,6 +272,10 @@ void Editor::save_file_as() const {
 
     const auto editor = active_editor.lock();
     editor->save_file_as(wpath);
+}
+
+void Editor::open_preview() {
+    m_preview_open = true;
 }
 
 void Editor::select_chunk_dir() {
@@ -675,12 +682,16 @@ void Editor::render_object_editor() {
 }
 
 void Editor::render_preview() {
-    ImGui::Begin("Preview");
+    if (!m_preview_open) {
+        return;
+    }
 
-    const auto active_editor = get_active_editor();
-    if (!active_editor.expired()) {
-        const auto editor = active_editor.lock();
-        editor->render_preview();
+    if (ImGui::Begin("Preview", &m_preview_open)) {
+        const auto active_editor = get_active_editor();
+        if (!active_editor.expired()) {
+            const auto editor = active_editor.lock();
+            editor->render_preview();
+        }
     }
 
     ImGui::End();

@@ -86,6 +86,8 @@ public:
     void save_file() const;
     void save_file_as() const;
 
+    void open_preview();
+
     std::weak_ptr<GUIEditor> get_active_editor() const {
         return m_editors.empty() || m_active_editor == -1
             ? std::weak_ptr<GUIEditor>()
@@ -124,6 +126,7 @@ private:
 
     bool m_first_render = true;
     bool m_options_menu_open = false;
+    bool m_preview_open = false;
     bool m_error_popup_select_file_open = false;
     bool m_error_popup_open = false;
     std::string m_error_popup_message;
