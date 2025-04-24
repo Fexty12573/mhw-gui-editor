@@ -52,7 +52,9 @@ void GUIEditor::render_instance(GUIInstance& inst) {
             }
         }
 
-        const auto param_idx = m_file.m_header.instanceParamEntryStartIndex + inst.Index;
+        const auto param_idx = m_file.is_mhgu()
+            ? m_file.m_header_mhgu.instExeParamOffset + inst.Index
+            : m_file.m_header.instanceParamEntryStartIndex + inst.Index;
         if (param_idx < m_file.m_params.size()) {
             render_param(m_file.m_params[param_idx]);
         }

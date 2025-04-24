@@ -202,6 +202,9 @@
     <ClCompile Include="Editor.cpp">
       <Filter>Source Files\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="GUIEditor_Preview.cpp">
+      <Filter>Source Files\Editor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">

@@ -187,6 +187,7 @@
     <ClCompile Include="GUIEditor_ObjSequence.cpp" />
     <ClCompile Include="GUIEditor_Overview.cpp" />
     <ClCompile Include="GUIEditor_Param.cpp" />
+    <ClCompile Include="GUIEditor_Preview.cpp" />
     <ClCompile Include="GUIEditor_ResourceManager.cpp" />
     <ClCompile Include="GUIEditor_Sequence.cpp" />
     <ClCompile Include="GUIEditor_TextureViewer.cpp" />

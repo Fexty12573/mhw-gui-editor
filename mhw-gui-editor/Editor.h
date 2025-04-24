@@ -82,6 +82,7 @@ public:
     void render(u32 dockspace_id = 0);
 
     void open_file();
+    void open_file(const std::filesystem::path& path);
     void save_file() const;
     void save_file_as() const;
 
@@ -107,12 +108,15 @@ private:
     void render_resource_manager() const;
     void render_texture_viewer() const;
     void render_object_editor();
+    void render_preview();
 
     void select_chunk_dir();
     void select_native_dir();
     void select_arcfs_dir();
 
     void dump_object_data() const;
+
+    void handle_file_drop(HDROP drop);
 
 private:
     App* m_owner;
@@ -139,6 +143,9 @@ private:
 
     std::unordered_map<std::string, std::shared_ptr<ObjectInfo>> m_object_info;
     std::unordered_map<ObjectType, std::shared_ptr<ObjectInfo>> m_object_info2;
+
+    //Microsoft::WRL::ComPtr<ID3D11PixelShader> m_wrap_shader;
+    //Microsoft::WRL::ComPtr<ID3D11Buffer> m_wrap_shader_buffer;
 
     Settings m_settings;
 };

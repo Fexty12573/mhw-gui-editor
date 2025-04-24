@@ -106,6 +106,12 @@ Editor::Editor(App* owner) : m_owner(owner) {
         m_object_info[key] = p_info;
         m_object_info2[p_info->Type] = p_info;
     }
+
+    m_owner->add_window_message_callback([this](UINT msg, WPARAM wparam, LPARAM lparam) {
+        if (msg == WM_DROPFILES) {
+            handle_file_drop((HDROP)wparam);
+        }
+    });
 }
 
 void Editor::add_menu_item(const std::string& menu, const MenuItem& item) {
@@ -173,6 +179,7 @@ void Editor::render(u32 dockspace_id) {
     render_texture_viewer();
     render_object_editor();
     render_options_menu();
+    render_preview();
 
     const auto active_editor = get_active_editor();
     if (!active_editor.expired()) {
@@ -207,8 +214,11 @@ void Editor::open_file() {
     LPWSTR file_name;
     HR_ASSERT(item->GetDisplayName(SIGDN_FILESYSPATH, &file_name));
 
-    const std::filesystem::path wpath(file_name);
-    m_editors.emplace_back(std::make_shared<GUIEditor>(this, wpath));
+    return open_file(file_name);
+}
+
+void Editor::open_file(const std::filesystem::path& path) {
+    m_editors.emplace_back(std::make_shared<GUIEditor>(this, path));
     m_active_editor = m_editors.size() - 1;
 
     m_first_render = true;
@@ -664,6 +674,18 @@ void Editor::render_object_editor() {
     
 }
 
+void Editor::render_preview() {
+    ImGui::Begin("Preview");
+
+    const auto active_editor = get_active_editor();
+    if (!active_editor.expired()) {
+        const auto editor = active_editor.lock();
+        editor->render_preview();
+    }
+
+    ImGui::End();
+}
+
 void Editor::dump_object_data() const {
     const auto dir = open_folder_dialog(L"Select a search directory");
 
@@ -722,4 +744,20 @@ void Editor::dump_object_data() const {
     }
 
     std::ofstream("cGUIObject.json") << data.dump(4);
+}
+
+void Editor::handle_file_drop(HDROP drop) {
+    char file_name[MAX_PATH];
+
+    const auto count = DragQueryFileA(drop, 0xFFFFFFFF, nullptr, 0);
+    for (auto i = 0; i < count; ++i) {
+        if (DragQueryFileA(drop, i, file_name, sizeof file_name)) {
+            const auto path = std::filesystem::path(file_name);
+            if (path.extension() == ".gui") {
+                open_file(path);
+            }
+        }
+    }
+
+    DragFinish(drop);
 }

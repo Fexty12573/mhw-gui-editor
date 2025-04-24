@@ -63,6 +63,14 @@ void GUIEditor::render_tree_viewer() {
     }
 
     if (ImGui::TreeNodeEx("Instances", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+        for (const auto inst : m_file.m_root_instances) {
+            render_instance(m_file.m_instances[inst]);
+        }
+
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNodeEx("Instances (List View)", ImGuiTreeNodeFlags_SpanAvailWidth)) {
         for (auto& inst : m_file.m_instances) {
             render_instance(inst);
         }

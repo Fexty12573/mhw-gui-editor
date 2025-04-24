@@ -19,6 +19,10 @@ public:
     const ComPtr<ID3D11DeviceContext>& get_context() const { return m_context; }
     const ComPtr<IDXGISwapChain>& get_swapchain() const { return m_swap_chain; }
 
+    void add_window_message_callback(const MessageCallback& callback) {
+        m_window.add_message_callback(callback);
+    }
+
 private:
 	void render_frame();
 	void handle_input();

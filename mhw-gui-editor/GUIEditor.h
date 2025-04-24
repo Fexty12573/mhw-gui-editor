@@ -32,6 +32,12 @@ struct ParamValidationResult {
     }
 };
 
+struct AnimationPreviewContext {
+	ImVec2 Offset;
+	ImVec2 Scale;
+	ImVec4 Tint;
+};
+
 inline bool operator&(PopupType a, PopupType b) {
     return static_cast<int>(a) & static_cast<int>(b);
 }
@@ -58,11 +64,17 @@ public:
 	void render_resource_manager();
 	void render_texture_viewer() const;
 	void render_object_editor();
+	void render_preview();
 
 private:
 	void render_animation(GUIAnimation& anim);
+    void render_texture_preview(const GUIInitParam* texture, const GUIInitParam* rect, const GUIInitParam* size,
+	    const GUIInitParam* sampler, const GUIInitParam* vertexColor);
+    void render_texture_preview(const GUIObject& obj);
 	void render_object(GUIObject& obj, u32 seq_count = 0, GUIAnimation* parent_anim = nullptr);
-	void render_sequence(GUISequence& seq) const;
+    void render_texture_set_preview(const GUIObject& obj, const GUIInitParam* texture, const GUIInitParam* size,
+		const GUIInitParam* sampler, const GUIInitParam* vertexColor);
+    void render_sequence(GUISequence& seq) const;
 	void render_obj_sequence(GUIObjectSequence& objseq, ObjectType source_object = ObjectType::None, u32 object_id = -1, const GUISequence* seq = nullptr);
 	void render_init_param(GUIInitParam& param, ObjectType source_object = ObjectType::None) const;
 	void render_param(GUIParam& param, ObjectType source_object = ObjectType::None);
@@ -73,6 +85,8 @@ private:
     void render_font_filter_border(const std::shared_ptr<GUIFontFilterBorder>& filter) const;
     void render_font_filter_gradation_overlay(const std::shared_ptr<GUIFontFilterGradationOverlay>& filter) const;
     void render_font_filter_distance_field(const std::shared_ptr<GUIFontFilterDistanceField>& filter) const;
+
+	void render_object_preview(const GUIObject& obj, AnimationPreviewContext ctx);
 
     [[nodiscard]] ParamValidationResult is_valid_param(ParamType type, const std::string& name, ObjectType source_object) const;
 	void update_indices();
@@ -104,6 +118,9 @@ private:
 
 	int m_selected_object = -1;
     int m_selected_texture = -1;
+	int m_preview_instance = -1;
+
+    ImVec2 m_preview_offset = { 0, 0 };
 };
 
 ///	TODO: Add an 'About' window and a 'Help' window

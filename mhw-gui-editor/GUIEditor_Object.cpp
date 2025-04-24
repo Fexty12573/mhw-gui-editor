@@ -54,102 +54,10 @@ void GUIEditor::render_object(GUIObject& obj, u32 seq_count, GUIAnimation* paren
             }
         }
 
-        if (obj.Type == ObjectType::cGUIObjTexture || obj.Type == ObjectType::cGUIObjTexWithParam) {
-            const GUIInitParam* texture = nullptr;
-            const GUIInitParam* rect = nullptr;
-            const GUIInitParam* size = nullptr;
-            const GUIInitParam* sampler = nullptr;
-            const GUIInitParam* vertexColor = nullptr;
-            const u64 max = std::min(static_cast<u64>(obj.InitParamIndex + obj.InitParamNum), m_file.m_init_params.size());
-
-            for (auto i = obj.InitParamIndex; i < max; ++i) {
-                if (m_file.m_init_params[i].Name == "Texture" && m_file.m_init_params[i].Type == ParamType::TEXTURE) {
-                    texture = &m_file.m_init_params[i];
-                } else if (m_file.m_init_params[i].Name == "mTextureRect") {
-                    rect = &m_file.m_init_params[i];
-                } else if (m_file.m_init_params[i].Name == "Size") {
-                    size = &m_file.m_init_params[i];
-                } else if (m_file.m_init_params[i].Name == "SamplerState") {
-                    sampler = &m_file.m_init_params[i];
-                } else if (m_file.m_init_params[i].Name == "VertexColor") {
-                    vertexColor = &m_file.m_init_params[i];
-                }
-            }
-
-            if (texture && rect && size) {
-                if (ImGui::TreeNodeEx("Texture Preview", ImGuiTreeNodeFlags_SpanAvailWidth)) {
-                    const auto& tex = std::ranges::find_if(
-                        m_file.m_textures,
-                        [&texture](const GUITexture& tex0) {
-                            return tex0.ID == texture->Value32;
-                        }
-                    );
-
-                    if (tex->RenderTexture.is_valid()) {
-                        const ImVec2 uv0 = {
-                            rect->ValueVector.x / tex->Width,
-                            rect->ValueVector.y / tex->Height
-                        };
-                        const ImVec2 uv1 = {
-                            rect->ValueVector.z / tex->Width,
-                            rect->ValueVector.w / tex->Height
-                        };
-                        const ImVec4 tint = vertexColor ? ImVec4(
-                            vertexColor->ValueVector.x,
-                            vertexColor->ValueVector.y,
-                            vertexColor->ValueVector.z,
-                            vertexColor->ValueVector.w
-                        ) : ImVec4(1, 1, 1, 1);
-
-                        if (sampler) {
-                            const auto draw_list = ImGui::GetWindowDrawList();
-                            const auto& callback_data = m_draw_callback_data.emplace_back(
-                                std::make_unique<DrawCallbackData>(
-                                    m_app->get_context().Get(),
-                                    m_owner->get_samplers().at((SamplerMode)sampler->Value32).get(),
-                                    nullptr
-                                )
-                            );
-
-                            // Set custom sampler
-                            draw_list->AddCallback([](const ImDrawList*, const ImDrawCmd* cmd) {
-                                const auto data = (DrawCallbackData*)cmd->UserCallbackData;
-                                if (data) {
-                                    data->Context->PSGetSamplers(0, 1, &data->OriginalState);
-                                    data->Context->PSSetSamplers(0, 1, data->Sampler->get().GetAddressOf());
-                                }
-                            }, callback_data.get());
-
-                            ImGui::Image(
-                                tex->RenderTexture.get_view().Get(),
-                                { size->ValueVector.x, size->ValueVector.y },
-                                uv0, uv1,
-                                tint
-                            );
-
-                            // Restore original sampler
-                            draw_list->AddCallback([](const ImDrawList*, const ImDrawCmd* cmd) {
-                                const auto data = (DrawCallbackData*)cmd->UserCallbackData;
-                                if (data) {
-                                    data->Context->PSSetSamplers(0, 1, &data->OriginalState);
-                                }
-                            }, callback_data.get());
-                        } else {
-                            ImGui::Image(
-                                tex->RenderTexture.get_view().Get(),
-                                { size->ValueVector.x, size->ValueVector.y },
-                                uv0, uv1,
-                                tint
-                            );
-                        }
-                    } else {
-                        ImGui::TextColored({ 1.0f, 0.2f, 0.2f, 1.0f }, "Error: Couldn't load texture!");
-                        ImGui::Text("Make sure the file exists and you have the correct chunk path set under Tools -> Options");
-                    }
-
-                    ImGui::TreePop();
-                }
-            }
+        if (obj.Type == ObjectType::cGUIObjTexture ||
+            obj.Type == ObjectType::cGUIObjTexWithParam ||
+            obj.Type == ObjectType::cGUIObjTextureSet) {
+            render_texture_preview(obj);
         }
 
         if (obj.InitParamNum > 0) {
@@ -236,4 +144,179 @@ void GUIEditor::render_object(GUIObject& obj, u32 seq_count, GUIAnimation* paren
 
     ImGui::PopID();
     ImGui::PopID();
+}
+
+void GUIEditor::render_texture_preview(const GUIObject& obj) {
+    const GUIInitParam* texture = nullptr;
+    const GUIInitParam* rect = nullptr;
+    const GUIInitParam* size = nullptr;
+    const GUIInitParam* sampler = nullptr;
+    const GUIInitParam* vertexColor = nullptr;
+    const u64 max = std::min(static_cast<u64>(obj.InitParamIndex + obj.InitParamNum), m_file.m_init_params.size());
+
+    for (auto i = obj.InitParamIndex; i < max; ++i) {
+        if (m_file.m_init_params[i].Name == "Texture" && m_file.m_init_params[i].Type == ParamType::TEXTURE) {
+            texture = &m_file.m_init_params[i];
+        } else if (m_file.m_init_params[i].Name == "mTextureRect") {
+            rect = &m_file.m_init_params[i];
+        } else if (m_file.m_init_params[i].Name == "Size") {
+            size = &m_file.m_init_params[i];
+        } else if (m_file.m_init_params[i].Name == "SamplerState") {
+            sampler = &m_file.m_init_params[i];
+        } else if (m_file.m_init_params[i].Name == "VertexColor") {
+            vertexColor = &m_file.m_init_params[i];
+        }
+    }
+
+    if (obj.Type == ObjectType::cGUIObjTextureSet && size && !obj.ExtendData.UVs.empty()) {
+        render_texture_set_preview(obj, texture, size, sampler, vertexColor);
+    } else if (texture && rect && size) {
+        render_texture_preview(texture, rect, size, sampler, vertexColor);
+    }
+}
+
+void GUIEditor::render_texture_set_preview(const GUIObject& obj, const GUIInitParam* texture,
+    const GUIInitParam* size, const GUIInitParam* sampler, const GUIInitParam* vertexColor) {
+    if (ImGui::TreeNodeEx("Texture Preview", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+        const auto& tex = std::ranges::find_if(
+            m_file.m_textures,
+            [&texture](const GUITexture& tex0) {
+            return tex0.ID == texture->Value32;
+        }
+        );
+
+        if (tex->RenderTexture.is_valid()) {
+            for (const auto& uv : obj.ExtendData.UVs) {
+                const ImVec2 uv0 = { uv.x, uv.y };
+                const ImVec2 uv1 = { uv.w, uv.h };
+                const ImVec4 tint = vertexColor ? ImVec4(
+                    vertexColor->ValueVector.x,
+                    vertexColor->ValueVector.y,
+                    vertexColor->ValueVector.z,
+                    vertexColor->ValueVector.w
+                ) : ImVec4(1, 1, 1, 1);
+
+                if (sampler) {
+                    const auto draw_list = ImGui::GetWindowDrawList();
+                    const auto& callback_data = m_draw_callback_data.emplace_back(
+                        std::make_unique<DrawCallbackData>(
+                            m_app->get_context().Get(),
+                            m_owner->get_samplers().at((SamplerMode)sampler->Value32).get(),
+                            nullptr
+                        )
+                    );
+
+                    // Set custom sampler
+                    draw_list->AddCallback([](const ImDrawList*, const ImDrawCmd* cmd) {
+                        const auto data = (DrawCallbackData*)cmd->UserCallbackData;
+                        if (data) {
+                            data->Context->PSGetSamplers(0, 1, &data->OriginalState);
+                            data->Context->PSSetSamplers(0, 1, data->Sampler->get().GetAddressOf());
+                        }
+                    }, callback_data.get());
+
+                    ImGui::Image(
+                        tex->RenderTexture.get_view().Get(),
+                        { size->ValueVector.x, size->ValueVector.y },
+                        uv0, uv1,
+                        tint
+                    );
+
+                    // Restore original sampler
+                    draw_list->AddCallback([](const ImDrawList*, const ImDrawCmd* cmd) {
+                        const auto data = (DrawCallbackData*)cmd->UserCallbackData;
+                        if (data) {
+                            data->Context->PSSetSamplers(0, 1, &data->OriginalState);
+                        }
+                    }, callback_data.get());
+                } else {
+                    ImGui::Image(
+                        tex->RenderTexture.get_view().Get(),
+                        { size->ValueVector.x, size->ValueVector.y },
+                        uv0, uv1,
+                        tint
+                    );
+                }
+            }
+        } else {
+            ImGui::TextColored({ 1.0f, 0.2f, 0.2f, 1.0f }, "Error: Couldn't load texture!");
+            ImGui::Text("Make sure the file exists and you have the correct chunk path set under Tools -> Options");
+        }
+    }
+}
+
+void GUIEditor::render_texture_preview(const GUIInitParam* texture, 
+    const GUIInitParam* rect, const GUIInitParam* size, const GUIInitParam* sampler, const GUIInitParam* vertexColor) {
+    if (ImGui::TreeNodeEx("Texture Preview", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+        const auto& tex = std::ranges::find_if(
+            m_file.m_textures,
+            [&texture](const GUITexture& tex0) {
+            return tex0.ID == texture->Value32;
+        }
+        );
+
+        if (tex->RenderTexture.is_valid()) {
+            const ImVec2 uv0 = {
+                rect->ValueVector.x / tex->Width,
+                rect->ValueVector.y / tex->Height
+            };
+            const ImVec2 uv1 = {
+                rect->ValueVector.z / tex->Width,
+                rect->ValueVector.w / tex->Height
+            };
+            const ImVec4 tint = vertexColor ? ImVec4(
+                vertexColor->ValueVector.x,
+                vertexColor->ValueVector.y,
+                vertexColor->ValueVector.z,
+                vertexColor->ValueVector.w
+            ) : ImVec4(1, 1, 1, 1);
+
+            if (sampler) {
+                const auto draw_list = ImGui::GetWindowDrawList();
+                const auto& callback_data = m_draw_callback_data.emplace_back(
+                    std::make_unique<DrawCallbackData>(
+                        m_app->get_context().Get(),
+                        m_owner->get_samplers().at((SamplerMode)sampler->Value32).get(),
+                        nullptr
+                    )
+                );
+
+                // Set custom sampler
+                draw_list->AddCallback([](const ImDrawList*, const ImDrawCmd* cmd) {
+                    const auto data = (DrawCallbackData*)cmd->UserCallbackData;
+                    if (data) {
+                        data->Context->PSGetSamplers(0, 1, &data->OriginalState);
+                        data->Context->PSSetSamplers(0, 1, data->Sampler->get().GetAddressOf());
+                    }
+                }, callback_data.get());
+
+                ImGui::Image(
+                    tex->RenderTexture.get_view().Get(),
+                    { size->ValueVector.x, size->ValueVector.y },
+                    uv0, uv1,
+                    tint
+                );
+
+                // Restore original sampler
+                draw_list->AddCallback([](const ImDrawList*, const ImDrawCmd* cmd) {
+                    const auto data = (DrawCallbackData*)cmd->UserCallbackData;
+                    if (data) {
+                        data->Context->PSSetSamplers(0, 1, &data->OriginalState);
+                    }
+                }, callback_data.get());
+            } else {
+                ImGui::Image(
+                    tex->RenderTexture.get_view().Get(),
+                    { size->ValueVector.x, size->ValueVector.y },
+                    uv0, uv1,
+                    tint
+                );
+            }
+        } else {
+            ImGui::TextColored({ 1.0f, 0.2f, 0.2f, 1.0f }, "Error: Couldn't load texture!");
+            ImGui::Text("Make sure the file exists and you have the correct chunk path set under Tools -> Options");
+        }
+
+        ImGui::TreePop();
+    }
 }

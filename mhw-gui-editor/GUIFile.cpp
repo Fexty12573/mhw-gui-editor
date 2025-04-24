@@ -237,6 +237,21 @@ void GUIFile::load_from(BinaryReader& stream) {
         spdlog::error("Invalid GUI file version: {:08X}", (u32)mini_header.version);
         return;
     }
+
+    // Determine instance root(s)
+    for (const auto [i, inst] : std::views::enumerate(m_instances)) {
+        const bool is_child_instance = std::ranges::any_of(m_instances, [i, &inst](const GUIInstance& other) {
+            if (other.ID == inst.ID) {
+                return false;
+            }
+
+            return other.ChildIndex == i || other.NextIndex == i;
+        });
+
+        if (!is_child_instance) {
+            m_root_instances.push_back(inst.Index);
+        }
+    }
 }
 
 void GUIFile::load_resources(const std::string& chunk_path, const std::string& native_path, const std::string& arcfs_path, ID3D11Device* device, ID3D11DeviceContext* context) {

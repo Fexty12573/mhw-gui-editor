@@ -12,7 +12,7 @@
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-Window::Window(std::string title, int width, int height)
+Window::Window(std::string title, int width, int height, DWORD ex_style)
 	: m_window(nullptr), m_title(std::move(title)), m_width(width), m_height(height) {
 
 	HR_INIT(S_OK);
@@ -42,7 +42,8 @@ Window::Window(std::string title, int width, int height)
 		throw;
 	}
 
-	m_window = CreateWindow(
+	m_window = CreateWindowExA(
+        ex_style,
 		wc.lpszClassName,
 		m_title.c_str(), 
 		WS_OVERLAPPEDWINDOW, 
@@ -142,6 +143,10 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam)) {
 		return true;
 	}
+
+    for (const auto& callback : m_message_callbacks) {
+        callback(msg, wParam, lParam);
+    }
 
 	switch (msg)
 	{

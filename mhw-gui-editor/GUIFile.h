@@ -66,10 +66,54 @@ public:
     void insert_texture(GUITexture tex, s32 index = -1, bool update_indices = true);
     void insert_font_filter(std::shared_ptr<GUIFontFilter> filter, s32 index = -1, bool update_indices = true);
 
+	[[nodiscard]] u32 get_width() const {
+        return is_mhgu() ? m_header_mhgu.viewSize_Width : m_header.viewSize_Width;
+	}
+
+	[[nodiscard]] u32 get_height() const {
+		return is_mhgu() ? m_header_mhgu.viewSize_Height : m_header.viewSize_Height;
+	}
+
     void erase_keys(u32 index, u32 count = 1, bool update_indices = true);
 
     template<class T> [[nodiscard]] u32 get_unused_id(const std::vector<T>& vec) const {
         return std::ranges::max_element(vec, [](const T& a, const T& b) { return a.ID < b.ID; })->ID + 1;
+    }
+
+	template<class T>
+    GUIParam* find_param(const T& thing, std::string_view name) {
+        const auto params = get_params(thing);
+        const auto p = std::ranges::find_if(params, [&](const GUIParam& param) {
+            return param.Name == name;
+        });
+
+        return p != params.end() ? &*p : nullptr;
+    }
+
+	template<class T>
+    GUIInitParam* find_init_param(const T& thing, std::string_view name) {
+		const auto init_params = get_init_params(thing);
+		const auto p = std::ranges::find_if(init_params, [&](const GUIInitParam& param) {
+			return param.Name == name;
+		});
+
+		return p != init_params.end() ? &*p : nullptr;
+    }
+
+	template<class T>
+    std::span<GUIParam> get_params(const T& thing) {
+        return std::span<GUIParam>(
+            m_params.data() + thing.ParamIndex,
+            thing.ParamNum
+        );
+    }
+
+	template<class T>
+    std::span<GUIInitParam> get_init_params(const T& thing) {
+        return std::span<GUIInitParam>(
+            m_init_params.data() + thing.InitParamIndex,
+            thing.InitParamNum
+        );
     }
 
 	friend class GUIEditor;
@@ -109,5 +153,6 @@ private:
 	std::vector<GUIResource> m_resources;
 	std::vector<GUIGeneralResource> m_general_resources;
     std::vector<GUIVertex> m_vertices;
+	std::vector<size_t> m_root_instances;
 };
 

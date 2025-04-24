@@ -443,6 +443,21 @@ enum class SamplerMode : u8
     ClampPoint = 0x3
 };
 
+enum class ControlPoint : u8
+{
+    TL = 0x0,
+    TC = 0x1,
+    TR = 0x2,
+    UNK_3 = 0x3,
+    CL = 0x4,
+    CC = 0x5,
+    CR = 0x6,
+    UNK_7 = 0x7,
+    BL = 0x8,
+    BC = 0x9,
+    BR = 0xA,
+};
+
 enum class Alignment : u8
 {
     NONE = 0x0,
