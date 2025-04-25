@@ -82,7 +82,7 @@ void GUIEditor::render_preview() {
         return;
     }
 
-    const AnimationPreviewContext ctx = {
+    AnimationPreviewContext ctx = {
         .Offset = m_preview_offset,
         .Scale = { 1, 1 },
         .Tint = { 1, 1, 1, 1 }
@@ -99,6 +99,17 @@ void GUIEditor::render_preview() {
         ImGui::EndChild();
         return;
     }
+
+    // Apply instance parameters
+    const auto p_posx = m_file.find_init_param(inst, "PosX");
+    const auto p_posy = m_file.find_init_param(inst, "PosY");
+    const auto p_sclx = m_file.find_init_param(inst, "SclX");
+    const auto p_scly = m_file.find_init_param(inst, "SclY");
+
+    ctx.Offset.x += p_posx ? p_posx->ValueFloat : 0;
+    ctx.Offset.y += p_posy ? p_posy->ValueFloat : 0;
+    ctx.Scale.x *= p_sclx ? p_sclx->ValueFloat : 1;
+    ctx.Scale.y *= p_scly ? p_scly->ValueFloat : 1;
 
     const auto& object = m_file.m_objects[anim->RootObjectIndex];
 
@@ -283,6 +294,7 @@ void GUIEditor::render_object_preview(const GUIObject& obj, AnimationPreviewCont
                 const auto data = (DrawCallbackData*)cmd->UserCallbackData;
                 if (data) {
                     data->Context->PSGetSamplers(0, 1, &data->OriginalState);
+                    data->Context->PSSetSamplers(0, 1, data->Sampler->get().GetAddressOf());
                 }
             }, callback_data.get());
 
@@ -378,6 +390,7 @@ void GUIEditor::render_object_preview(const GUIObject& obj, AnimationPreviewCont
                     const auto data = (DrawCallbackData*)cmd->UserCallbackData;
                     if (data) {
                         data->Context->PSGetSamplers(0, 1, &data->OriginalState);
+                        data->Context->PSSetSamplers(0, 1, data->Sampler->get().GetAddressOf());
                     }
                 }, callback_data.get());
 
